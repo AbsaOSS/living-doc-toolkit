@@ -1,0 +1,172 @@
+#
+# Copyright 2023 ABSA Group Limited
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+name: Build and Test
+on:
+  pull_request:
+    branches:
+      - '**'
+    types: [ opened, synchronize, reopened ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pre-commit:
+    runs-on: ubuntu-latest
+    name: Pre-commit Hooks
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v5
+        with:
+          python-version: '3.14'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run pre-commit hooks
+        # Black, Pylint, and mypy are skipped here because they are run in dedicated
+        # workflow jobs (code-format-check, static-code-analysis, and mypy) to avoid
+        # duplicate execution of the same checks.
+        run: |
+          SKIP=black,pylint,mypy pre-commit run --all-files
+
+  static-code-analysis:
+    runs-on: ubuntu-latest
+    name: Pylint Static Code Analysis
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v5
+        with:
+          python-version: '3.14'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Analyze code with Pylint
+        id: analyze-code
+        run: |
+          pylint_score=$(pylint $(git ls-files '*.py')| grep 'rated at' | awk '{print $7}' | cut -d'/' -f1)
+          if [ -z "$pylint_score" ]; then
+            echo "Failed to extract Pylint score"
+            exit 1
+          fi
+          echo "score=$pylint_score" >> "$GITHUB_OUTPUT"
+
+      - name: Check Pylint score
+        run: |
+          score="${{ steps.analyze-code.outputs.score }}"
+          echo "Pylint score is $score"
+
+          if (( $(echo "$score < 9.5" | bc -l) )); then
+            echo "Failure: Pylint score is below 9.5 (project score: $score)."
+            exit 1
+          else
+            echo "Success: Pylint score is above 9.5 (project score: $score)."
+          fi
+
+  code-format-check:
+    runs-on: ubuntu-latest
+    name: Black Format Check
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v5
+        with:
+          python-version: '3.14'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Check code format with Black
+        id: check-format
+        run: |
+          black --check $(git ls-files '*.py')
+
+  unit-test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v5
+        with:
+          python-version: '3.14'
+          cache: 'pip'
+
+      - name: Install Python dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Set PYTHONPATH environment variable
+        run: echo "PYTHONPATH=${GITHUB_WORKSPACE}" >> $GITHUB_ENV
+
+      - name: Check code coverage with Pytest
+        run: python -m pytest --cov=. -v tests/unit --cov-fail-under=80
+
+  mypy-check:
+    runs-on: ubuntu-latest
+    name: Mypy Type Check
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v5
+        with:
+          python-version: '3.14'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+      - name: Check types with Mypy
+        id: check-types
+        run: |
+          mypy .
