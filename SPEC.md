@@ -983,14 +983,6 @@ All transformations tracked in `meta.audit.trace[]`:
 
 ## 12. Future Extensions
 
-### 12.1 Planned Services (Out of Scope for v1.0)
-
-- **Service: `enrich-metrics`**: Add coverage matrices and statistics
-- **Service: `transform-html`**: Convert to HTML-ready format
-- **Service: `validate-contracts`**: Standalone schema validation tool
-
-### 12.2 Extension Points
-
 - **Adapter Registry:** Plugin system for new producer adapters
 - **Normalizer Plugins:** Custom markdown parsing rules
 - **Output Validators:** Pluggable schema validators for different versions
