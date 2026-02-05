@@ -1,0 +1,698 @@
+{
+  "$defs": {
+    "AuditEnvelopeV1": {
+      "additionalProperties": false,
+      "description": "Audit Envelope v1.0.",
+      "properties": {
+        "extensions": {
+          "additionalProperties": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "description": "Namespaced extensions (optional)",
+          "title": "Extensions",
+          "type": "object"
+        },
+        "producer": {
+          "$ref": "#/$defs/Producer",
+          "description": "Producer metadata"
+        },
+        "run": {
+          "$ref": "#/$defs/Run",
+          "description": "Run metadata"
+        },
+        "schema_version": {
+          "description": "Schema version (must be '1.0')",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "source": {
+          "$ref": "#/$defs/Source",
+          "description": "Source metadata"
+        },
+        "trace": {
+          "description": "Trace steps",
+          "items": {
+            "$ref": "#/$defs/TraceStep"
+          },
+          "title": "Trace",
+          "type": "array"
+        }
+      },
+      "required": [
+        "schema_version",
+        "producer",
+        "run",
+        "source",
+        "trace"
+      ],
+      "title": "AuditEnvelopeV1",
+      "type": "object"
+    },
+    "Content": {
+      "additionalProperties": false,
+      "description": "Content section.",
+      "properties": {
+        "user_stories": {
+          "description": "List of user stories",
+          "items": {
+            "$ref": "#/$defs/UserStory"
+          },
+          "title": "User Stories",
+          "type": "array"
+        }
+      },
+      "required": [
+        "user_stories"
+      ],
+      "title": "Content",
+      "type": "object"
+    },
+    "Meta": {
+      "additionalProperties": false,
+      "description": "Metadata section.",
+      "properties": {
+        "audit": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AuditEnvelopeV1"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Audit envelope (optional)"
+        },
+        "document_title": {
+          "description": "Document title (1-200 chars)",
+          "title": "Document Title",
+          "type": "string"
+        },
+        "document_version": {
+          "description": "Document version (1-50 chars)",
+          "title": "Document Version",
+          "type": "string"
+        },
+        "generated_at": {
+          "description": "ISO 8601 UTC timestamp",
+          "title": "Generated At",
+          "type": "string"
+        },
+        "run_context": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RunContext"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Run context (optional)"
+        },
+        "selection_summary": {
+          "$ref": "#/$defs/SelectionSummary",
+          "description": "Selection summary"
+        },
+        "source_set": {
+          "description": "Source set (non-empty)",
+          "items": {
+            "type": "string"
+          },
+          "title": "Source Set",
+          "type": "array"
+        }
+      },
+      "required": [
+        "document_title",
+        "document_version",
+        "generated_at",
+        "source_set",
+        "selection_summary"
+      ],
+      "title": "Meta",
+      "type": "object"
+    },
+    "Producer": {
+      "additionalProperties": false,
+      "description": "Producer metadata.",
+      "properties": {
+        "build": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Build identifier",
+          "title": "Build"
+        },
+        "name": {
+          "description": "Producer name (required, non-empty)",
+          "title": "Name",
+          "type": "string"
+        },
+        "version": {
+          "description": "Producer version (semver)",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "version"
+      ],
+      "title": "Producer",
+      "type": "object"
+    },
+    "Run": {
+      "additionalProperties": false,
+      "description": "Run metadata.",
+      "properties": {
+        "actor": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Actor",
+          "title": "Actor"
+        },
+        "ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Git ref",
+          "title": "Ref"
+        },
+        "run_attempt": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Run attempt",
+          "title": "Run Attempt"
+        },
+        "run_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Run ID",
+          "title": "Run Id"
+        },
+        "sha": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Commit SHA",
+          "title": "Sha"
+        },
+        "workflow": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Workflow name",
+          "title": "Workflow"
+        }
+      },
+      "title": "Run",
+      "type": "object"
+    },
+    "RunContext": {
+      "additionalProperties": false,
+      "description": "Run context (optional).",
+      "properties": {
+        "branch": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Branch",
+          "title": "Branch"
+        },
+        "ci_run_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "CI run ID",
+          "title": "Ci Run Id"
+        },
+        "commit_sha": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Commit SHA",
+          "title": "Commit Sha"
+        },
+        "triggered_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Triggered by",
+          "title": "Triggered By"
+        }
+      },
+      "title": "RunContext",
+      "type": "object"
+    },
+    "Sections": {
+      "additionalProperties": false,
+      "description": "User story sections.",
+      "properties": {
+        "acceptance_criteria": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Acceptance criteria (Markdown, optional)",
+          "title": "Acceptance Criteria"
+        },
+        "business_value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Business value (Markdown, optional)",
+          "title": "Business Value"
+        },
+        "connections": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Connections (Markdown, optional)",
+          "title": "Connections"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description (Markdown)",
+          "title": "Description"
+        },
+        "last_edited": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Last edited (Markdown, optional)",
+          "title": "Last Edited"
+        },
+        "preconditions": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Preconditions (Markdown, optional)",
+          "title": "Preconditions"
+        },
+        "user_guide": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "User guide (Markdown, optional)",
+          "title": "User Guide"
+        }
+      },
+      "title": "Sections",
+      "type": "object"
+    },
+    "SelectionSummary": {
+      "additionalProperties": false,
+      "description": "Selection summary.",
+      "properties": {
+        "excluded_items": {
+          "description": "Excluded items (>= 0)",
+          "minimum": 0,
+          "title": "Excluded Items",
+          "type": "integer"
+        },
+        "included_items": {
+          "description": "Included items (>= 0)",
+          "minimum": 0,
+          "title": "Included Items",
+          "type": "integer"
+        },
+        "total_items": {
+          "description": "Total items (>= 0)",
+          "minimum": 0,
+          "title": "Total Items",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "total_items",
+        "included_items",
+        "excluded_items"
+      ],
+      "title": "SelectionSummary",
+      "type": "object"
+    },
+    "Source": {
+      "additionalProperties": false,
+      "description": "Source metadata.",
+      "properties": {
+        "enterprise": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Enterprise name",
+          "title": "Enterprise"
+        },
+        "organization": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Organization name",
+          "title": "Organization"
+        },
+        "repositories": {
+          "description": "Source repositories",
+          "items": {
+            "type": "string"
+          },
+          "title": "Repositories",
+          "type": "array"
+        },
+        "systems": {
+          "description": "Source systems (required, non-empty)",
+          "items": {
+            "type": "string"
+          },
+          "title": "Systems",
+          "type": "array"
+        }
+      },
+      "required": [
+        "systems"
+      ],
+      "title": "Source",
+      "type": "object"
+    },
+    "Timestamps": {
+      "additionalProperties": false,
+      "description": "Timestamps for user story.",
+      "properties": {
+        "created": {
+          "description": "ISO 8601 timestamp",
+          "title": "Created",
+          "type": "string"
+        },
+        "updated": {
+          "description": "ISO 8601 timestamp",
+          "title": "Updated",
+          "type": "string"
+        }
+      },
+      "required": [
+        "created",
+        "updated"
+      ],
+      "title": "Timestamps",
+      "type": "object"
+    },
+    "TraceStep": {
+      "additionalProperties": false,
+      "description": "Trace step in audit trail.",
+      "properties": {
+        "finished_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "ISO 8601 timestamp",
+          "title": "Finished At"
+        },
+        "started_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "ISO 8601 timestamp",
+          "title": "Started At"
+        },
+        "step": {
+          "description": "Step name (e.g., 'collection', 'normalization')",
+          "title": "Step",
+          "type": "string"
+        },
+        "tool": {
+          "description": "Tool name",
+          "title": "Tool",
+          "type": "string"
+        },
+        "tool_version": {
+          "description": "Tool version (semver)",
+          "title": "Tool Version",
+          "type": "string"
+        },
+        "warnings": {
+          "description": "List of warnings",
+          "items": {
+            "$ref": "#/$defs/Warning"
+          },
+          "title": "Warnings",
+          "type": "array"
+        }
+      },
+      "required": [
+        "step",
+        "tool",
+        "tool_version"
+      ],
+      "title": "TraceStep",
+      "type": "object"
+    },
+    "UserStory": {
+      "additionalProperties": false,
+      "description": "User story model.",
+      "properties": {
+        "id": {
+          "description": "Canonical stable ID (e.g., 'github:owner/repo#123')",
+          "title": "Id",
+          "type": "string"
+        },
+        "sections": {
+          "$ref": "#/$defs/Sections",
+          "description": "Sections"
+        },
+        "state": {
+          "description": "State (e.g., 'open', 'closed')",
+          "title": "State",
+          "type": "string"
+        },
+        "tags": {
+          "description": "Tags",
+          "items": {
+            "type": "string"
+          },
+          "title": "Tags",
+          "type": "array"
+        },
+        "timestamps": {
+          "$ref": "#/$defs/Timestamps",
+          "description": "Timestamps"
+        },
+        "title": {
+          "description": "Title (1-500 chars)",
+          "title": "Title",
+          "type": "string"
+        },
+        "url": {
+          "description": "Valid URL",
+          "title": "Url",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "state",
+        "tags",
+        "url",
+        "timestamps",
+        "sections"
+      ],
+      "title": "UserStory",
+      "type": "object"
+    },
+    "Warning": {
+      "additionalProperties": false,
+      "description": "Warning in trace step.",
+      "properties": {
+        "code": {
+          "description": "Warning code (e.g., 'VERSION_MISMATCH')",
+          "title": "Code",
+          "type": "string"
+        },
+        "context": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional context (e.g., field path)",
+          "title": "Context"
+        },
+        "message": {
+          "description": "Human-readable message",
+          "title": "Message",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "title": "Warning",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "PDF Ready v1.0 root model.",
+  "properties": {
+    "content": {
+      "$ref": "#/$defs/Content",
+      "description": "Content"
+    },
+    "meta": {
+      "$ref": "#/$defs/Meta",
+      "description": "Metadata"
+    },
+    "schema_version": {
+      "description": "Schema version (must be '1.0')",
+      "title": "Schema Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "meta",
+    "content"
+  ],
+  "title": "PdfReadyV1",
+  "type": "object"
+}
