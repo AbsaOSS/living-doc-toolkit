@@ -1,0 +1,14 @@
+[tool.black]
+line-length = 120
+target-version = ['py314']
+
+[tool.mypy]
+check_untyped_defs = true
+python_version = "3.14"
+
+[tool.coverage.run]
+omit = ["tests/*"]
+
+[tool.pytest.ini_options]
+addopts = "--cov=. --cov-report=term --cov-fail-under=80"
+testpaths = ["tests"]
