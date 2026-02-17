@@ -195,8 +195,15 @@ def test_deterministic_serialization():
     envelope = AuditEnvelopeV1(
         schema_version="1.0",
         producer=Producer(name="test", version="1.0.0", build=None),
-        run=Run(),
-        source=Source(systems=["GitHub"]),
+        run=Run(
+            run_id=None,
+            run_attempt=None,
+            actor=None,
+            workflow=None,
+            ref=None,
+            sha=None,
+        ),
+        source=Source(systems=["GitHub"], repositories=[], organization=None, enterprise=None),
         trace=[],
     )
 
