@@ -1,0 +1,74 @@
+{
+  "metadata": {
+    "generator": {
+      "name": "AbsaOSS/living-doc-collector-gh",
+      "version": "1.0.0"
+    },
+    "run": {
+      "run_id": "12345",
+      "run_attempt": "1",
+      "actor": "test-user",
+      "workflow": "collect-docs",
+      "ref": "refs/heads/main",
+      "sha": "abc123def456"
+    },
+    "source": {
+      "systems": ["github"],
+      "repositories": ["AbsaOSS/living-doc-toolkit"],
+      "organization": "AbsaOSS",
+      "enterprise": null
+    }
+  },
+  "issues": [
+    {
+      "number": 1,
+      "title": "Implement user authentication",
+      "state": "open",
+      "labels": ["enhancement", "security"],
+      "html_url": "https://github.com/AbsaOSS/living-doc-toolkit/issues/1",
+      "created_at": "2026-01-15T10:00:00Z",
+      "updated_at": "2026-01-20T15:30:00Z",
+      "body": "## Overview\nImplement secure user authentication for the application.\n\n## Business Value\nProvides secure access control and user management capabilities.\n\n## Prerequisites\n- Database schema updated\n- OAuth provider configured\n\n## Acceptance Criteria\n- User can log in with email and password\n- User can log in with OAuth (Google, GitHub)\n- Session management is secure\n- Password reset functionality works"
+    },
+    {
+      "number": 2,
+      "title": "Add dark mode support",
+      "state": "closed",
+      "labels": ["enhancement", "ui"],
+      "html_url": "https://github.com/AbsaOSS/living-doc-toolkit/issues/2",
+      "created_at": "2026-01-10T09:00:00Z",
+      "updated_at": "2026-01-25T14:00:00Z",
+      "body": "## Summary\nAdd dark mode theme support to improve user experience.\n\n## Why\nMany users prefer dark mode for reduced eye strain.\n\n## Done Criteria\n- Theme toggle button in settings\n- All pages support dark mode\n- User preference is saved"
+    },
+    {
+      "number": 3,
+      "title": "Fix pagination bug",
+      "state": "open",
+      "labels": ["bug"],
+      "html_url": "https://github.com/AbsaOSS/living-doc-toolkit/issues/3",
+      "created_at": "2026-01-18T11:30:00Z",
+      "updated_at": "2026-01-18T11:30:00Z",
+      "body": "Pagination is not working correctly on the users list page. When clicking page 2, it shows page 1 content."
+    },
+    {
+      "number": 4,
+      "title": "Document API endpoints",
+      "state": "open",
+      "labels": ["documentation"],
+      "html_url": "https://github.com/AbsaOSS/living-doc-toolkit/issues/4",
+      "created_at": "2026-01-22T08:00:00Z",
+      "updated_at": "2026-01-23T16:45:00Z",
+      "body": "## Description\nCreate comprehensive API documentation.\n\n## How To\n1. List all endpoints with examples\n2. Document request/response formats\n3. Add authentication requirements\n\n## Related\n- #1 (authentication)\n- API specification document\n\n## Custom Section\nThis is a custom section that should be appended to description."
+    },
+    {
+      "number": 5,
+      "title": "Empty body issue",
+      "state": "open",
+      "labels": [],
+      "html_url": "https://github.com/AbsaOSS/living-doc-toolkit/issues/5",
+      "created_at": "2026-01-24T12:00:00Z",
+      "updated_at": "2026-01-24T12:00:00Z",
+      "body": null
+    }
+  ]
+}

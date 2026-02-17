@@ -1,0 +1,200 @@
+{
+  "content": {
+    "user_stories": [
+      {
+        "id": "github:AbsaOSS/living-doc-toolkit#1",
+        "sections": {
+          "acceptance_criteria": "- User can log in with email and password\n- User can log in with OAuth (Google, GitHub)\n- Session management is secure\n- Password reset functionality works",
+          "business_value": "Provides secure access control and user management capabilities.",
+          "connections": null,
+          "description": "Implement secure user authentication for the application.",
+          "last_edited": null,
+          "preconditions": "- Database schema updated\n- OAuth provider configured",
+          "user_guide": null
+        },
+        "state": "open",
+        "tags": [
+          "enhancement",
+          "security"
+        ],
+        "timestamps": {
+          "created": "2026-01-15T10:00:00Z",
+          "updated": "2026-01-20T15:30:00Z"
+        },
+        "title": "Implement user authentication",
+        "url": "https://github.com/AbsaOSS/living-doc-toolkit/issues/1"
+      },
+      {
+        "id": "github:AbsaOSS/living-doc-toolkit#2",
+        "sections": {
+          "acceptance_criteria": "- Theme toggle button in settings\n- All pages support dark mode\n- User preference is saved",
+          "business_value": "Many users prefer dark mode for reduced eye strain.",
+          "connections": null,
+          "description": "Add dark mode theme support to improve user experience.",
+          "last_edited": null,
+          "preconditions": null,
+          "user_guide": null
+        },
+        "state": "closed",
+        "tags": [
+          "enhancement",
+          "ui"
+        ],
+        "timestamps": {
+          "created": "2026-01-10T09:00:00Z",
+          "updated": "2026-01-25T14:00:00Z"
+        },
+        "title": "Add dark mode support",
+        "url": "https://github.com/AbsaOSS/living-doc-toolkit/issues/2"
+      },
+      {
+        "id": "github:AbsaOSS/living-doc-toolkit#3",
+        "sections": {
+          "acceptance_criteria": null,
+          "business_value": null,
+          "connections": null,
+          "description": "Pagination is not working correctly on the users list page. When clicking page 2, it shows page 1 content.",
+          "last_edited": null,
+          "preconditions": null,
+          "user_guide": null
+        },
+        "state": "open",
+        "tags": [
+          "bug"
+        ],
+        "timestamps": {
+          "created": "2026-01-18T11:30:00Z",
+          "updated": "2026-01-18T11:30:00Z"
+        },
+        "title": "Fix pagination bug",
+        "url": "https://github.com/AbsaOSS/living-doc-toolkit/issues/3"
+      },
+      {
+        "id": "github:AbsaOSS/living-doc-toolkit#4",
+        "sections": {
+          "acceptance_criteria": null,
+          "business_value": null,
+          "connections": "- #1 (authentication)\n- API specification document",
+          "description": "Create comprehensive API documentation.\n\n### Custom Section\nThis is a custom section that should be appended to description.",
+          "last_edited": null,
+          "preconditions": null,
+          "user_guide": "1. List all endpoints with examples\n2. Document request/response formats\n3. Add authentication requirements"
+        },
+        "state": "open",
+        "tags": [
+          "documentation"
+        ],
+        "timestamps": {
+          "created": "2026-01-22T08:00:00Z",
+          "updated": "2026-01-23T16:45:00Z"
+        },
+        "title": "Document API endpoints",
+        "url": "https://github.com/AbsaOSS/living-doc-toolkit/issues/4"
+      },
+      {
+        "id": "github:AbsaOSS/living-doc-toolkit#5",
+        "sections": {
+          "acceptance_criteria": null,
+          "business_value": null,
+          "connections": null,
+          "description": null,
+          "last_edited": null,
+          "preconditions": null,
+          "user_guide": null
+        },
+        "state": "open",
+        "tags": [],
+        "timestamps": {
+          "created": "2026-01-24T12:00:00Z",
+          "updated": "2026-01-24T12:00:00Z"
+        },
+        "title": "Empty body issue",
+        "url": "https://github.com/AbsaOSS/living-doc-toolkit/issues/5"
+      }
+    ]
+  },
+  "meta": {
+    "audit": {
+      "extensions": {
+        "collector-gh": {
+          "original_metadata": {
+            "generator": {
+              "name": "AbsaOSS/living-doc-collector-gh",
+              "version": "1.0.0"
+            },
+            "run": {
+              "actor": "test-user",
+              "ref": "refs/heads/main",
+              "run_attempt": "1",
+              "run_id": "12345",
+              "sha": "abc123def456",
+              "workflow": "collect-docs"
+            },
+            "source": {
+              "enterprise": null,
+              "organization": "AbsaOSS",
+              "repositories": [
+                "AbsaOSS/living-doc-toolkit"
+              ],
+              "systems": [
+                "github"
+              ]
+            }
+          }
+        }
+      },
+      "producer": {
+        "build": null,
+        "name": "AbsaOSS/living-doc-collector-gh",
+        "version": "1.0.0"
+      },
+      "run": {
+        "actor": "test-user",
+        "ref": "refs/heads/main",
+        "run_attempt": "1",
+        "run_id": "12345",
+        "sha": "abc123def456",
+        "workflow": "collect-docs"
+      },
+      "schema_version": "1.0",
+      "source": {
+        "enterprise": null,
+        "organization": "AbsaOSS",
+        "repositories": [
+          "AbsaOSS/living-doc-toolkit"
+        ],
+        "systems": [
+          "github"
+        ]
+      },
+      "trace": [
+        {
+          "finished_at": "DYNAMIC_TIMESTAMP",
+          "started_at": "DYNAMIC_TIMESTAMP",
+          "step": "normalization",
+          "tool": "living-doc-toolkit",
+          "tool_version": "1.0.0",
+          "warnings": []
+        }
+      ]
+    },
+    "document_title": "Living Documentation - AbsaOSS/living-doc-toolkit",
+    "document_version": "1.0.0",
+    "generated_at": "DYNAMIC_TIMESTAMP",
+    "run_context": {
+      "branch": "refs/heads/main",
+      "ci_run_id": "12345",
+      "commit_sha": "abc123def456",
+      "triggered_by": "test-user"
+    },
+    "selection_summary": {
+      "excluded_items": 0,
+      "included_items": 5,
+      "total_items": 5
+    },
+    "source_set": [
+      "github:AbsaOSS/living-doc-toolkit"
+    ]
+  },
+  "schema_version": "1.0"
+}
