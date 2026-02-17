@@ -31,6 +31,7 @@ def test_logging_format_matches_spec():
     assert len(logger.handlers) > 0
     handler = logger.handlers[0]
     formatter = handler.formatter
+    assert formatter is not None
 
     # Test format by creating a log record
     record = logging.LogRecord(
@@ -52,6 +53,7 @@ def test_logging_format_with_different_levels():
     logger = setup_logging(verbose=True)
     handler = logger.handlers[0]
     formatter = handler.formatter
+    assert formatter is not None
 
     # Test DEBUG level
     record = logging.LogRecord(

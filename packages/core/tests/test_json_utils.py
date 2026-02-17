@@ -142,14 +142,14 @@ def test_validate_json_structure_with_missing_keys():
 def test_validate_json_structure_with_empty_required():
     """Test validate_json_structure with no required keys."""
     data = {"key": "value"}
-    required = []
+    required: list[str] = []
     missing = validate_json_structure(data, required)
     assert missing == []
 
 
 def test_validate_json_structure_with_empty_data():
     """Test validate_json_structure with empty data dict."""
-    data = {}
+    data: dict[str, str] = {}
     required = ["key1", "key2"]
     missing = validate_json_structure(data, required)
     assert sorted(missing) == ["key1", "key2"]

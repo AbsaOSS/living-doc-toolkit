@@ -333,7 +333,15 @@ def test_run_context_with_data():
 
 def test_sections_all_optional():
     """Test that all Sections fields are optional."""
-    sections = Sections()
+    sections = Sections(
+        description=None,
+        business_value=None,
+        preconditions=None,
+        acceptance_criteria=None,
+        user_guide=None,
+        connections=None,
+        last_edited=None,
+    )
 
     assert sections.description is None
     assert sections.business_value is None
@@ -377,6 +385,8 @@ def test_deterministic_serialization():
             generated_at="2026-01-23T12:00:00Z",
             source_set=["test"],
             selection_summary=SelectionSummary(total_items=0, included_items=0, excluded_items=0),
+            run_context=None,
+            audit=None,
         ),
         content=Content(user_stories=[]),
     )
