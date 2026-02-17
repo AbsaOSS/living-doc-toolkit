@@ -9,7 +9,7 @@ description = "Core utilities for the Living Documentation Toolkit"
 readme = "README.md"
 license = {text = "Apache-2.0"}
 authors = [
-    {name = "AbsaOSS", email = "opensource@absa.africa"}
+    {name = "AbsaOSS", email = "miroslav.pojer@absa.africa"}
 ]
 requires-python = ">=3.11"
 dependencies = [
