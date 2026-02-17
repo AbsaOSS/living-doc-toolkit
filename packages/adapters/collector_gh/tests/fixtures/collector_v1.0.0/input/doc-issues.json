@@ -1,0 +1,145 @@
+{
+  "metadata": {
+    "generator": {
+      "name": "AbsaOSS/living-doc-collector-gh",
+      "version": "1.0.0",
+      "build": "sha-abc123"
+    },
+    "run": {
+      "run_id": "123456789",
+      "run_attempt": "1",
+      "actor": "john.doe@example.com",
+      "workflow": "collect-documentation",
+      "ref": "refs/heads/main",
+      "sha": "abc123def456789"
+    },
+    "source": {
+      "systems": ["GitHub"],
+      "repositories": ["AbsaOSS/example-project"],
+      "organization": "AbsaOSS",
+      "enterprise": null
+    }
+  },
+  "issues": [
+    {
+      "number": 1,
+      "title": "User Authentication with OAuth2",
+      "state": "open",
+      "labels": ["documentation", "priority:high", "authentication"],
+      "html_url": "https://github.com/AbsaOSS/example-project/issues/1",
+      "created_at": "2026-01-10T08:00:00Z",
+      "updated_at": "2026-01-20T14:30:00Z",
+      "body": "## Description\nAs a user, I want to authenticate using OAuth2 providers so that I can securely access the application without creating a separate account.\n\n## Business Value\nReduces user friction during onboarding and improves security by leveraging trusted identity providers.\n\n## Acceptance Criteria\n- User can select OAuth2 provider (Google, Microsoft, GitHub)\n- Successful authentication redirects to application dashboard\n- Failed authentication shows appropriate error message\n- User profile is created/updated from OAuth2 data"
+    },
+    {
+      "number": 2,
+      "title": "Export Data to CSV Format",
+      "state": "open",
+      "labels": ["documentation", "feature", "priority:medium"],
+      "html_url": "https://github.com/AbsaOSS/example-project/issues/2",
+      "created_at": "2026-01-12T09:15:00Z",
+      "updated_at": "2026-01-22T10:45:00Z",
+      "body": "## Description\nAs a data analyst, I want to export report data to CSV format so that I can perform further analysis in Excel or other tools.\n\n## Preconditions\n- User has at least one report generated\n- User has permission to export data\n\n## Acceptance Criteria\n- Export button is visible on report page\n- CSV file includes all report columns\n- CSV file respects user's date/time format preferences\n- Export completes within 30 seconds for reports up to 10,000 rows\n\n## User Guide\n1. Navigate to the report page\n2. Click the \"Export to CSV\" button in the top-right corner\n3. Wait for download to complete\n4. Open the CSV file in your preferred tool"
+    },
+    {
+      "number": 3,
+      "title": "Real-time Notification System",
+      "state": "closed",
+      "labels": ["documentation", "enhancement", "notifications"],
+      "html_url": "https://github.com/AbsaOSS/example-project/issues/3",
+      "created_at": "2026-01-05T11:20:00Z",
+      "updated_at": "2026-01-25T16:00:00Z",
+      "body": "## Overview\nImplement a real-time notification system that alerts users about important events without requiring page refresh.\n\n## Business Value\nImproves user engagement and ensures timely awareness of critical updates.\n\n## Done Criteria\n| Criteria | Status |\n|----------|--------|\n| WebSocket connection established | ✓ |\n| Notifications appear as toast messages | ✓ |\n| Users can dismiss notifications | ✓ |\n| Notification history is accessible | ✓ |\n\n## Connections\n- Related to #5 (Push Notification Support)\n- Depends on #12 (WebSocket Infrastructure)"
+    },
+    {
+      "number": 4,
+      "title": "Multi-language Support for UI",
+      "state": "open",
+      "labels": ["documentation", "i18n", "priority:low"],
+      "html_url": "https://github.com/AbsaOSS/example-project/issues/4",
+      "created_at": "2026-01-14T13:30:00Z",
+      "updated_at": "2026-01-23T09:20:00Z",
+      "body": "## Summary\nAdd internationalization support to allow users to switch between English, French, and German languages.\n\n## Prerequisites\n- Translation keys are defined in locale files\n- Language selector is added to user preferences\n\n## AC\n- User can select preferred language from profile settings\n- UI text updates immediately after language change\n- Selected language persists across sessions\n- All user-facing text is translatable (no hardcoded strings)\n\n## Last Edited\nUpdated by alice.smith@example.com on 2026-01-23"
+    },
+    {
+      "number": 5,
+      "title": "Advanced Search with Filters",
+      "state": "open",
+      "labels": ["documentation", "search", "ux"],
+      "html_url": "https://github.com/AbsaOSS/example-project/issues/5",
+      "created_at": "2026-01-16T10:00:00Z",
+      "updated_at": "2026-01-24T11:30:00Z",
+      "body": "## Description\nAs a power user, I want to use advanced search filters to quickly find specific records based on multiple criteria.\n\n## Why\nReduces time spent manually browsing through large datasets and improves productivity.\n\n## Acceptance Criteria\n- Search supports text, date range, and category filters\n- Filters can be combined with AND/OR logic\n- Search results update in real-time as filters are applied\n- Search history is saved for quick access\n- Export search results to CSV"
+    },
+    {
+      "number": 6,
+      "title": "Dashboard Customization",
+      "state": "open",
+      "labels": ["documentation", "dashboard", "personalization"],
+      "html_url": "https://github.com/AbsaOSS/example-project/issues/6",
+      "created_at": "2026-01-17T14:45:00Z",
+      "updated_at": "2026-01-25T08:15:00Z",
+      "body": "## Description\nAllow users to customize their dashboard by adding, removing, and rearranging widgets.\n\n## Business Value\nEnhances user experience by providing personalized views tailored to individual workflows.\n\n## Preconditions\n- User is logged in\n- At least 3 widget types are available\n\n## Acceptance Criteria\n- Users can drag and drop widgets to reorder them\n- Users can add widgets from a widget library\n- Users can remove widgets they don't need\n- Dashboard layout is saved automatically\n- Layout persists across devices\n\n## Instructions\n### Adding a Widget\n1. Click \"Add Widget\" button\n2. Select widget type from dropdown\n3. Configure widget settings\n4. Click \"Save\"\n\n### Removing a Widget\n1. Hover over widget\n2. Click the X icon in the top-right corner\n3. Confirm deletion"
+    },
+    {
+      "number": 7,
+      "title": "Audit Log for Compliance",
+      "state": "closed",
+      "labels": ["documentation", "compliance", "security"],
+      "html_url": "https://github.com/AbsaOSS/example-project/issues/7",
+      "created_at": "2026-01-08T09:00:00Z",
+      "updated_at": "2026-01-26T12:00:00Z",
+      "body": "## Description\nImplement comprehensive audit logging to track all user actions for compliance and security purposes.\n\n## Business Value\nEnsures regulatory compliance (GDPR, SOX) and provides security incident investigation capabilities.\n\n## Acceptance Criteria\n- All CRUD operations are logged with timestamp, user ID, and action details\n- Logs are immutable and stored in a tamper-proof format\n- Logs are retained for 7 years\n- Administrators can search and filter audit logs\n- Failed login attempts are logged\n\n## Related\n- Links to compliance documentation: https://example.com/compliance\n- See also: #15 (Role-Based Access Control)"
+    },
+    {
+      "number": 8,
+      "title": "Email Notification Templates",
+      "state": "open",
+      "labels": ["documentation", "notifications", "email"],
+      "html_url": "https://github.com/AbsaOSS/example-project/issues/8",
+      "created_at": "2026-01-18T11:30:00Z",
+      "updated_at": "2026-01-24T15:45:00Z",
+      "body": "## Overview\nCreate customizable email templates for various notification types (welcome, password reset, report ready, etc.).\n\n## Value\nProvides consistent branding and messaging across all email communications.\n\n## Setup\n- Email service (SendGrid/Mailgun) is configured\n- Template variables are documented\n\n## Done Criteria\n- At least 5 email templates are available\n- Templates support variable substitution (user name, links, etc.)\n- Templates are responsive (mobile-friendly)\n- Administrators can preview templates before sending\n- Template changes are version-controlled"
+    },
+    {
+      "number": 9,
+      "title": "Two-Factor Authentication (2FA)",
+      "state": "open",
+      "labels": ["documentation", "security", "priority:high"],
+      "html_url": "https://github.com/AbsaOSS/example-project/issues/9",
+      "created_at": "2026-01-11T08:30:00Z",
+      "updated_at": "2026-01-26T10:00:00Z",
+      "body": "## Description\nAs a security-conscious user, I want to enable two-factor authentication to add an extra layer of protection to my account.\n\n## Business Value\nSignificantly reduces the risk of unauthorized account access and data breaches.\n\n## Acceptance Criteria\n- Users can enable 2FA via authenticator apps (Google Authenticator, Authy)\n- Backup codes are generated and displayed once\n- 2FA can be disabled with password confirmation\n- Failed 2FA attempts are rate-limited\n- SMS-based 2FA is supported as fallback\n\n## User Guide\n### Enabling 2FA\n1. Go to Account Settings > Security\n2. Click \"Enable Two-Factor Authentication\"\n3. Scan QR code with authenticator app\n4. Enter verification code to confirm\n5. Save backup codes in a secure location\n\n### Disabling 2FA\n1. Go to Account Settings > Security\n2. Click \"Disable Two-Factor Authentication\"\n3. Enter current password\n4. Enter 2FA code\n5. Click \"Confirm\"\n\n## History\nInitially proposed in Q4 2025, prioritized for Q1 2026 release."
+    },
+    {
+      "number": 10,
+      "title": "API Rate Limiting",
+      "state": "closed",
+      "labels": ["documentation", "api", "performance"],
+      "html_url": "https://github.com/AbsaOSS/example-project/issues/10",
+      "created_at": "2026-01-09T14:00:00Z",
+      "updated_at": "2026-01-27T09:30:00Z",
+      "body": "## Description\nImplement rate limiting for all API endpoints to prevent abuse and ensure fair resource allocation.\n\n## Business Value\nProtects system availability and prevents denial-of-service attacks.\n\n## Acceptance Criteria\n- Rate limit is 100 requests per minute per API key\n- Exceeding rate limit returns 429 status code with Retry-After header\n- Rate limit counters reset every minute\n- Premium users have higher rate limits (500 requests/minute)\n- Rate limit status is visible in API response headers\n\n## Connections\n- Related to API documentation: https://api.example.com/docs\n- See also: #18 (API Key Management)"
+    },
+    {
+      "number": 11,
+      "title": "Scheduled Report Generation",
+      "state": "open",
+      "labels": ["documentation", "reports", "automation"],
+      "html_url": "https://github.com/AbsaOSS/example-project/issues/11",
+      "created_at": "2026-01-19T10:15:00Z",
+      "updated_at": "2026-01-26T14:20:00Z",
+      "body": "## Description\nAllow users to schedule automatic report generation and delivery via email at specified intervals.\n\n## Business Value\nSaves time by automating repetitive reporting tasks and ensures stakeholders receive timely updates.\n\n## Preconditions\n- User has created at least one report template\n- Email service is configured and operational\n\n## AC\n- Users can schedule reports (daily, weekly, monthly)\n- Reports are generated at the specified time\n- Generated reports are emailed as PDF attachments\n- Users can pause or cancel scheduled reports\n- Failed report generations trigger alerts\n\n## How To\n1. Open the report you want to schedule\n2. Click \"Schedule\" button\n3. Select frequency (daily/weekly/monthly)\n4. Choose delivery time\n5. Enter recipient email addresses\n6. Click \"Save Schedule\"\n\n## Changes\nScheduling logic was refactored in v2.3 to improve reliability."
+    },
+    {
+      "number": 12,
+      "title": "Dark Mode Theme",
+      "state": "open",
+      "labels": ["documentation", "ui", "accessibility"],
+      "html_url": "https://github.com/AbsaOSS/example-project/issues/12",
+      "created_at": "2026-01-20T09:45:00Z",
+      "updated_at": "2026-01-27T11:00:00Z",
+      "body": "## Summary\nImplement a dark mode theme option to reduce eye strain and improve accessibility for users in low-light environments.\n\n## Value\nEnhances user comfort and accessibility, especially for users who work extended hours.\n\n## Acceptance Criteria\n- Theme toggle is available in user preferences\n- Dark mode applies to all UI components\n- Theme preference persists across sessions\n- System theme preference is detected and applied automatically\n- Contrast ratios meet WCAG AA standards\n\n## Links\n- Design mockups: https://figma.com/darkmode\n- WCAG guidelines: https://www.w3.org/WAI/WCAG21/quickref/"
+    }
+  ]
+}

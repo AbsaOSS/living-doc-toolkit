@@ -1,0 +1,145 @@
+{
+  "metadata": {
+    "generator": {
+      "name": "AbsaOSS/living-doc-collector-gh",
+      "version": "1.2.0",
+      "build": "sha-xyz789"
+    },
+    "run": {
+      "run_id": "987654321",
+      "run_attempt": "2",
+      "actor": "jane.smith@example.com",
+      "workflow": "documentation-pipeline",
+      "ref": "refs/heads/develop",
+      "sha": "xyz789abc456def"
+    },
+    "source": {
+      "systems": ["GitHub"],
+      "repositories": ["AbsaOSS/example-project"],
+      "organization": "AbsaOSS",
+      "enterprise": "AbsaCorp"
+    }
+  },
+  "issues": [
+    {
+      "number": 20,
+      "title": "Shopping Cart Persistence",
+      "state": "open",
+      "labels": ["documentation", "e-commerce", "priority:high"],
+      "html_url": "https://github.com/AbsaOSS/example-project/issues/20",
+      "created_at": "2026-01-21T08:00:00Z",
+      "updated_at": "2026-01-27T15:00:00Z",
+      "body": "## Description\nAs a customer, I want my shopping cart to persist across sessions so that I don't lose my selected items if I close the browser.\n\n## Business Value\nReduces cart abandonment rates and improves conversion by preserving user shopping intent.\n\n## Acceptance Criteria\n- Cart items are saved to database after each addition/removal\n- Cart is restored when user logs in\n- Cart items expire after 30 days of inactivity\n- Guest carts are converted to user carts upon registration\n- Out-of-stock items show appropriate messaging"
+    },
+    {
+      "number": 21,
+      "title": "Product Recommendation Engine",
+      "state": "open",
+      "labels": ["documentation", "ml", "personalization"],
+      "html_url": "https://github.com/AbsaOSS/example-project/issues/21",
+      "created_at": "2026-01-22T09:30:00Z",
+      "updated_at": "2026-01-28T10:45:00Z",
+      "body": "## Overview\nImplement a machine learning-based product recommendation system that suggests relevant items based on browsing history and purchase patterns.\n\n## Why\nIncreases average order value and improves customer satisfaction through personalized shopping experiences.\n\n## Prerequisites\n- User behavior tracking is implemented\n- Product catalog is indexed and searchable\n- ML model training pipeline is established\n\n## Done Criteria\n- Recommendations appear on product pages and homepage\n- Recommendations update in real-time based on browsing behavior\n- Click-through rate on recommendations is measured\n- Recommendation quality improves over time\n- Users can dismiss recommendations"
+    },
+    {
+      "number": 22,
+      "title": "Payment Gateway Integration",
+      "state": "closed",
+      "labels": ["documentation", "payments", "integration"],
+      "html_url": "https://github.com/AbsaOSS/example-project/issues/22",
+      "created_at": "2026-01-15T11:00:00Z",
+      "updated_at": "2026-01-29T14:30:00Z",
+      "body": "## Description\nIntegrate Stripe payment gateway to support credit card, debit card, and digital wallet payments.\n\n## Business Value\nEnables secure online transactions and supports multiple payment methods for customer convenience.\n\n## Acceptance Criteria\n| Payment Method | Status | Notes |\n|----------------|--------|-------|\n| Credit Cards | ✓ | Visa, Mastercard, Amex |\n| Debit Cards | ✓ | All major providers |\n| Apple Pay | ✓ | iOS only |\n| Google Pay | ✓ | Android and Web |\n| PayPal | Pending | Integration in progress |\n\n## User Guide\n### Making a Payment\n1. Add items to cart\n2. Proceed to checkout\n3. Select payment method\n4. Enter payment details\n5. Review and confirm order\n6. Receive confirmation email\n\n## Related\n- Stripe API documentation: https://stripe.com/docs\n- PCI compliance: #45"
+    },
+    {
+      "number": 23,
+      "title": "Inventory Management Dashboard",
+      "state": "open",
+      "labels": ["documentation", "inventory", "admin"],
+      "html_url": "https://github.com/AbsaOSS/example-project/issues/23",
+      "created_at": "2026-01-23T13:15:00Z",
+      "updated_at": "2026-01-28T09:20:00Z",
+      "body": "## Summary\nCreate an admin dashboard for managing product inventory, tracking stock levels, and receiving low-stock alerts.\n\n## Value\nPrevents stockouts and overstocking by providing real-time inventory visibility.\n\n## AC\n- Dashboard displays current stock levels for all products\n- Low-stock alerts are sent when quantity falls below threshold\n- Inventory can be updated manually or via bulk import\n- Stock movement history is tracked and auditable\n- Dashboard is accessible to users with 'inventory_manager' role"
+    },
+    {
+      "number": 24,
+      "title": "Customer Review and Rating System",
+      "state": "open",
+      "labels": ["documentation", "reviews", "social"],
+      "html_url": "https://github.com/AbsaOSS/example-project/issues/24",
+      "created_at": "2026-01-24T10:00:00Z",
+      "updated_at": "2026-01-29T11:30:00Z",
+      "body": "## Description\nAs a customer, I want to read and write product reviews to make informed purchasing decisions and share my experiences.\n\n## Business Value\nBuilds trust and credibility, provides social proof, and increases conversion rates.\n\n## Preconditions\n- User has purchased the product\n- User is logged in\n\n## Acceptance Criteria\n- Customers can rate products from 1 to 5 stars\n- Customers can write text reviews (up to 1000 characters)\n- Reviews can include photos (up to 5 images)\n- Reviews are moderated before publication\n- Average rating is displayed on product page\n- Reviews can be sorted by date, rating, or helpfulness\n\n## Instructions\n### Writing a Review\n1. Navigate to product page\n2. Click \"Write a Review\"\n3. Select star rating\n4. Write review text\n5. Optionally upload photos\n6. Click \"Submit Review\"\n7. Review enters moderation queue\n\n### Flagging Inappropriate Reviews\n1. Click \"Report\" on the review\n2. Select reason (spam, offensive, etc.)\n3. Provide additional details\n4. Submit report"
+    },
+    {
+      "number": 25,
+      "title": "Order Tracking and Notifications",
+      "state": "closed",
+      "labels": ["documentation", "orders", "notifications"],
+      "html_url": "https://github.com/AbsaOSS/example-project/issues/25",
+      "created_at": "2026-01-16T14:30:00Z",
+      "updated_at": "2026-01-30T08:00:00Z",
+      "body": "## Description\nProvide customers with real-time order tracking and automated notifications at each stage of the fulfillment process.\n\n## Business Value\nReduces customer support inquiries and improves customer satisfaction through transparency.\n\n## Acceptance Criteria\n- Order status is updated in real-time (processing, shipped, delivered)\n- Customers receive email notifications at each status change\n- Tracking link is provided for shipped orders\n- Estimated delivery date is displayed\n- Customers can view order history\n\n## Connections\n- Integration with shipping providers: #48\n- Email notification templates: #8"
+    },
+    {
+      "number": 26,
+      "title": "Wishlist Functionality",
+      "state": "open",
+      "labels": ["documentation", "wishlist", "feature"],
+      "html_url": "https://github.com/AbsaOSS/example-project/issues/26",
+      "created_at": "2026-01-25T09:45:00Z",
+      "updated_at": "2026-01-29T15:45:00Z",
+      "body": "## Overview\nAllow customers to save products to a wishlist for future purchase consideration.\n\n## Why\nEncourages repeat visits and provides insights into customer preferences.\n\n## Setup\n- User authentication is implemented\n- Product catalog is available\n\n## Done Criteria\n- Users can add/remove products to wishlist\n- Wishlist is accessible from user profile\n- Wishlist can be shared via unique URL\n- Price drop notifications for wishlist items\n- Move to cart functionality available"
+    },
+    {
+      "number": 27,
+      "title": "Coupon and Discount System",
+      "state": "open",
+      "labels": ["documentation", "promotions", "pricing"],
+      "html_url": "https://github.com/AbsaOSS/example-project/issues/27",
+      "created_at": "2026-01-26T11:00:00Z",
+      "updated_at": "2026-01-30T10:15:00Z",
+      "body": "## Description\nAs a marketing manager, I want to create and manage promotional coupons to drive sales and customer engagement.\n\n## Business Value\nIncreases sales during promotional periods and enables targeted marketing campaigns.\n\n## Acceptance Criteria\n- Coupons can be percentage-based or fixed amount\n- Coupons have start and end dates\n- Coupons can have usage limits (per customer and total)\n- Coupons can be restricted to specific products or categories\n- Invalid or expired coupons show appropriate error messages\n- Coupon usage is tracked and reportable\n\n## User Guide\n### Creating a Coupon\n1. Navigate to Admin > Promotions > Coupons\n2. Click \"Create New Coupon\"\n3. Enter coupon code (e.g., SUMMER2026)\n4. Select discount type and amount\n5. Set validity period\n6. Configure usage limits\n7. Click \"Save\"\n\n### Applying a Coupon (Customer)\n1. Add items to cart\n2. Proceed to checkout\n3. Enter coupon code in the promo field\n4. Click \"Apply\"\n5. Discount is reflected in order total"
+    },
+    {
+      "number": 28,
+      "title": "Gift Card System",
+      "state": "open",
+      "labels": ["documentation", "gift-cards", "payments"],
+      "html_url": "https://github.com/AbsaOSS/example-project/issues/28",
+      "created_at": "2026-01-27T08:30:00Z",
+      "updated_at": "2026-01-30T12:00:00Z",
+      "body": "## Summary\nImplement a gift card system allowing customers to purchase, send, and redeem gift cards.\n\n## Value\nGenerates additional revenue and provides gifting options for customers.\n\n## Prerequisites\n- Payment gateway is integrated\n- Email notification system is functional\n\n## AC\n- Customers can purchase gift cards in denominations of $25, $50, $100, or custom amounts\n- Gift cards can be sent via email with personalized messages\n- Gift cards have unique codes and are validated at checkout\n- Gift card balance is tracked and displayed\n- Partial redemptions are supported\n- Gift cards expire after 2 years"
+    },
+    {
+      "number": 29,
+      "title": "Multi-Currency Support",
+      "state": "closed",
+      "labels": ["documentation", "i18n", "pricing"],
+      "html_url": "https://github.com/AbsaOSS/example-project/issues/29",
+      "created_at": "2026-01-18T10:15:00Z",
+      "updated_at": "2026-01-31T09:30:00Z",
+      "body": "## Description\nSupport multiple currencies to enable international sales and provide localized pricing.\n\n## Business Value\nExpands market reach and improves conversion rates for international customers.\n\n## Acceptance Criteria\n- Support for USD, EUR, GBP, and JPY\n- Currency is detected based on user location\n- Users can manually switch currency\n- Exchange rates are updated daily\n- Prices are displayed in selected currency throughout the site\n- Orders are processed in customer's selected currency\n\n## Links\n- Currency conversion API: https://exchangerate-api.com\n- Pricing strategy documentation"
+    },
+    {
+      "number": 30,
+      "title": "Customer Loyalty Program",
+      "state": "open",
+      "labels": ["documentation", "loyalty", "gamification"],
+      "html_url": "https://github.com/AbsaOSS/example-project/issues/30",
+      "created_at": "2026-01-28T13:45:00Z",
+      "updated_at": "2026-01-31T11:00:00Z",
+      "body": "## Description\nAs a returning customer, I want to earn loyalty points for purchases that can be redeemed for discounts on future orders.\n\n## Business Value\nIncreases customer retention and lifetime value through rewards and incentives.\n\n## Acceptance Criteria\n- Customers earn 1 point per $1 spent\n- Points can be redeemed at a rate of 100 points = $5 discount\n- Points balance is visible in user profile\n- Points transactions are logged (earned, redeemed, expired)\n- Bonus point promotions can be configured\n- Points expire after 12 months of inactivity\n\n## How To\n### Earning Points\n- Complete purchases (automatic)\n- Refer friends (bonus points)\n- Write product reviews (bonus points)\n- Complete profile information (one-time bonus)\n\n### Redeeming Points\n1. Go to checkout\n2. View available points balance\n3. Select points to redeem\n4. Discount is applied to order total\n\n## History\nLoyalty program launched in Q2 2026 with initial tier structure."
+    },
+    {
+      "number": 31,
+      "title": "Product Comparison Feature",
+      "state": "open",
+      "labels": ["documentation", "comparison", "ux"],
+      "html_url": "https://github.com/AbsaOSS/example-project/issues/31",
+      "created_at": "2026-01-29T09:00:00Z",
+      "updated_at": "2026-01-31T14:20:00Z",
+      "body": "## Overview\nAllow customers to compare specifications and features of up to 4 products side-by-side.\n\n## Why\nHelps customers make informed decisions and reduces decision fatigue.\n\n## Setup\n- Product specifications are standardized in the database\n- Comparison UI is designed and approved\n\n## Done Criteria\n- Users can add products to comparison list from any page\n- Comparison view shows products in a table format\n- Key specifications are highlighted\n- Differences are visually emphasized\n- Comparison can be shared via URL\n- Comparison list is limited to 4 products"
+    }
+  ]
+}

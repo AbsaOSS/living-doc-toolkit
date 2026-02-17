@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "living-doc-adapter-collector-gh"
+version = "1.0.0"
+description = "Collector-GH adapter for the Living Documentation Toolkit"
+readme = "README.md"
+license = {text = "Apache-2.0"}
+authors = [
+    {name = "AbsaOSS", email = "miroslav.pojer@absa.africa"}
+]
+requires-python = ">=3.11"
+dependencies = [
+    "pydantic>=2.10.0",
+    "packaging"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "black>=23.0.0",
+    "pylint>=3.0.0",
+    "mypy>=1.0.0"
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.black]
+line-length = 120
+target-version = ['py314']
+
+[tool.mypy]
+check_untyped_defs = true
+python_version = "3.14"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--cov=src --cov-report=term --cov-report=html --cov-fail-under=80"
