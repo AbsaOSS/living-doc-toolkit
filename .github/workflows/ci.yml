@@ -14,12 +14,11 @@
 # limitations under the License.
 #
 
-name: Build and Test
+name: CI
 on:
+  push:
+    branches: [ "master" ]
   pull_request:
-    branches:
-      - master
-    types: [ opened, synchronize, reopened ]
 
 jobs:
   static-code-analysis:
@@ -31,6 +30,9 @@ jobs:
         package:
           - packages/core
           - packages/datasets_pdf
+          - packages/adapters/collector_gh
+          - packages/services/normalize_issues
+          - apps/cli
     steps:
       - name: Checkout repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
@@ -45,6 +47,10 @@ jobs:
 
       - name: Install dependencies
         run: |
+          pip install -e packages/core
+          pip install -e packages/datasets_pdf
+          pip install -e packages/adapters/collector_gh
+          pip install -e packages/services/normalize_issues
           pip install -e "${{ matrix.package }}[dev]"
 
       - name: Analyze code with Pylint
@@ -72,6 +78,9 @@ jobs:
         package:
           - packages/core
           - packages/datasets_pdf
+          - packages/adapters/collector_gh
+          - packages/services/normalize_issues
+          - apps/cli
     steps:
       - name: Checkout repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
@@ -86,6 +95,10 @@ jobs:
 
       - name: Install dependencies
         run: |
+          pip install -e packages/core
+          pip install -e packages/datasets_pdf
+          pip install -e packages/adapters/collector_gh
+          pip install -e packages/services/normalize_issues
           pip install -e "${{ matrix.package }}[dev]"
 
       - name: Check code format with Black
@@ -103,6 +116,9 @@ jobs:
         package:
           - packages/core
           - packages/datasets_pdf
+          - packages/adapters/collector_gh
+          - packages/services/normalize_issues
+          - apps/cli
 
     defaults:
       run:
@@ -121,6 +137,10 @@ jobs:
 
       - name: Install Python dependencies
         run: |
+          pip install -e packages/core
+          pip install -e packages/datasets_pdf
+          pip install -e packages/adapters/collector_gh
+          pip install -e packages/services/normalize_issues
           pip install -e "${{ matrix.package }}[dev]"
 
       - name: Check code coverage with Pytest
@@ -136,6 +156,9 @@ jobs:
         package:
           - packages/core
           - packages/datasets_pdf
+          - packages/adapters/collector_gh
+          - packages/services/normalize_issues
+          - apps/cli
     steps:
       - name: Checkout repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
@@ -150,6 +173,10 @@ jobs:
 
       - name: Install dependencies
         run: |
+          pip install -e packages/core
+          pip install -e packages/datasets_pdf
+          pip install -e packages/adapters/collector_gh
+          pip install -e packages/services/normalize_issues
           pip install -e "${{ matrix.package }}[dev]"
 
       - name: Check types with Mypy
