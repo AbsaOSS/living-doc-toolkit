@@ -31,10 +31,17 @@ where = ["src"]
 [tool.black]
 line-length = 120
 target-version = ['py314']
+extend-exclude = '''
+^(
+    tests/
+    | verifications/
+)
+'''
 
 [tool.mypy]
 check_untyped_defs = true
 python_version = "3.14"
+exclude = '^(tests/|verifications/)'
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
