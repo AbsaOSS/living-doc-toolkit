@@ -1,6 +1,6 @@
 # Living Documentation Toolkit
 
-[![CI](https://github.com/AbsaOSS/living-doc-toolkit/actions/workflows/ci.yml/badge.svg)](https://github.com/AbsaOSS/living-doc-toolkit/actions/workflows/ci.yml)
+[![CI](https://github.com/AbsaOSS/living-doc-toolkit/actions/workflows/test.yml/badge.svg)](https://github.com/AbsaOSS/living-doc-toolkit/actions/workflows/test.yml)
 [![Integration Tests](https://github.com/AbsaOSS/living-doc-toolkit/actions/workflows/integration.yml/badge.svg)](https://github.com/AbsaOSS/living-doc-toolkit/actions/workflows/integration.yml)
 
 A monorepo hosting multiple independent Python services that transform and enrich machine-readable artifacts produced by upstream collectors (e.g., [living-doc-collector-gh](https://github.com/AbsaOSS/living-doc-collector-gh)) into datasets consumable by downstream actions (e.g., [living-doc-generator-pdf](https://github.com/AbsaOSS/living-doc-generator-pdf)).

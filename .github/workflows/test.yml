@@ -14,11 +14,11 @@
 # limitations under the License.
 #
 
-name: CI
+name: Test
 on:
-  push:
-    branches: [ "master" ]
   pull_request:
+    branches: [ "master" ]
+    types: [opened, synchronize, reopened]
 
 jobs:
   static-code-analysis:
