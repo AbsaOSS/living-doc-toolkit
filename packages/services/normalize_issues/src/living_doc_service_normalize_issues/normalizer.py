@@ -6,8 +6,7 @@ Markdown normalizer for user story sections.
 This module handles parsing markdown content and normalizing headings to canonical section names.
 """
 
-from living_doc_core.markdown_utils import split_by_headings, normalize_heading
-
+from living_doc_core.markdown_utils import split_by_headings, normalize_heading  # type: ignore[import-untyped]
 
 # Heading synonym mapping (case-insensitive)
 HEADING_SYNONYMS = {
@@ -21,7 +20,7 @@ HEADING_SYNONYMS = {
 }
 
 
-def normalize_sections(markdown: str) -> dict:
+def normalize_sections(markdown: str) -> dict:  # pylint: disable=too-many-branches
     """
     Normalize markdown content into canonical sections.
 
@@ -58,6 +57,9 @@ def normalize_sections(markdown: str) -> dict:
     if "" in sections_raw and sections_raw[""]:
         description_parts.append(sections_raw[""].strip())
 
+    # First pass: collect known sections and track description synonym
+    known_description_content = None
+
     # Process each heading and its content
     for heading, content in sections_raw.items():
         if heading == "":  # Already processed above
@@ -71,15 +73,25 @@ def normalize_sections(markdown: str) -> dict:
             canonical = synonym_to_canonical[normalized]
             # Store content under canonical section key
             if content and content.strip():
-                result[canonical] = content.strip()
+                if canonical == "description":
+                    # Store description content to prepend to description_parts
+                    known_description_content = content.strip()
+                else:
+                    result[canonical] = content.strip()
         else:
             # Unknown heading: append to description as structured content
             if content and content.strip():
                 description_parts.append(f"### {heading}\n{content.strip()}")
 
-    # Combine all description parts
+    # Build final description by combining known description + pre-heading + unknown
+    final_description_parts = []
+    if known_description_content:
+        final_description_parts.append(known_description_content)
     if description_parts:
-        result["description"] = "\n\n".join(description_parts)
+        final_description_parts.extend(description_parts)
+
+    if final_description_parts:
+        result["description"] = "\n\n".join(final_description_parts)
 
     # Ensure empty sections are represented as None
     if not result:

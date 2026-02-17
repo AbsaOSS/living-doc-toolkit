@@ -2,7 +2,7 @@
   "content": {
     "user_stories": [
       {
-        "id": "github:github:AbsaOSS/living-doc-toolkit#1",
+        "id": "github:AbsaOSS/living-doc-toolkit#1",
         "sections": {
           "acceptance_criteria": "- User can log in with email and password\n- User can log in with OAuth (Google, GitHub)\n- Session management is secure\n- Password reset functionality works",
           "business_value": "Provides secure access control and user management capabilities.",
@@ -25,7 +25,7 @@
         "url": "https://github.com/AbsaOSS/living-doc-toolkit/issues/1"
       },
       {
-        "id": "github:github:AbsaOSS/living-doc-toolkit#2",
+        "id": "github:AbsaOSS/living-doc-toolkit#2",
         "sections": {
           "acceptance_criteria": "- Theme toggle button in settings\n- All pages support dark mode\n- User preference is saved",
           "business_value": "Many users prefer dark mode for reduced eye strain.",
@@ -48,7 +48,7 @@
         "url": "https://github.com/AbsaOSS/living-doc-toolkit/issues/2"
       },
       {
-        "id": "github:github:AbsaOSS/living-doc-toolkit#3",
+        "id": "github:AbsaOSS/living-doc-toolkit#3",
         "sections": {
           "acceptance_criteria": null,
           "business_value": null,
@@ -70,12 +70,12 @@
         "url": "https://github.com/AbsaOSS/living-doc-toolkit/issues/3"
       },
       {
-        "id": "github:github:AbsaOSS/living-doc-toolkit#4",
+        "id": "github:AbsaOSS/living-doc-toolkit#4",
         "sections": {
           "acceptance_criteria": null,
           "business_value": null,
           "connections": "- #1 (authentication)\n- API specification document",
-          "description": "### Custom Section\nThis is a custom section that should be appended to description.",
+          "description": "Create comprehensive API documentation.\n\n### Custom Section\nThis is a custom section that should be appended to description.",
           "last_edited": null,
           "preconditions": null,
           "user_guide": "1. List all endpoints with examples\n2. Document request/response formats\n3. Add authentication requirements"
@@ -92,7 +92,7 @@
         "url": "https://github.com/AbsaOSS/living-doc-toolkit/issues/4"
       },
       {
-        "id": "github:github:AbsaOSS/living-doc-toolkit#5",
+        "id": "github:AbsaOSS/living-doc-toolkit#5",
         "sections": {
           "acceptance_criteria": null,
           "business_value": null,
@@ -134,7 +134,7 @@
               "enterprise": null,
               "organization": "AbsaOSS",
               "repositories": [
-                "github:AbsaOSS/living-doc-toolkit"
+                "AbsaOSS/living-doc-toolkit"
               ],
               "systems": [
                 "github"
@@ -161,7 +161,7 @@
         "enterprise": null,
         "organization": "AbsaOSS",
         "repositories": [
-          "github:AbsaOSS/living-doc-toolkit"
+          "AbsaOSS/living-doc-toolkit"
         ],
         "systems": [
           "github"

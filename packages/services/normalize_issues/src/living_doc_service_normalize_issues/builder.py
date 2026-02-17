@@ -8,8 +8,8 @@ This module builds PdfReadyV1 objects from AdapterResult data with normalized se
 
 from datetime import datetime, timezone
 
-from living_doc_adapter_collector_gh.models import AdapterResult
-from living_doc_datasets_pdf.audit.v1.models import (
+from living_doc_adapter_collector_gh.models import AdapterResult  # type: ignore[import-untyped]
+from living_doc_datasets_pdf.audit.v1.models import (  # type: ignore[import-untyped]
     AuditEnvelopeV1,
     AuditWarning,
     Producer,
@@ -17,7 +17,7 @@ from living_doc_datasets_pdf.audit.v1.models import (
     Source,
     TraceStep,
 )
-from living_doc_datasets_pdf.pdf_ready.v1.models import (
+from living_doc_datasets_pdf.pdf_ready.v1.models import (  # type: ignore[import-untyped]
     Content,
     Meta,
     PdfReadyV1,
@@ -31,7 +31,7 @@ from living_doc_datasets_pdf.pdf_ready.v1.models import (
 from living_doc_service_normalize_issues.normalizer import normalize_sections
 
 
-def build_pdf_ready(adapter_result: AdapterResult, options: dict) -> PdfReadyV1:
+def build_pdf_ready(adapter_result: AdapterResult, options: dict) -> PdfReadyV1:  # pylint: disable=too-many-locals
     """
     Build PDF-ready JSON from adapter result.
 
@@ -79,13 +79,18 @@ def build_pdf_ready(adapter_result: AdapterResult, options: dict) -> PdfReadyV1:
 
     # Build SelectionSummary
     total_items = len(adapter_result.items)
-    selection_summary = SelectionSummary(total_items=total_items, included_items=total_items, excluded_items=0)
+    selection_summary = SelectionSummary(
+        total_items=total_items, included_items=total_items, excluded_items=0
+    )
 
     # Build source_set from adapter metadata
     source_set = []
     for repo in adapter_result.metadata.source.repositories:
-        # Repositories from collector-gh are already prefixed with github:
-        source_set.append(repo)
+        # Format repositories with github: prefix for source_set
+        if not repo.startswith("github:"):
+            source_set.append(f"github:{repo}")
+        else:
+            source_set.append(repo)
 
     # Fallback for document_title if not provided
     document_title = options.get("document_title")
@@ -134,7 +139,7 @@ def build_pdf_ready(adapter_result: AdapterResult, options: dict) -> PdfReadyV1:
     return pdf_ready
 
 
-def _build_audit_envelope(adapter_result: AdapterResult, options: dict) -> AuditEnvelopeV1:
+def _build_audit_envelope(adapter_result: AdapterResult, options: dict) -> AuditEnvelopeV1:  # pylint: disable=unused-argument
     """
     Build audit envelope from adapter metadata.
 
@@ -142,7 +147,7 @@ def _build_audit_envelope(adapter_result: AdapterResult, options: dict) -> Audit
 
     Args:
         adapter_result: Adapter result with metadata
-        options: Configuration options
+        options: Configuration options (currently unused)
 
     Returns:
         AuditEnvelopeV1 object
@@ -178,7 +183,9 @@ def _build_audit_envelope(adapter_result: AdapterResult, options: dict) -> Audit
     # Convert adapter warnings to audit warnings
     audit_warnings = []
     for warning in adapter_result.warnings:
-        audit_warnings.append(AuditWarning(code=warning.code, message=warning.message, context=warning.context))
+        audit_warnings.append(
+            AuditWarning(code=warning.code, message=warning.message, context=warning.context)
+        )
 
     normalization_step = TraceStep(
         step="normalization",
@@ -196,7 +203,12 @@ def _build_audit_envelope(adapter_result: AdapterResult, options: dict) -> Audit
 
     # Build audit envelope
     audit = AuditEnvelopeV1(
-        schema_version="1.0", producer=producer, run=run, source=source, trace=trace, extensions=extensions
+        schema_version="1.0",
+        producer=producer,
+        run=run,
+        source=source,
+        trace=trace,
+        extensions=extensions,
     )
 
     return audit

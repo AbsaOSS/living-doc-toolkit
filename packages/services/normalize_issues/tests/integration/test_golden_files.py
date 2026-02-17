@@ -51,7 +51,7 @@ def test_golden_files(tmp_path):
 
     # Verify first user story has normalized sections
     story1 = actual["content"]["user_stories"][0]
-    assert story1["id"] == "github:github:AbsaOSS/living-doc-toolkit#1"
+    assert story1["id"] == "github:AbsaOSS/living-doc-toolkit#1"
     assert story1["sections"]["description"] == "Implement secure user authentication for the application."
     assert story1["sections"]["business_value"] == "Provides secure access control and user management capabilities."
     assert story1["sections"]["preconditions"] == "- Database schema updated\n- OAuth provider configured"

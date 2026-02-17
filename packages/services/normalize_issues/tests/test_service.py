@@ -30,7 +30,7 @@ def test_run_service_valid_input(tmp_path):
             },
             "source": {
                 "systems": ["github"],
-                "repositories": ["github:owner/repo"],
+                "repositories": ["owner/repo"],
                 "organization": "owner",
                 "enterprise": None,
             },
@@ -136,7 +136,7 @@ def test_run_service_explicit_adapter(tmp_path):
                 "ref": None,
                 "sha": None,
             },
-            "source": {"systems": ["github"], "repositories": ["github:owner/repo"], "organization": None, "enterprise": None},
+            "source": {"systems": ["github"], "repositories": ["owner/repo"], "organization": None, "enterprise": None},
         },
         "issues": [
             {
@@ -195,7 +195,7 @@ def test_run_service_empty_items(tmp_path):
                 "ref": None,
                 "sha": None,
             },
-            "source": {"systems": ["github"], "repositories": ["github:owner/repo"], "organization": None, "enterprise": None},
+            "source": {"systems": ["github"], "repositories": ["owner/repo"], "organization": None, "enterprise": None},
         },
         "issues": [],
     }
@@ -231,7 +231,7 @@ def test_run_service_multiple_items(tmp_path):
                 "ref": None,
                 "sha": None,
             },
-            "source": {"systems": ["github"], "repositories": ["github:owner/repo"], "organization": None, "enterprise": None},
+            "source": {"systems": ["github"], "repositories": ["owner/repo"], "organization": None, "enterprise": None},
         },
         "issues": [
             {

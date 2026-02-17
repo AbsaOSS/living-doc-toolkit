@@ -14,7 +14,7 @@
     },
     "source": {
       "systems": ["github"],
-      "repositories": ["github:AbsaOSS/living-doc-toolkit"],
+      "repositories": ["AbsaOSS/living-doc-toolkit"],
       "organization": "AbsaOSS",
       "enterprise": null
     }

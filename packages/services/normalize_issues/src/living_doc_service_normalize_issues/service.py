@@ -7,13 +7,11 @@ This module provides the main service entry point for normalizing collector-gh o
 into PDF-ready JSON format.
 """
 
-import logging
-
-from living_doc_adapter_collector_gh.detector import can_handle
-from living_doc_adapter_collector_gh.parser import parse
-from living_doc_core.errors import AdapterError, InvalidInputError, NormalizationError
-from living_doc_core.json_utils import read_json, write_json
-from living_doc_core.logging_config import setup_logging
+from living_doc_adapter_collector_gh.detector import can_handle  # type: ignore[import-untyped]
+from living_doc_adapter_collector_gh.parser import parse  # type: ignore[import-untyped]
+from living_doc_core.errors import AdapterError, InvalidInputError, NormalizationError  # type: ignore[import-untyped]
+from living_doc_core.json_utils import read_json, write_json  # type: ignore[import-untyped]
+from living_doc_core.logging_config import setup_logging  # type: ignore[import-untyped]
 
 from living_doc_service_normalize_issues.builder import build_pdf_ready
 
@@ -97,10 +95,10 @@ def run_service(input_path: str, output_path: str, options: dict) -> None:
 
         # Step 7: Log summary
         logger.info("Normalization completed successfully")
-        logger.info("  - User stories: %d", len(pdf_ready.content.user_stories))
-        logger.info("  - Document title: %s", pdf_ready.meta.document_title)
-        logger.info("  - Document version: %s", pdf_ready.meta.document_version)
-        logger.info("  - Generated at: %s", pdf_ready.meta.generated_at)
+        logger.info("  - User stories: %d", len(pdf_ready.content.user_stories))  # pylint: disable=no-member
+        logger.info("  - Document title: %s", pdf_ready.meta.document_title)  # pylint: disable=no-member
+        logger.info("  - Document version: %s", pdf_ready.meta.document_version)  # pylint: disable=no-member
+        logger.info("  - Generated at: %s", pdf_ready.meta.generated_at)  # pylint: disable=no-member
 
     except (InvalidInputError, AdapterError, NormalizationError) as e:
         logger.error("Normalization failed: %s", e.message)

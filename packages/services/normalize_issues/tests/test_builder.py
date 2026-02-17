@@ -253,7 +253,9 @@ def test_build_pdf_ready_audit_trace_normalization_step():
     metadata = AdapterMetadata(
         producer=AdapterMetadataProducer(name="living-doc-collector-gh", version="1.0.0", build=None),
         run=AdapterMetadataRun(run_id=None, run_attempt=None, actor=None, workflow=None, ref=None, sha=None),
-        source=AdapterMetadataSource(systems=["github"], repositories=["github:owner/repo"], organization=None, enterprise=None),
+        source=AdapterMetadataSource(
+            systems=["github"], repositories=["github:owner/repo"], organization=None, enterprise=None
+        ),
         original_metadata={},
     )
 
@@ -288,7 +290,9 @@ def test_build_pdf_ready_warnings_in_audit():
     metadata = AdapterMetadata(
         producer=AdapterMetadataProducer(name="living-doc-collector-gh", version="1.0.0", build=None),
         run=AdapterMetadataRun(run_id=None, run_attempt=None, actor=None, workflow=None, ref=None, sha=None),
-        source=AdapterMetadataSource(systems=["github"], repositories=["github:owner/repo"], organization=None, enterprise=None),
+        source=AdapterMetadataSource(
+            systems=["github"], repositories=["github:owner/repo"], organization=None, enterprise=None
+        ),
         original_metadata={},
     )
 
@@ -325,7 +329,9 @@ def test_build_pdf_ready_run_context():
         run=AdapterMetadataRun(
             run_id="789", run_attempt="2", actor="testuser", workflow="ci", ref="feature-branch", sha="def456"
         ),
-        source=AdapterMetadataSource(systems=["github"], repositories=["github:owner/repo"], organization=None, enterprise=None),
+        source=AdapterMetadataSource(
+            systems=["github"], repositories=["github:owner/repo"], organization=None, enterprise=None
+        ),
         original_metadata={},
     )
 
@@ -360,7 +366,9 @@ def test_build_pdf_ready_multiple_items():
     metadata = AdapterMetadata(
         producer=AdapterMetadataProducer(name="living-doc-collector-gh", version="1.0.0", build=None),
         run=AdapterMetadataRun(run_id=None, run_attempt=None, actor=None, workflow=None, ref=None, sha=None),
-        source=AdapterMetadataSource(systems=["github"], repositories=["github:owner/repo"], organization=None, enterprise=None),
+        source=AdapterMetadataSource(
+            systems=["github"], repositories=["github:owner/repo"], organization=None, enterprise=None
+        ),
         original_metadata={},
     )
 
