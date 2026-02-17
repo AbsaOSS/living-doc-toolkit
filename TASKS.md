@@ -124,42 +124,42 @@ This document provides an actionable, phase-by-phase implementation roadmap for 
 
 ### Tasks
 
-- [ ] **3.1 Set up package structure**
+- [x] **3.1 Set up package structure**
   - Create `packages/core/pyproject.toml`
   - Define package as `living-doc-core`
   - Add dependencies: `click ^8.1.0` (for potential future use)
   - Create `src/living_doc_core/__init__.py`
   - **Verification:** Package installable with `pip install -e packages/core`
 
-- [ ] **3.2 Create JSON utilities**
+- [x] **3.2 Create JSON utilities**
   - Create `src/living_doc_core/json_utils.py`
   - Add `read_json(filepath)` with error handling
   - Add `write_json(filepath, data, indent=2, sort_keys=True)` for deterministic output
   - Add validation helpers
   - **Verification:** Read/write round-trip produces identical output
 
-- [ ] **3.3 Create logging configuration**
+- [x] **3.3 Create logging configuration**
   - Create `src/living_doc_core/logging_config.py`
   - Add `setup_logging(verbose=False)` function
   - Configure log levels: `DEBUG`, `INFO`, `WARNING`, `ERROR`
   - Add log formatting: `[{level}] {message}`
   - **Verification:** Logging output matches expected format
 
-- [ ] **3.4 Create Markdown utilities**
+- [x] **3.4 Create Markdown utilities**
   - Create `src/living_doc_core/markdown_utils.py`
   - Add `split_by_headings(markdown_text, level=2)` → dict of heading → content
   - Add `normalize_heading(text)` → lowercase, stripped
   - Add `extract_lists(markdown_text)` (optional, for future use)
   - **Verification:** Headings split correctly with test cases
 
-- [ ] **3.5 Create common error types**
+- [x] **3.5 Create common error types**
   - Create `src/living_doc_core/errors.py`
   - Define `ToolkitError` (base exception)
   - Define `InvalidInputError`, `AdapterError`, `SchemaValidationError`, `NormalizationError`, `FileIOError`
   - Map error types to exit codes (from SPEC.md 3.1.2)
   - **Verification:** Error classes raise correctly with messages
 
-- [ ] **3.6 Write unit tests**
+- [x] **3.6 Write unit tests**
   - Create `tests/test_json_utils.py`
     - Test read/write with valid JSON
     - Test read with malformed JSON (should raise error)
