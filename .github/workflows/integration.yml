@@ -45,9 +45,7 @@ jobs:
           pip install -e "apps/cli[dev]"
 
       - name: Run golden verification
-        if: hashFiles('verifications/verify_golden.py') != ''
         run: python verifications/verify_golden.py
 
       - name: Run compatibility verification
-        if: hashFiles('verifications/verify_compatibility.py') != ''
         run: python verifications/verify_compatibility.py
