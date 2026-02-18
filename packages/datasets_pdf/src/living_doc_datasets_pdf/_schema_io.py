@@ -13,28 +13,22 @@
 # limitations under the License.
 
 """
-Audit Envelope v1 JSON Schema export.
+Shared I/O helper for JSON Schema export.
 """
 
+import json
 from pathlib import Path
 
-from living_doc_datasets_pdf.audit.v1.models import AuditEnvelopeV1
-from living_doc_datasets_pdf._schema_io import write_schema_file
 
-
-def export_json_schema(output_path: str | Path | None = None) -> dict:
+def write_schema_file(schema: dict, output_path: Path) -> None:
     """
-    Export JSON schema for AuditEnvelopeV1.
+    Write a JSON schema dictionary to a file.
 
     Args:
-        output_path: Optional path to write schema file. If None, schema is only returned.
-
-    Returns:
-        JSON schema as dictionary.
+        schema: JSON schema dictionary.
+        output_path: Path to write the file.
     """
-    schema = AuditEnvelopeV1.model_json_schema()
-
-    if output_path:
-        write_schema_file(schema, Path(output_path))
-
-    return schema
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(output_path, "w", encoding="utf-8") as f:
+        json.dump(schema, f, indent=2, sort_keys=True)
+        f.write("\n")

@@ -6,7 +6,10 @@ Markdown normalizer for user story sections.
 This module handles parsing markdown content and normalizing headings to canonical section names.
 """
 
-from living_doc_core.markdown_utils import split_by_headings, normalize_heading  # type: ignore[import-untyped]
+from living_doc_core.markdown_utils import (  # type: ignore[import-untyped]
+    normalize_heading,
+    split_by_headings,
+)
 
 # Heading synonym mapping (case-insensitive)
 HEADING_SYNONYMS = {
