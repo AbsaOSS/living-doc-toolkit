@@ -104,9 +104,7 @@ class AuditEnvelopeV1(BaseModel):
     run: Run = Field(..., description="Run metadata")
     source: Source = Field(..., description="Source metadata")
     trace: list[TraceStep] = Field(..., description="Trace steps")
-    extensions: dict[str, dict[str, Any]] = Field(
-        default_factory=dict, description="Namespaced extensions (optional)"
-    )
+    extensions: dict[str, dict[str, Any]] = Field(default_factory=dict, description="Namespaced extensions (optional)")
 
     model_config = {"extra": "forbid", "strict": True}
 

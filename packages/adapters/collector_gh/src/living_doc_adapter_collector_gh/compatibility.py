@@ -39,8 +39,7 @@ def check_compatibility(version: str) -> list[CompatibilityWarning]:
             CompatibilityWarning(
                 code="VERSION_MISMATCH",
                 message=(
-                    f"Producer version {version} is outside confirmed range"
-                    f" >={CONFIRMED_MIN},<{CONFIRMED_MAX}"
+                    f"Producer version {version} is outside confirmed range" f" >={CONFIRMED_MIN},<{CONFIRMED_MAX}"
                 ),
                 context="metadata.generator.version",
             )
