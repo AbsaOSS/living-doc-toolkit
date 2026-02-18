@@ -1,0 +1,131 @@
+name: Living Documentation Pipeline
+
+# Trigger on push to main branch or manual workflow dispatch
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  normalize-issues:
+    name: Normalize Issues to PDF-Ready Format
+    runs-on: ubuntu-latest
+    
+    steps:
+      # Step 1: Checkout repository code
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      # Step 2: Set up Python 3.14
+      - name: Set up Python 3.14
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+          cache: 'pip'
+      
+      # Step 3: Install living-doc-toolkit
+      - name: Install living-doc-toolkit
+        run: |
+          # Install all packages
+          pip install -e packages/core
+          pip install -e packages/datasets_pdf
+          pip install -e packages/adapters/collector_gh
+          pip install -e packages/services/normalize_issues
+          pip install -e apps/cli
+      
+      # Step 4: Run normalize-issues service
+      # NOTE: This assumes doc-issues.json exists in the repository
+      # In a real pipeline, this would come from the collector action
+      - name: Normalize issues
+        run: |
+          living-doc normalize-issues \
+            --input doc-issues.json \
+            --output pdf_ready.json \
+            --document-title "Product Requirements" \
+            --document-version "${{ github.ref_name }}" \
+            --verbose
+      
+      # Step 5: Upload artifacts
+      - name: Upload PDF-ready JSON
+        uses: actions/upload-artifact@v4
+        with:
+          name: pdf-ready-json
+          path: pdf_ready.json
+          retention-days: 30
+
+  # ============================================================================
+  # CHAINING EXAMPLE: Full Pipeline (Collector → Builder → Generator)
+  # ============================================================================
+  # 
+  # In a complete pipeline, you would chain three actions:
+  # 
+  # 1. COLLECTOR: Collect issues from GitHub
+  #    - Action: AbsaOSS/living-doc-collector-gh@v1
+  #    - Output: doc-issues.json
+  # 
+  # 2. BUILDER (this workflow): Normalize issues
+  #    - Tool: living-doc-toolkit normalize-issues
+  #    - Input: doc-issues.json
+  #    - Output: pdf_ready.json
+  # 
+  # 3. GENERATOR: Generate PDF document
+  #    - Action: AbsaOSS/living-doc-generator-pdf@v1
+  #    - Input: pdf_ready.json
+  #    - Output: living-documentation.pdf
+  # 
+  # Example full pipeline:
+  # 
+  # jobs:
+  #   collect:
+  #     runs-on: ubuntu-latest
+  #     steps:
+  #       - uses: actions/checkout@v4
+  #       - uses: AbsaOSS/living-doc-collector-gh@v1
+  #         with:
+  #           github-token: ${{ secrets.GITHUB_TOKEN }}
+  #           output-file: doc-issues.json
+  #       - uses: actions/upload-artifact@v4
+  #         with:
+  #           name: collector-output
+  #           path: doc-issues.json
+  # 
+  #   normalize:
+  #     needs: collect
+  #     runs-on: ubuntu-latest
+  #     steps:
+  #       - uses: actions/checkout@v4
+  #       - uses: actions/download-artifact@v4
+  #         with:
+  #           name: collector-output
+  #       - uses: actions/setup-python@v5
+  #         with:
+  #           python-version: '3.14'
+  #       - run: |
+  #           pip install living-doc-toolkit
+  #           living-doc normalize-issues \
+  #             --input doc-issues.json \
+  #             --output pdf_ready.json
+  #       - uses: actions/upload-artifact@v4
+  #         with:
+  #           name: pdf-ready-json
+  #           path: pdf_ready.json
+  # 
+  #   generate:
+  #     needs: normalize
+  #     runs-on: ubuntu-latest
+  #     steps:
+  #       - uses: actions/checkout@v4
+  #       - uses: actions/download-artifact@v4
+  #         with:
+  #           name: pdf-ready-json
+  #       - uses: AbsaOSS/living-doc-generator-pdf@v1
+  #         with:
+  #           input-file: pdf_ready.json
+  #           output-file: living-documentation.pdf
+  #       - uses: actions/upload-artifact@v4
+  #         with:
+  #           name: living-documentation
+  #           path: living-documentation.pdf
+  # 
+  # ============================================================================
