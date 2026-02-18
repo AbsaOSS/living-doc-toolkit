@@ -32,7 +32,12 @@ def test_version(version: str, expected_warnings: bool) -> bool:
                 "ref": None,
                 "sha": None,
             },
-            "source": {"systems": ["github"], "repositories": ["github:test/repo"], "organization": None, "enterprise": None},
+            "source": {
+                "systems": ["github"],
+                "repositories": ["github:test/repo"],
+                "organization": None,
+                "enterprise": None,
+            },
         },
         "issues": [
             {
