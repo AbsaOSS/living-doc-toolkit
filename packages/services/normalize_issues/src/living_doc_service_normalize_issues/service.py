@@ -9,7 +9,11 @@ into PDF-ready JSON format.
 
 from living_doc_adapter_collector_gh.detector import can_handle  # type: ignore[import-untyped]
 from living_doc_adapter_collector_gh.parser import parse  # type: ignore[import-untyped]
-from living_doc_core.errors import AdapterError, InvalidInputError, NormalizationError  # type: ignore[import-untyped]
+from living_doc_core.errors import (  # type: ignore[import-untyped]
+    AdapterError,
+    InvalidInputError,
+    NormalizationError,
+)
 from living_doc_core.json_utils import read_json, write_json  # type: ignore[import-untyped]
 from living_doc_core.logging_config import setup_logging  # type: ignore[import-untyped]
 

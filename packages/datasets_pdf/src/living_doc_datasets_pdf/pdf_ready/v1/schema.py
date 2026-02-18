@@ -16,10 +16,10 @@
 PDF Ready v1 JSON Schema export.
 """
 
-import json
 from pathlib import Path
 
 from living_doc_datasets_pdf.pdf_ready.v1.models import PdfReadyV1
+from living_doc_datasets_pdf._schema_io import write_schema_file
 
 
 def export_json_schema(output_path: str | Path | None = None) -> dict:
@@ -35,10 +35,6 @@ def export_json_schema(output_path: str | Path | None = None) -> dict:
     schema = PdfReadyV1.model_json_schema()
 
     if output_path:
-        output_path = Path(output_path)
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(output_path, "w", encoding="utf-8") as f:
-            json.dump(schema, f, indent=2, sort_keys=True)
-            f.write("\n")
+        write_schema_file(schema, Path(output_path))
 
     return schema

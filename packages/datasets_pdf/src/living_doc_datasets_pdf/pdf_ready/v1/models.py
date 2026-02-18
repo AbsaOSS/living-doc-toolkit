@@ -38,7 +38,9 @@ class Sections(BaseModel):
     description: str | None = Field(None, description="Description (Markdown)")
     business_value: str | None = Field(None, description="Business value (Markdown, optional)")
     preconditions: str | None = Field(None, description="Preconditions (Markdown, optional)")
-    acceptance_criteria: str | None = Field(None, description="Acceptance criteria (Markdown, optional)")
+    acceptance_criteria: str | None = Field(
+        None, description="Acceptance criteria (Markdown, optional)"
+    )
     user_guide: str | None = Field(None, description="User guide (Markdown, optional)")
     connections: str | None = Field(None, description="Connections (Markdown, optional)")
     last_edited: str | None = Field(None, description="Last edited (Markdown, optional)")

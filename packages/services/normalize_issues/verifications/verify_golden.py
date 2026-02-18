@@ -12,6 +12,7 @@ import json
 import sys
 from pathlib import Path
 
+from living_doc_core.errors import AdapterError, InvalidInputError, NormalizationError
 from living_doc_service_normalize_issues.service import run_service
 
 
@@ -47,9 +48,12 @@ def main() -> int:
 
     # Run normalization
     try:
-        options = {"document_title": "Living Documentation - AbsaOSS/living-doc-toolkit", "document_version": "1.0.0"}
+        options = {
+            "document_title": "Living Documentation - AbsaOSS/living-doc-toolkit",
+            "document_version": "1.0.0",
+        }
         run_service(str(input_file), str(output_file), options)
-    except Exception as e:
+    except (AdapterError, InvalidInputError, NormalizationError, OSError) as e:
         print(f"ERROR: Normalization failed: {e}")
         return 1
 
@@ -60,7 +64,7 @@ def main() -> int:
 
         with open(output_file, "r", encoding="utf-8") as f:
             actual = json.load(f)
-    except Exception as e:
+    except (OSError, json.JSONDecodeError) as e:
         print(f"ERROR: Failed to load output files: {e}")
         return 1
 
@@ -74,12 +78,12 @@ def main() -> int:
         print(f"  - Document title: {actual['meta']['document_title']}")
         print(f"  - Document version: {actual['meta']['document_version']}")
         return 0
-    else:
-        print("✗ Output does NOT match expected golden file")
-        print()
-        print("Differences found. Run diff to see details:")
-        print(f"  diff {expected_file} {output_file}")
-        return 1
+
+    print("✗ Output does NOT match expected golden file")
+    print()
+    print("Differences found. Run diff to see details:")
+    print(f"  diff {expected_file} {output_file}")
+    return 1
 
 
 if __name__ == "__main__":

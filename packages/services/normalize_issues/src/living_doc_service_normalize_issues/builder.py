@@ -69,7 +69,10 @@ def build_pdf_ready(adapter_result: AdapterResult, options: dict) -> PdfReadyV1:
             state=item.state,
             tags=item.tags,
             url=item.url,
-            timestamps=Timestamps(created=item.timestamps.created, updated=item.timestamps.updated),
+            timestamps=Timestamps(
+            created=item.timestamps.created,
+            updated=item.timestamps.updated,
+        ),
             sections=sections,
         )
         user_stories.append(user_story)
@@ -79,7 +82,11 @@ def build_pdf_ready(adapter_result: AdapterResult, options: dict) -> PdfReadyV1:
 
     # Build SelectionSummary
     total_items = len(adapter_result.items)
-    selection_summary = SelectionSummary(total_items=total_items, included_items=total_items, excluded_items=0)
+    selection_summary = SelectionSummary(
+        total_items=total_items,
+        included_items=total_items,
+        excluded_items=0,
+    )
 
     # Build source_set from adapter metadata
     source_set = []
@@ -138,8 +145,8 @@ def build_pdf_ready(adapter_result: AdapterResult, options: dict) -> PdfReadyV1:
 
 
 def _build_audit_envelope(
-    adapter_result: AdapterResult, options: dict
-) -> AuditEnvelopeV1:  # pylint: disable=unused-argument
+    adapter_result: AdapterResult, _options: dict
+) -> AuditEnvelopeV1:
     """
     Build audit envelope from adapter metadata.
 
@@ -181,9 +188,10 @@ def _build_audit_envelope(
     now = datetime.now(timezone.utc).isoformat()
 
     # Convert adapter warnings to audit warnings
-    audit_warnings = []
-    for warning in adapter_result.warnings:
-        audit_warnings.append(AuditWarning(code=warning.code, message=warning.message, context=warning.context))
+    audit_warnings = [
+        AuditWarning(code=w.code, message=w.message, context=w.context)
+        for w in adapter_result.warnings
+    ]
 
     normalization_step = TraceStep(
         step="normalization",

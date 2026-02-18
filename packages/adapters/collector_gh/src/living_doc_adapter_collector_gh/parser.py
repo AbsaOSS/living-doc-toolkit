@@ -93,7 +93,9 @@ def parse(payload: dict) -> AdapterResult:
                 )
                 items.append(item)
             except (KeyError, TypeError) as e:
-                raise AdapterError(f"Failed to parse issue {issue.get('number', 'unknown')}: {e}") from e
+                raise AdapterError(
+                    f"Failed to parse issue {issue.get('number', 'unknown')}: {e}"
+                ) from e
 
         return AdapterResult(items=items, metadata=metadata, warnings=warnings)
 

@@ -12,6 +12,7 @@ import json
 import sys
 from pathlib import Path
 
+from living_doc_core.errors import AdapterError, InvalidInputError, NormalizationError
 from living_doc_service_normalize_issues.service import run_service
 
 
@@ -77,20 +78,18 @@ def test_version(version: str, expected_warnings: bool) -> bool:
                 for warning in warnings:
                     print(f"  - [{warning['code']}] {warning['message']}")
                 return True
-            else:
-                print("✗ Expected warnings but none found")
-                return False
-        else:
-            if not warnings:
-                print("✓ No warnings (as expected)")
-                return True
-            else:
-                print(f"✗ Unexpected warnings found: {len(warnings)}")
-                for warning in warnings:
-                    print(f"  - [{warning['code']}] {warning['message']}")
-                return False
+            print("✗ Expected warnings but none found")
+            return False
 
-    except Exception as e:
+        if not warnings:
+            print("✓ No warnings (as expected)")
+            return True
+        print(f"✗ Unexpected warnings found: {len(warnings)}")
+        for warning in warnings:
+            print(f"  - [{warning['code']}] {warning['message']}")
+        return False
+
+    except (AdapterError, InvalidInputError, NormalizationError, OSError) as e:
         print(f"✗ Error: {e}")
         return False
 
@@ -124,9 +123,8 @@ def main() -> int:
     if all_passed:
         print("\n✓ All compatibility tests passed")
         return 0
-    else:
-        print("\n✗ Some compatibility tests failed")
-        return 1
+    print("\n✗ Some compatibility tests failed")
+    return 1
 
 
 if __name__ == "__main__":
