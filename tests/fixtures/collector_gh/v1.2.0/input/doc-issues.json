@@ -1,0 +1,165 @@
+{
+  "metadata": {
+    "generator": {
+      "name": "AbsaOSS/living-doc-collector-gh",
+      "version": "1.2.0",
+      "build": "def789ghi012"
+    },
+    "run": {
+      "run_id": "9876543210",
+      "run_attempt": "2",
+      "actor": "pm@example.com",
+      "workflow": "documentation-pipeline",
+      "ref": "refs/heads/release-2.0",
+      "sha": "def789ghi012345"
+    },
+    "source": {
+      "systems": ["GitHub"],
+      "repositories": ["AbsaOSS/living-doc-v2"],
+      "organization": "AbsaOSS",
+      "enterprise": null
+    }
+  },
+  "issues": [
+    {
+      "number": 201,
+      "title": "Implement real-time notifications",
+      "state": "open",
+      "labels": ["feature", "websocket", "priority:high"],
+      "html_url": "https://github.com/AbsaOSS/living-doc-v2/issues/201",
+      "created_at": "2026-02-01T08:00:00Z",
+      "updated_at": "2026-02-10T15:30:00Z",
+      "body": "## Description\n\nImplement real-time push notifications using WebSocket connections to provide instant updates to users.\n\n## Business Value\n\n- Eliminates need for page refreshing\n- Improves user engagement and responsiveness\n- Reduces server load from polling\n- Enables collaborative features\n\n## Preconditions\n\n- WebSocket infrastructure must be available (Socket.io or similar)\n- Redis pub/sub for message distribution across servers\n- Load balancer must support WebSocket connections\n- Client library for WebSocket management\n\n## Acceptance Criteria\n\n**Connection Management:**\n- [ ] Client establishes WebSocket connection on login\n- [ ] Connection survives network hiccups (auto-reconnect)\n- [ ] Heartbeat ping/pong every 30 seconds\n- [ ] Graceful fallback to polling if WebSocket unavailable\n\n**Notification Types:**\n- [ ] New message received\n- [ ] Task assignment\n- [ ] Status change on watched items\n- [ ] System announcements\n- [ ] Collaboration updates (user joined, user typing)\n\n**Performance:**\n- [ ] Support 10,000 concurrent connections per server\n- [ ] Message delivery latency < 100ms\n- [ ] CPU usage < 20% at max capacity\n\n## User Guide\n\n**For End Users:**\nNotifications appear automatically - no configuration needed!\n- Toast notification appears in bottom-right corner\n- Click notification to navigate to relevant item\n- Bell icon shows notification count\n- Notification center lists all recent notifications\n\n**For Developers:**\n```javascript\n// Subscribe to notifications\nconst socket = io();\nsocket.on('notification', (data) => {\n  showToast(data.message, data.type);\n});\n```"
+    },
+    {
+      "number": 202,
+      "title": "Data export to multiple formats",
+      "state": "open",
+      "labels": ["feature", "export"],
+      "html_url": "https://github.com/AbsaOSS/living-doc-v2/issues/202",
+      "created_at": "2026-02-02T09:15:00Z",
+      "updated_at": "2026-02-11T10:45:00Z",
+      "body": "## Overview\n\nEnable users to export data in multiple formats: CSV, Excel, JSON, and PDF.\n\n## Why\n\nUsers need data in different formats for reporting, analysis, and integration with other tools.\n\n## Setup\n\n| Format | Library | Version |\n|--------|---------|--------|\n| CSV | csv | stdlib |\n| Excel | openpyxl | 3.1.0 |\n| JSON | json | stdlib |\n| PDF | reportlab | 4.0.0 |\n\n## AC\n\n**Supported Formats:**\n- [ ] CSV - comma-separated values\n- [ ] XLSX - Excel workbook with formatting\n- [ ] JSON - structured data export\n- [ ] PDF - formatted report with branding\n\n**Export Options:**\n- [ ] Select fields to include/exclude\n- [ ] Date range filter\n- [ ] Sort order selection\n- [ ] Page orientation for PDF (portrait/landscape)\n\n**Implementation:**\n- [ ] Export button in list views\n- [ ] Format selection dropdown\n- [ ] Background job for large exports\n- [ ] Email notification when export ready\n- [ ] Download link expires after 24 hours\n\n## Instructions\n\n1. Navigate to any list view (users, reports, etc.)\n2. Click \"Export\" button in toolbar\n3. Select desired format from dropdown\n4. Configure export options (optional)\n5. Click \"Generate Export\"\n6. For small exports: Download starts immediately\n7. For large exports: Email sent when ready\n\n## Related\n\n- #203 - Report scheduling\n- #204 - Data import"
+    },
+    {
+      "number": 203,
+      "title": "Scheduled report generation",
+      "state": "closed",
+      "labels": ["feature", "reports"],
+      "html_url": "https://github.com/AbsaOSS/living-doc-v2/issues/203",
+      "created_at": "2026-02-03T10:30:00Z",
+      "updated_at": "2026-02-12T14:00:00Z",
+      "body": "## Summary\n\nAllow users to schedule automatic report generation and delivery.\n\n## Value\n\nSaves time and ensures stakeholders receive regular updates without manual intervention.\n\n## Prerequisites\n\n- Celery or similar job scheduler configured\n- Email delivery system operational\n- Report templates defined\n- Cloud storage for report archives\n\n## Done Criteria\n\n**Scheduling Options:**\n- [ ] Daily, weekly, monthly schedules\n- [ ] Custom cron expressions for advanced users\n- [ ] Timezone selection\n- [ ] Start date and optional end date\n\n**Delivery Methods:**\n- [ ] Email with PDF attachment\n- [ ] Email with download link\n- [ ] Save to cloud storage (S3, GCS)\n- [ ] Webhook notification\n\n**Report Types:**\n- [ ] User activity summary\n- [ ] Performance metrics\n- [ ] Compliance audit report\n- [ ] Custom report builder\n\n## How To\n\n**Creating a Scheduled Report:**\n1. Go to Reports → Scheduled Reports\n2. Click \"New Schedule\"\n3. Select report type and parameters\n4. Choose frequency (daily/weekly/monthly)\n5. Add email recipients\n6. Click \"Create Schedule\"\n\n**Managing Schedules:**\n- View all schedules in dashboard\n- Pause/resume schedules\n- Edit schedule parameters\n- View execution history\n- Download previous reports\n\n## History\n\nImplemented by emma@example.com on 2026-02-12"
+    },
+    {
+      "number": 204,
+      "title": "Bulk data import from CSV/Excel",
+      "state": "open",
+      "labels": ["feature", "import"],
+      "html_url": "https://github.com/AbsaOSS/living-doc-v2/issues/204",
+      "created_at": "2026-02-04T11:00:00Z",
+      "updated_at": "2026-02-13T09:30:00Z",
+      "body": "## Description\n\nEnable bulk import of data from CSV and Excel files with validation and error handling.\n\n**Supported Entities:**\n- Users (bulk user provisioning)\n- Products (inventory updates)\n- Transactions (bulk data entry)\n- Configuration settings\n\n## Business Value\n\nAccelerates data migration and initial setup. Reduces manual data entry errors and saves hours of work.\n\n## Acceptance Criteria\n\n**File Upload:**\n- [ ] Drag-and-drop file upload\n- [ ] Support CSV and XLSX formats\n- [ ] Max file size: 10MB\n- [ ] Sample templates available for download\n\n**Validation:**\n- [ ] Column header mapping (automatic + manual)\n- [ ] Data type validation\n- [ ] Required field checking\n- [ ] Duplicate detection\n- [ ] Preview before import (first 10 rows)\n\n**Processing:**\n- [ ] Background processing for large files\n- [ ] Progress bar with percentage complete\n- [ ] Partial import on errors (continue processing valid rows)\n- [ ] Detailed error report for failed rows\n- [ ] Transaction rollback option\n\n**Error Handling:**\n- [ ] Download error report as CSV\n- [ ] Highlight problematic rows and columns\n- [ ] Suggested fixes for common errors\n- [ ] Ability to fix and re-upload\n\n## User Guide\n\n**Import Process:**\n1. Click \"Import\" button\n2. Select entity type (Users, Products, etc.)\n3. Download template file (optional)\n4. Upload your populated CSV/Excel file\n5. Map columns if automatic mapping fails\n6. Review preview of first 10 rows\n7. Click \"Import\" to process\n8. Monitor progress bar\n9. Review completion summary\n10. Download error report if needed\n\n**Template Format:**\nDownload templates include:\n- Required column headers\n- Example data rows\n- Data type comments\n- Validation rules\n\n## Connections\n\nRelated to #202 (data export)"
+    },
+    {
+      "number": 205,
+      "title": "Implement full-text search with Elasticsearch",
+      "state": "open",
+      "labels": ["feature", "search", "infrastructure"],
+      "html_url": "https://github.com/AbsaOSS/living-doc-v2/issues/205",
+      "created_at": "2026-02-05T08:30:00Z",
+      "updated_at": "2026-02-14T11:00:00Z",
+      "body": "## Overview\n\nReplace basic SQL LIKE queries with Elasticsearch for powerful full-text search capabilities.\n\n## Why\n\n- Current search is slow on large datasets (3+ seconds)\n- No support for fuzzy matching or typo tolerance\n- Cannot search across multiple fields efficiently\n- No relevance ranking\n\n## Setup\n\n**Infrastructure:**\n- Elasticsearch 8.x cluster (3 nodes)\n- Kibana for monitoring and debugging\n- Logstash for data synchronization\n- 100GB storage allocation\n\n**Data Synchronization:**\n- Full index rebuild: Weekly (Sunday 2 AM)\n- Incremental updates: Real-time via change data capture\n- Fallback: Hourly delta sync job\n\n## AC\n\n**Search Features:**\n- [ ] Full-text search across all text fields\n- [ ] Fuzzy matching (handle typos)\n- [ ] Phrase matching with quotes\n- [ ] Boolean operators (AND, OR, NOT)\n- [ ] Wildcard search (* and ?)\n- [ ] Field-specific search (title:\"example\")\n- [ ] Relevance-based ranking\n- [ ] Search suggestions (autocomplete)\n\n**Performance:**\n- [ ] Search response time < 200ms (p95)\n- [ ] Support 100 concurrent searches\n- [ ] Index size < 5GB\n\n**Indexing:**\n- [ ] Index users, documents, messages, products\n- [ ] Custom analyzers for each language\n- [ ] Configurable field weights for ranking\n\n## Instructions\n\n**Basic Search:**\n- Enter search terms in global search box\n- Press Enter or click search icon\n- Results appear with highlighting\n\n**Advanced Search:**\n- Use quotes for exact phrases: \"product manager\"\n- Combine terms: python AND django\n- Exclude terms: java NOT javascript  \n- Field search: author:\"john doe\"\n- Wildcard: test*\n\n## Related\n\n- #206 - Search analytics\n- External: [Elasticsearch Guide](https://elastic.co/guide)"
+    },
+    {
+      "number": 206,
+      "title": "Search analytics and insights",
+      "state": "open",
+      "labels": ["analytics", "search"],
+      "html_url": "https://github.com/AbsaOSS/living-doc-v2/issues/206",
+      "created_at": "2026-02-06T09:45:00Z",
+      "updated_at": "2026-02-15T10:15:00Z",
+      "body": "## Description\n\nTrack and analyze search behavior to improve search relevance and understand user needs.\n\n## Value\n\nInsights from search data help improve content organization, identify gaps, and optimize search algorithms.\n\n## Done Criteria\n\n**Tracked Metrics:**\n- Search queries (text, filters, results count)\n- Click-through rate (which results users clicked)\n- Zero-result searches (queries with no results)\n- Search refinements (query modifications)\n- Time to click (search duration)\n- Abandoned searches\n\n**Analytics Dashboard:**\n- [ ] Top 100 search queries\n- [ ] Most clicked results\n- [ ] Zero-result query report\n- [ ] Search success rate\n- [ ] Average results per query\n- [ ] Search trends over time\n\n**Actionable Insights:**\n- [ ] Recommend synonyms for common searches\n- [ ] Identify content gaps (frequent zero-result queries)\n- [ ] Suggest popular content for homepage\n- [ ] Alert on broken links in search results"
+    },
+    {
+      "number": 207,
+      "title": "Implement caching strategy with Redis",
+      "state": "closed",
+      "labels": ["performance", "caching"],
+      "html_url": "https://github.com/AbsaOSS/living-doc-v2/issues/207",
+      "created_at": "2026-02-07T10:00:00Z",
+      "updated_at": "2026-02-16T14:30:00Z",
+      "body": "## Summary\n\nImplement comprehensive caching strategy using Redis to improve application performance.\n\n## Business Value\n\n- 70% reduction in database load\n- 5x faster page load times for cached content\n- Better scalability and reduced infrastructure costs\n\n## Prerequisites\n\n- Redis cluster deployed (3 nodes, master-replica setup)\n- Cache warming strategy defined\n- Cache invalidation events identified\n\n## Acceptance Criteria\n\n**Cache Layers:**\n\n1. **Page Cache** (TTL: 5 minutes)\n   - Full HTML responses for public pages\n   - Vary by user role for personalized pages\n   \n2. **API Response Cache** (TTL: 2 minutes)\n   - GET endpoints only\n   - Cache key includes query parameters\n   - Skip for user-specific data\n   \n3. **Database Query Cache** (TTL: 10 minutes)\n   - Expensive queries (joins, aggregations)\n   - Reference data (countries, categories)\n   \n4. **Session Cache** (TTL: 8 hours)\n   - User sessions and authentication tokens\n   - Shopping cart data\n\n**Cache Invalidation:**\n- [ ] Automatic invalidation on data updates\n- [ ] Manual cache clear for administrators\n- [ ] Tag-based invalidation (e.g., clear all user-related caches)\n- [ ] LRU eviction when memory limit reached\n\n**Monitoring:**\n- [ ] Cache hit/miss rate metrics\n- [ ] Memory usage dashboard\n- [ ] Slow cache operations alerts\n\n## History\n\nDeployed by frank@example.com on 2026-02-16"
+    },
+    {
+      "number": 208,
+      "title": "Add comprehensive input validation",
+      "state": "open",
+      "labels": ["security", "validation"],
+      "html_url": "https://github.com/AbsaOSS/living-doc-v2/issues/208",
+      "created_at": "2026-02-08T11:15:00Z",
+      "updated_at": "2026-02-17T09:00:00Z",
+      "body": "## Overview\n\nImplement comprehensive server-side input validation to prevent injection attacks and data corruption.\n\n## Why\n\nSecurity best practice. Prevents SQL injection, XSS, command injection, and ensures data integrity.\n\n## Setup\n\nValidation library setup:\n- Backend: Pydantic for Python, Joi for Node.js\n- Sanitization: bleach for HTML, validator.js for strings\n- Content Security Policy headers\n\n## AC\n\n**Validation Rules:**\n\nEmail fields:\n- [ ] Valid email format\n- [ ] Domain whitelist (optional)\n- [ ] Max length: 254 characters\n\nText inputs:\n- [ ] HTML tag stripping or escaping\n- [ ] Max length enforcement\n- [ ] No control characters\n- [ ] Unicode normalization\n\nNumeric inputs:\n- [ ] Type validation (int vs float)\n- [ ] Range checking (min/max)\n- [ ] Precision limits\n\nFile uploads:\n- [ ] File extension whitelist\n- [ ] MIME type verification\n- [ ] File size limits\n- [ ] Malware scanning\n\n**Error Messages:**\n- [ ] User-friendly messages (not technical)\n- [ ] Field-specific errors\n- [ ] Multiple errors displayed together\n- [ ] No sensitive information in errors\n\n## User Guide\n\nWhen validation fails:\n- Red border appears around invalid field\n- Error message appears below field\n- Submit button remains disabled\n- Fix all errors to enable submission"
+    },
+    {
+      "number": 209,
+      "title": "Implement GDPR compliance features",
+      "state": "open",
+      "labels": ["compliance", "privacy"],
+      "html_url": "https://github.com/AbsaOSS/living-doc-v2/issues/209",
+      "created_at": "2026-02-09T08:00:00Z",
+      "updated_at": "2026-02-18T10:30:00Z",
+      "body": "## Description\n\nImplement features required for GDPR compliance including consent management, data portability, and right to be forgotten.\n\n## Business Value\n\nLegal requirement for EU users. Builds trust and demonstrates commitment to privacy. Avoids hefty fines (up to 4% of revenue).\n\n## Preconditions\n\n- Legal review of privacy policy\n- Data processing agreements with third parties\n- Data classification and inventory complete\n- Privacy impact assessment approved\n\n## Acceptance Criteria\n\n**Consent Management:**\n- [ ] Cookie consent banner on first visit\n- [ ] Granular consent options (necessary, functional, marketing)\n- [ ] Easy withdrawal of consent\n- [ ] Consent records stored with timestamp\n- [ ] Opt-out links in all marketing emails\n\n**Data Subject Rights:**\n\n1. **Right to Access**\n   - [ ] User can download all personal data (JSON format)\n   - [ ] Data export includes: profile, activity logs, communications\n   - [ ] Export generated within 24 hours\n   \n2. **Right to Rectification**  \n   - [ ] User can edit profile information\n   - [ ] Request form for data corrections\n   \n3. **Right to Erasure (Right to be Forgotten)**\n   - [ ] Account deletion request form\n   - [ ] 30-day grace period before permanent deletion\n   - [ ] Anonymize user data instead of deletion (where legally required to retain)\n   - [ ] Email confirmation of deletion\n   \n4. **Right to Data Portability**\n   - [ ] Export data in machine-readable format (JSON/CSV)\n   - [ ] Transfer data directly to another service (if possible)\n\n**Privacy by Design:**\n- [ ] Data minimization (collect only necessary data)\n- [ ] Pseudonymization of personal data in logs\n- [ ] Encryption at rest and in transit\n- [ ] Access controls and audit logging\n- [ ] Automated data retention policies\n\n## User Guide\n\n**Accessing Your Data:**\n1. Go to Settings → Privacy\n2. Click \"Download My Data\"\n3. Email sent when export ready (usually < 1 hour)\n4. Download link valid for 48 hours\n\n**Deleting Your Account:**\n1. Go to Settings → Privacy\n2. Click \"Delete My Account\"\n3. Enter password to confirm\n4. Account enters 30-day deletion queue\n5. Cancel deletion anytime within 30 days\n6. After 30 days, deletion is permanent\n\n## Connections\n\n- Related to #112 (audit logging)\n- Related to legal compliance initiative"
+    },
+    {
+      "number": 210,
+      "title": "Internationalization (i18n) support",
+      "state": "open",
+      "labels": ["feature", "i18n"],
+      "html_url": "https://github.com/AbsaOSS/living-doc-v2/issues/210",
+      "created_at": "2026-02-10T09:30:00Z",
+      "updated_at": "2026-02-18T11:45:00Z",
+      "body": "## Overview\n\nAdd internationalization support to enable multi-language user interface.\n\n## Value\n\nExpands market reach. Improves user experience for non-English speakers. Requirement for international expansion.\n\n## Prerequisites\n\n- Translation management system (e.g., Crowdin, Lokalise)\n- Professional translation service engaged\n- Language selection UI/UX designed\n- Right-to-left (RTL) layout considerations\n\n## Done Criteria\n\n**Supported Languages (Phase 1):**\n- [ ] English (default)\n- [ ] Spanish\n- [ ] French\n- [ ] German\n- [ ] Japanese\n\n**Implementation:**\n- [ ] Extract all UI strings to translation files\n- [ ] Use i18n library (react-i18next, Flask-Babel, etc.)\n- [ ] Language selector in header\n- [ ] User language preference saved\n- [ ] Browser language auto-detection\n- [ ] Fallback to English for missing translations\n\n**Content Types:**\n- [ ] UI labels and buttons\n- [ ] Error messages\n- [ ] Email templates\n- [ ] Help documentation\n- [ ] Date/time formatting per locale\n- [ ] Number formatting (decimals, thousands separators)\n- [ ] Currency formatting\n\n**Quality:**\n- [ ] 100% translation coverage for supported languages\n- [ ] Professional translation review\n- [ ] Test all workflows in each language\n- [ ] No hardcoded strings in code\n\n## How To\n\n**Changing Language:**\n1. Click language selector in header (globe icon)\n2. Select desired language from dropdown\n3. Page refreshes with new language\n4. Preference saved for future visits\n\n**For Developers:**\n```javascript\n// Before\n<button>Submit</button>\n\n// After  \n<button>{t('common.submit')}</button>\n```\n\n## Related\n\n- #211 - Right-to-left (RTL) language support"
+    },
+    {
+      "number": 211,
+      "title": "Support right-to-left (RTL) languages",
+      "state": "open",
+      "labels": ["i18n", "ui"],
+      "html_url": "https://github.com/AbsaOSS/living-doc-v2/issues/211",
+      "created_at": "2026-02-11T10:00:00Z",
+      "updated_at": "2026-02-18T13:00:00Z",
+      "body": "## Description\n\nAdd support for right-to-left languages (Arabic, Hebrew) including layout mirroring and text direction.\n\n## Value\n\nEnables product usage in Middle East and Israel markets. Shows cultural sensitivity and attention to detail.\n\n## Setup\n\n- RTL CSS framework or utility classes\n- Bi-directional text handling\n- Icon flipping for directional icons\n\n## Acceptance Criteria\n\n**Layout:**\n- [ ] Entire UI mirrors for RTL languages\n- [ ] Sidebar moves to right side\n- [ ] Text alignment: right for RTL, left for LTR\n- [ ] Directional icons flipped (arrows, chevrons)\n- [ ] Margins and padding reversed\n\n**Text Direction:**\n- [ ] HTML dir attribute set correctly (rtl/ltr)\n- [ ] Bidirectional text handled correctly (mixed RTL/LTR)\n- [ ] Form inputs right-aligned for RTL\n\n**Testing:**\n- [ ] Test with Arabic language\n- [ ] Test with Hebrew language\n- [ ] Test mixed content (English + RTL)\n- [ ] Verify all pages render correctly\n\n## Connections\n\nDepends on #210 (i18n support)"
+    },
+    {
+      "number": 212,
+      "title": "Implement feature flags system",
+      "state": "closed",
+      "labels": ["infrastructure", "deployment"],
+      "html_url": "https://github.com/AbsaOSS/living-doc-v2/issues/212",
+      "created_at": "2026-02-12T11:30:00Z",
+      "updated_at": "2026-02-17T15:00:00Z",
+      "body": "## Summary\n\nImplement feature flags system for gradual rollouts and A/B testing.\n\n## Why\n\nEnables:\n- Safe deployment of new features\n- Gradual rollout to subset of users\n- Quick rollback without code deployment\n- A/B testing for feature validation\n- Different features for different user segments\n\n## Prerequisites\n\n- Feature flag service (LaunchDarkly, Unleash, or custom)\n- Admin UI for flag management\n- SDK integration in application code\n\n## Acceptance Criteria\n\n**Flag Types:**\n- [ ] Boolean flags (on/off)\n- [ ] Percentage rollouts (10%, 25%, 50%, etc.)\n- [ ] User segment targeting (beta users, premium, etc.)\n- [ ] A/B test variants (variant A vs B vs C)\n\n**Flag Management:**\n- [ ] Create/edit/delete flags via admin UI\n- [ ] Flag overrides for testing (per-user, per-session)\n- [ ] Flag change history and audit log\n- [ ] Schedule flag changes (enable at specific time)\n\n**Integration:**\n- [ ] Backend flag evaluation\n- [ ] Frontend flag evaluation\n- [ ] Real-time flag updates (no deployment needed)\n- [ ] Default values when flag service unavailable\n\n**Examples:**\n```python\nif feature_flags.is_enabled('new_dashboard', user):\n    return render_new_dashboard()\nelse:\n    return render_old_dashboard()\n```\n\n## Changes\n\nRolled out by grace@example.com on 2026-02-17"
+    },
+    {
+      "number": 213,
+      "title": "Simple issue with markdown table",
+      "state": "open",
+      "labels": ["test"],
+      "html_url": "https://github.com/AbsaOSS/living-doc-v2/issues/213",
+      "created_at": "2026-02-13T12:00:00Z",
+      "updated_at": "2026-02-13T12:00:00Z",
+      "body": "## Description\n\nTest case with markdown table:\n\n| Column 1 | Column 2 | Column 3 |\n|----------|----------|----------|\n| Value A  | Value B  | Value C  |\n| Value D  | Value E  | Value F  |\n\nThis tests table preservation in normalization."
+    },
+    {
+      "number": 214,
+      "title": "Issue with code blocks and lists",
+      "state": "closed",
+      "labels": ["test"],
+      "html_url": "https://github.com/AbsaOSS/living-doc-v2/issues/214",
+      "created_at": "2026-02-14T13:30:00Z",
+      "updated_at": "2026-02-14T14:00:00Z",
+      "body": "## Description\n\nTest complex markdown:\n\n```python\ndef hello_world():\n    print(\"Hello, World!\")\n    return 42\n```\n\n## Acceptance Criteria\n\n1. First criterion\n2. Second criterion  \n   - Nested item A\n   - Nested item B\n3. Third criterion\n\n## User Guide\n\n- **Bold item**: description\n- *Italic item*: description\n- `Code item`: description"
+    }
+  ]
+}

@@ -1,0 +1,436 @@
+{
+  "content": {
+    "user_stories": [
+      {
+        "id": "github:AbsaOSS/living-doc-project#101",
+        "sections": {
+          "acceptance_criteria": "- [ ] User can click \"Sign in with SSO\" button on login page\n- [ ] User is redirected to SSO provider login page\n- [ ] After successful authentication, user is redirected back with valid session\n- [ ] User profile information is populated from SSO claims\n- [ ] Session expires after 8 hours of inactivity\n- [ ] Failed authentication shows appropriate error message",
+          "business_value": "- Reduces password fatigue for users\n- Improves security through centralized authentication\n- Simplifies user onboarding and offboarding\n- Enables enterprise-grade access control",
+          "connections": "- Related to #102 (Multi-factor authentication)\n- Depends on #103 (User profile management)\n- See also: [Security Architecture](https://docs.example.com/security)",
+          "description": "As a user, I want to authenticate using Single Sign-On (SSO) so that I can access the application securely using my corporate credentials.",
+          "last_edited": "Last updated by alice@example.com on 2026-01-20",
+          "preconditions": "- SSO provider (Azure AD, Okta, or similar) must be configured\n- OAuth 2.0 client credentials must be obtained\n- Callback URLs must be registered with the provider",
+          "user_guide": "### For End Users\n\n1. Navigate to the login page\n2. Click the \"Sign in with SSO\" button\n3. Enter your corporate email on the SSO provider page\n4. Complete two-factor authentication if required\n5. You will be automatically redirected to the dashboard\n\n### For Administrators\n\nConfiguration steps:\n```yaml\nsso:\n  provider: azure-ad\n  client_id: ${SSO_CLIENT_ID}\n  client_secret: ${SSO_CLIENT_SECRET}\n  tenant_id: ${TENANT_ID}\n```"
+        },
+        "state": "open",
+        "tags": [
+          "authentication",
+          "priority:high",
+          "documentation"
+        ],
+        "timestamps": {
+          "created": "2026-01-10T08:00:00Z",
+          "updated": "2026-01-20T14:30:00Z"
+        },
+        "title": "Implement user authentication with SSO",
+        "url": "https://github.com/AbsaOSS/living-doc-project/issues/101"
+      },
+      {
+        "id": "github:AbsaOSS/living-doc-project#102",
+        "sections": {
+          "acceptance_criteria": "1. **TOTP Setup**\n   - User can enable MFA from account settings\n   - QR code is displayed for authenticator app setup\n   - Backup codes are generated (10 codes)\n   \n2. **Login Flow**\n   - After password validation, MFA code prompt appears\n   - User enters 6-digit code from authenticator app\n   - Code must be valid within 30-second window\n   - 3 failed attempts lock account for 15 minutes\n\n3. **Recovery Options**\n   - User can use backup codes when authenticator unavailable\n   - Admin can reset MFA for user accounts\n   - SMS fallback option for verified phone numbers",
+          "business_value": "MFA significantly reduces the risk of unauthorized access even if passwords are compromised. Industry best practice and compliance requirement for enterprise applications.",
+          "connections": "- #101 - SSO authentication (works together with MFA)\n- #104 - Session management\n- External: [OWASP MFA Guidelines](https://owasp.org/mfa)",
+          "description": "Enhance security by implementing multi-factor authentication (MFA) for all user accounts.",
+          "last_edited": "Modified by bob@example.com on 2026-01-21 - Added SMS fallback requirement",
+          "preconditions": "| Component | Requirement | Status |\n|-----------|-------------|--------|\n| TOTP Library | pyotp >= 2.8.0 | \u2705 Available |\n| QR Code Generator | qrcode >= 7.4.0 | \u2705 Available |\n| SMS Gateway | Twilio API | \u26a0\ufe0f Pending setup |",
+          "user_guide": "Enabling MFA:\n1. Go to Profile \u2192 Security Settings\n2. Click \"Enable Two-Factor Authentication\"\n3. Scan QR code with Google Authenticator, Authy, or similar app\n4. Enter verification code to confirm\n5. Save backup codes in secure location"
+        },
+        "state": "open",
+        "tags": [
+          "security",
+          "enhancement",
+          "priority:high"
+        ],
+        "timestamps": {
+          "created": "2026-01-11T09:30:00Z",
+          "updated": "2026-01-21T10:15:00Z"
+        },
+        "title": "Add multi-factor authentication support",
+        "url": "https://github.com/AbsaOSS/living-doc-project/issues/102"
+      },
+      {
+        "id": "github:AbsaOSS/living-doc-project#103",
+        "sections": {
+          "acceptance_criteria": "- User can view current profile information (name, email, avatar)\n- User can edit profile fields with inline validation\n- Changes are saved immediately with visual feedback\n- Profile picture upload supports JPEG, PNG (max 5MB)\n- Audit log tracks all profile changes",
+          "business_value": "Empowers users to manage their own information, reducing support burden and improving user satisfaction.",
+          "connections": "Related issues: #101, #105\nDesign mockups: [Figma Link](https://figma.com/file/xyz)",
+          "description": "Create a user profile management dashboard where users can view and edit their account information.",
+          "last_edited": null,
+          "preconditions": "- User authentication must be implemented (#101)\n- Database schema for user profiles must be ready\n- Frontend framework (React) must be set up",
+          "user_guide": "**Accessing Your Profile:**\n- Click your avatar in top-right corner\n- Select \"Profile Settings\" from dropdown menu\n\n**Editing Information:**\n- Click the edit icon next to any field\n- Make your changes\n- Changes save automatically when you click outside the field\n\n**Profile Picture:**\n- Click \"Change Photo\" button\n- Select image file (JPEG or PNG, under 5MB)\n- Crop if desired, then confirm"
+        },
+        "state": "closed",
+        "tags": [
+          "feature",
+          "ui"
+        ],
+        "timestamps": {
+          "created": "2026-01-05T14:00:00Z",
+          "updated": "2026-01-25T16:00:00Z"
+        },
+        "title": "User profile management dashboard",
+        "url": "https://github.com/AbsaOSS/living-doc-project/issues/103"
+      },
+      {
+        "id": "github:AbsaOSS/living-doc-project#104",
+        "sections": {
+          "acceptance_criteria": "- [ ] Session tokens use UUID v4 format\n- [ ] Tokens are stored with expiration timestamp in Redis\n- [ ] Cookie flags: httpOnly=true, secure=true, sameSite=strict\n- [ ] Activity within 30 minutes extends session by configured timeout\n- [ ] Expired sessions return 401 Unauthorized\n- [ ] User can view and revoke active sessions from settings\n- [ ] Session data includes: IP address, user agent, last activity timestamp",
+          "business_value": "Balances security and user convenience. Automatic timeout prevents unauthorized access from unattended sessions while activity tracking minimizes disruption to active users.",
+          "connections": "Blocks: #102 (MFA needs session management)\nRelated: #101 (SSO creates sessions)",
+          "description": "Implement secure session management with configurable timeout and automatic cleanup.\n\nKey requirements:\n- Session tokens stored securely (httpOnly, secure, sameSite cookies)\n- Configurable session timeout (default: 8 hours)\n- Automatic session extension on user activity\n- Session cleanup job runs every hour\n- Multiple concurrent sessions per user (max 5)",
+          "last_edited": null,
+          "preconditions": null,
+          "user_guide": null
+        },
+        "state": "open",
+        "tags": [
+          "security",
+          "backend"
+        ],
+        "timestamps": {
+          "created": "2026-01-12T11:00:00Z",
+          "updated": "2026-01-22T13:45:00Z"
+        },
+        "title": "Implement session management and timeout",
+        "url": "https://github.com/AbsaOSS/living-doc-project/issues/104"
+      },
+      {
+        "id": "github:AbsaOSS/living-doc-project#105",
+        "sections": {
+          "acceptance_criteria": "- Settings page with notification preferences UI\n- Toggle switches for each notification type:\n  - Email notifications (on/off)\n  - In-app notifications (on/off)  \n  - Push notifications (on/off)\n- Granular controls:\n  - Security alerts (always on)\n  - Account updates (optional)\n  - Marketing emails (optional)\n  - Weekly digest (optional)\n- Preferences saved per user in database\n- Notification service respects user preferences before sending",
+          "business_value": "Users can control communication frequency and channels, reducing notification fatigue and improving engagement.",
+          "connections": null,
+          "description": "Allow users to configure their notification preferences for email, in-app, and mobile push notifications.",
+          "last_edited": null,
+          "preconditions": null,
+          "user_guide": "1. Navigate to Settings \u2192 Notifications\n2. Toggle switches for desired notification types\n3. Expand \"Advanced Options\" for granular controls\n4. Click \"Save Preferences\" (auto-saves enabled by default)"
+        },
+        "state": "open",
+        "tags": [
+          "feature",
+          "notifications"
+        ],
+        "timestamps": {
+          "created": "2026-01-13T10:30:00Z",
+          "updated": "2026-01-23T11:20:00Z"
+        },
+        "title": "Add notification preferences",
+        "url": "https://github.com/AbsaOSS/living-doc-project/issues/105"
+      },
+      {
+        "id": "github:AbsaOSS/living-doc-project#106",
+        "sections": {
+          "acceptance_criteria": "- [ ] Fix offset calculation in all paginated endpoints\n- [ ] Add unit tests for pagination edge cases\n- [ ] Test with page sizes: 5, 10, 20, 50, 100\n- [ ] Verify page 1 shows items 1-N\n- [ ] Verify page 2 shows items N+1 to 2N",
+          "business_value": null,
+          "connections": null,
+          "description": "Pagination offset calculation is incorrect when page size is not 10. This causes wrong results to be displayed on pages 2+.\n\n**Bug Details:**\n```python\n# Current (wrong):\noffset = page * page_size\n\n# Should be:\noffset = (page - 1) * page_size\n```",
+          "last_edited": "Fixed and deployed by charlie@example.com on 2026-01-26",
+          "preconditions": null,
+          "user_guide": null
+        },
+        "state": "closed",
+        "tags": [
+          "bug",
+          "priority:medium"
+        ],
+        "timestamps": {
+          "created": "2026-01-14T13:15:00Z",
+          "updated": "2026-01-26T09:00:00Z"
+        },
+        "title": "Fix pagination offset calculation bug",
+        "url": "https://github.com/AbsaOSS/living-doc-project/issues/106"
+      },
+      {
+        "id": "github:AbsaOSS/living-doc-project#107",
+        "sections": {
+          "acceptance_criteria": "OpenAPI Specification:\n- [ ] All endpoints documented with descriptions\n- [ ] Request/response schemas defined\n- [ ] Authentication requirements specified\n- [ ] Example requests and responses included\n- [ ] Error responses documented (4xx, 5xx)\n\nSwagger UI:\n- [ ] Accessible at /api/docs endpoint\n- [ ] Interactive \"Try it out\" functionality works\n- [ ] Supports authentication token input\n- [ ] Auto-generated from code annotations",
+          "business_value": "API documentation improves developer experience and reduces integration time for external teams.",
+          "connections": "- #108 - API versioning strategy\n- #109 - Rate limiting\n- External docs: [OpenAPI Specification](https://swagger.io/specification/)",
+          "description": "Generate comprehensive API documentation using OpenAPI 3.0 specification and Swagger UI.",
+          "last_edited": null,
+          "preconditions": "- API endpoints must be stable and versioned (v1)\n- FastAPI/Flask framework must support OpenAPI decorators\n- Hosting environment for Swagger UI docs",
+          "user_guide": "Accessing API Docs:\n- Navigate to https://api.example.com/docs\n- Click \"Authorize\" button to enter API token\n- Expand any endpoint to see details\n- Click \"Try it out\" to test directly from browser"
+        },
+        "state": "open",
+        "tags": [
+          "documentation",
+          "api"
+        ],
+        "timestamps": {
+          "created": "2026-01-15T09:00:00Z",
+          "updated": "2026-01-24T14:30:00Z"
+        },
+        "title": "API documentation with OpenAPI/Swagger",
+        "url": "https://github.com/AbsaOSS/living-doc-project/issues/107"
+      },
+      {
+        "id": "github:AbsaOSS/living-doc-project#108",
+        "sections": {
+          "acceptance_criteria": "1. **Version Detection**\n   - Requests to `/api/v1/users` route to v1 handler\n   - Requests to `/api/v2/users` route to v2 handler\n   - Missing version defaults to latest stable\n   \n2. **Deprecation Handling**\n   - Deprecated endpoints return `Deprecation` header\n   - Header includes sunset date and migration guide URL\n   - Deprecated endpoints logged for usage analytics\n\n3. **Documentation**\n   - Version-specific documentation at /docs/v1, /docs/v2\n   - Migration guide between versions\n   - Changelog with breaking changes highlighted",
+          "business_value": "Enables API evolution without breaking existing integrations. Reduces coordination overhead for external teams consuming our API.",
+          "connections": "Related to #107 (API documentation)",
+          "description": "Establish API versioning strategy to support backward compatibility and smooth migrations.\n\n**Proposed Approach:**\n- URL path versioning: `/api/v1/`, `/api/v2/`\n- Major version in path, minor/patch in header\n- Deprecation notices 3 months before removal\n- Support N-1 versions (current + previous)",
+          "last_edited": null,
+          "preconditions": "- Update API gateway routing rules\n- Implement version detection middleware\n- Create deprecation warning mechanism\n- Update CI/CD to deploy multiple versions",
+          "user_guide": null
+        },
+        "state": "open",
+        "tags": [
+          "api",
+          "architecture"
+        ],
+        "timestamps": {
+          "created": "2026-01-16T10:45:00Z",
+          "updated": "2026-01-25T12:00:00Z"
+        },
+        "title": "Implement API versioning strategy",
+        "url": "https://github.com/AbsaOSS/living-doc-project/issues/108"
+      },
+      {
+        "id": "github:AbsaOSS/living-doc-project#109",
+        "sections": {
+          "acceptance_criteria": "- [ ] Rate limiting based on IP address for anonymous users\n- [ ] Rate limiting based on API token for authenticated users\n- [ ] Redis backend for distributed rate limit tracking\n- [ ] Response headers include rate limit info:\n  - `X-RateLimit-Limit`: Total requests allowed\n  - `X-RateLimit-Remaining`: Requests remaining\n  - `X-RateLimit-Reset`: Unix timestamp when limit resets\n- [ ] 429 Too Many Requests response when limit exceeded\n- [ ] Retry-After header indicates wait time in seconds",
+          "business_value": "Protects API availability and performance. Prevents denial-of-service attacks and ensures quality of service for all users.",
+          "connections": null,
+          "description": "Implement rate limiting to prevent API abuse and ensure fair resource allocation.\n\n**Rate Limits:**\n- Anonymous: 100 requests/hour\n- Authenticated: 1000 requests/hour\n- Premium tier: 5000 requests/hour",
+          "last_edited": "Implemented by dave@example.com on 2026-01-27",
+          "preconditions": null,
+          "user_guide": null
+        },
+        "state": "closed",
+        "tags": [
+          "api",
+          "security"
+        ],
+        "timestamps": {
+          "created": "2026-01-17T11:30:00Z",
+          "updated": "2026-01-27T10:00:00Z"
+        },
+        "title": "Add API rate limiting",
+        "url": "https://github.com/AbsaOSS/living-doc-project/issues/109"
+      },
+      {
+        "id": "github:AbsaOSS/living-doc-project#110",
+        "sections": {
+          "acceptance_criteria": "Pre-Migration:\n- [ ] Full database backup completed and verified\n- [ ] Staging migration successful with zero data loss\n- [ ] All application tests pass against PG 15\n- [ ] Migration runbook reviewed by team\n- [ ] Stakeholders notified of maintenance window\n\nMigration:\n- [ ] Enable read-only mode on current database\n- [ ] Dump database using pg_dump\n- [ ] Provision PostgreSQL 15 instance\n- [ ] Restore data to new instance\n- [ ] Run ANALYZE to update statistics\n- [ ] Update application connection strings\n- [ ] Verify data integrity checksums\n\nPost-Migration:\n- [ ] All application endpoints responding correctly\n- [ ] Monitor query performance for 24 hours\n- [ ] Keep PG 12 instance running for 1 week (rollback option)\n- [ ] Update documentation with new connection details",
+          "business_value": "- 30% faster query performance (benchmark results)\n- Improved JSON query capabilities\n- Better index management\n- Extended support lifecycle",
+          "connections": "- Blocks #111 (performance optimization depends on PG 15 features)\n- Related: Infrastructure upgrade initiative",
+          "description": "Migrate production database from PostgreSQL 12 to PostgreSQL 15 to leverage performance improvements and new features.",
+          "last_edited": "Migration date updated by sre@example.com on 2026-01-26",
+          "preconditions": "- Complete backup of production database\n- Test migration on staging environment\n- Verify application compatibility with PG 15\n- Plan maintenance window (estimated 4 hours)\n- Rollback procedure documented and tested",
+          "user_guide": "**During Maintenance:**\n- Application will be read-only from 02:00-06:00 UTC on 2026-02-01\n- No action required from end users\n- Service will automatically reconnect after migration\n\n**For Developers:**\n- Update local connection strings to new instance\n- Connection pooling parameters may need adjustment\n- Review [PostgreSQL 15 release notes](https://www.postgresql.org/docs/15/release-15.html)"
+        },
+        "state": "open",
+        "tags": [
+          "database",
+          "infrastructure"
+        ],
+        "timestamps": {
+          "created": "2026-01-18T08:00:00Z",
+          "updated": "2026-01-26T16:30:00Z"
+        },
+        "title": "Database migration to PostgreSQL 15",
+        "url": "https://github.com/AbsaOSS/living-doc-project/issues/110"
+      },
+      {
+        "id": "github:AbsaOSS/living-doc-project#111",
+        "sections": {
+          "acceptance_criteria": "- [ ] Add composite index on users(email, active, created_at)\n- [ ] Add materialized view for dashboard analytics\n- [ ] Implement query result caching (Redis, 5 min TTL)\n- [ ] Add database connection pooling (pgbouncer)\n- [ ] All target performance metrics achieved\n- [ ] Performance monitoring alerts configured",
+          "business_value": "Improved application responsiveness leads to better user experience and higher satisfaction scores.",
+          "connections": "Dependency: #110 (PostgreSQL 15 migration)",
+          "description": "Optimize slow database queries identified in performance monitoring.\n\n**Problem Queries:**\n1. User search: 2.5s average response time\n2. Dashboard analytics: 4.1s average response time\n3. Report generation: 8.3s average response time\n\n**Target Performance:**\n1. User search: < 200ms\n2. Dashboard analytics: < 500ms\n3. Report generation: < 2s",
+          "last_edited": null,
+          "preconditions": "- PostgreSQL 15 migration must be completed (#110)\n- Enable query execution plan logging\n- Set up performance monitoring dashboard",
+          "user_guide": null
+        },
+        "state": "open",
+        "tags": [
+          "performance",
+          "database"
+        ],
+        "timestamps": {
+          "created": "2026-01-19T09:30:00Z",
+          "updated": "2026-01-27T11:15:00Z"
+        },
+        "title": "Query performance optimization",
+        "url": "https://github.com/AbsaOSS/living-doc-project/issues/111"
+      },
+      {
+        "id": "github:AbsaOSS/living-doc-project#112",
+        "sections": {
+          "acceptance_criteria": "**Events to Log:**\n- User authentication (login, logout, failed attempts)\n- Authorization changes (role assignments, permission changes)\n- Data access (view, export of sensitive data)\n- Data modifications (create, update, delete)\n- Administrative actions (user management, configuration changes)\n- Security events (password resets, MFA changes)\n\n**Log Format:**\n```json\n{\n  \"timestamp\": \"2026-01-28T09:00:00Z\",\n  \"event_type\": \"data_access\",\n  \"actor\": \"user@example.com\",\n  \"action\": \"export_report\",\n  \"resource\": \"financial_report_2025\",\n  \"ip_address\": \"192.168.1.100\",\n  \"user_agent\": \"Mozilla/5.0...\",\n  \"result\": \"success\",\n  \"metadata\": {}\n}\n```\n\n**Requirements:**\n- [ ] Logs written to append-only storage\n- [ ] Tamper-proof audit trail (checksums)\n- [ ] Centralized log collection\n- [ ] 7-year retention for compliance logs\n- [ ] 90-day retention for operational logs\n- [ ] Search and reporting UI for security team\n- [ ] Automated alerts for suspicious patterns",
+          "business_value": "Regulatory compliance requires detailed audit trails. Security teams need visibility into user actions for threat detection and incident investigation.",
+          "connections": "- Related to #101, #102 (authentication/authorization events)\n- Related to compliance initiative\n- External: [OWASP Logging Guide](https://owasp.org/logging)",
+          "description": "Implement comprehensive audit logging for compliance and security monitoring.",
+          "last_edited": null,
+          "preconditions": "- Log aggregation infrastructure (ELK or similar) must be ready\n- Data retention policy must be approved (7 years for financial data)\n- Log storage capacity planned and provisioned",
+          "user_guide": "**For Security Team:**\n- Access audit logs at /admin/audit\n- Search by user, event type, or date range\n- Export results to CSV for compliance reports\n\n**For Administrators:**\n- Configure retention policies in admin panel\n- Set up email alerts for critical events\n- Review daily summary reports"
+        },
+        "state": "open",
+        "tags": [
+          "security",
+          "compliance"
+        ],
+        "timestamps": {
+          "created": "2026-01-20T10:00:00Z",
+          "updated": "2026-01-28T09:00:00Z"
+        },
+        "title": "Implement audit logging system",
+        "url": "https://github.com/AbsaOSS/living-doc-project/issues/112"
+      },
+      {
+        "id": "github:AbsaOSS/living-doc-project#113",
+        "sections": {
+          "acceptance_criteria": "Offline Capabilities:\n- [ ] View cached content (last 7 days)\n- [ ] Create new items (queued for sync)\n- [ ] Edit existing items (queued for sync)\n- [ ] Delete items (queued for sync)\n- [ ] Search within cached content\n\nSync Behavior:\n- [ ] Automatic sync when connectivity restored\n- [ ] Manual sync trigger in app\n- [ ] Conflict detection and resolution UI\n- [ ] Progress indicator during sync\n- [ ] Failed sync items highlighted for user review\n\nStorage:\n- [ ] Max 100MB local storage per user\n- [ ] Automatic cache cleanup (30 days)\n- [ ] User can manually clear cache",
+          "business_value": "Users can continue working during travel or in areas with poor connectivity. Improves user satisfaction and productivity.",
+          "connections": "Design: [Offline UX Mockups](https://figma.com/file/offline)\nRelated: #114 (sync optimization)",
+          "description": "Enable offline mode in mobile app to allow users to work without internet connectivity.",
+          "last_edited": null,
+          "preconditions": "- Mobile app architecture supports local storage\n- Conflict resolution strategy defined\n- Background sync mechanism implemented",
+          "user_guide": "**Using Offline Mode:**\n1. Ensure app is synced while online\n2. App automatically detects loss of connectivity\n3. Offline indicator appears in header\n4. Continue working - changes saved locally\n5. When back online, app syncs automatically\n6. Review \"Sync Status\" to see pending changes\n\n**Handling Conflicts:**\n- If conflict detected, app shows both versions\n- User chooses which version to keep\n- Option to merge changes manually"
+        },
+        "state": "open",
+        "tags": [
+          "mobile",
+          "feature"
+        ],
+        "timestamps": {
+          "created": "2026-01-21T11:00:00Z",
+          "updated": "2026-01-28T14:00:00Z"
+        },
+        "title": "Mobile app: offline mode support",
+        "url": "https://github.com/AbsaOSS/living-doc-project/issues/113"
+      },
+      {
+        "id": "github:AbsaOSS/living-doc-project#114",
+        "sections": {
+          "acceptance_criteria": null,
+          "business_value": null,
+          "connections": null,
+          "description": null,
+          "last_edited": null,
+          "preconditions": null,
+          "user_guide": null
+        },
+        "state": "open",
+        "tags": [
+          "test"
+        ],
+        "timestamps": {
+          "created": "2026-01-22T12:00:00Z",
+          "updated": "2026-01-22T12:00:00Z"
+        },
+        "title": "Empty body test case",
+        "url": "https://github.com/AbsaOSS/living-doc-project/issues/114"
+      },
+      {
+        "id": "github:AbsaOSS/living-doc-project#115",
+        "sections": {
+          "acceptance_criteria": null,
+          "business_value": null,
+          "connections": null,
+          "description": "This issue has no markdown headings, just plain text content. It should be treated as description content. This tests the normalizer's handling of plain text without any markdown structure.",
+          "last_edited": null,
+          "preconditions": null,
+          "user_guide": null
+        },
+        "state": "closed",
+        "tags": [
+          "documentation"
+        ],
+        "timestamps": {
+          "created": "2026-01-23T13:30:00Z",
+          "updated": "2026-01-29T10:00:00Z"
+        },
+        "title": "No headings just plain text",
+        "url": "https://github.com/AbsaOSS/living-doc-project/issues/115"
+      }
+    ]
+  },
+  "meta": {
+    "audit": {
+      "extensions": {
+        "collector-gh": {
+          "original_metadata": {
+            "generator": {
+              "build": "abc123def456",
+              "name": "AbsaOSS/living-doc-collector-gh",
+              "version": "1.0.0"
+            },
+            "run": {
+              "actor": "developer@example.com",
+              "ref": "refs/heads/main",
+              "run_attempt": "1",
+              "run_id": "1234567890",
+              "sha": "abc123def456789",
+              "workflow": "collect-documentation"
+            },
+            "source": {
+              "enterprise": null,
+              "organization": "AbsaOSS",
+              "repositories": [
+                "AbsaOSS/living-doc-project"
+              ],
+              "systems": [
+                "GitHub"
+              ]
+            }
+          }
+        }
+      },
+      "producer": {
+        "build": "abc123def456",
+        "name": "AbsaOSS/living-doc-collector-gh",
+        "version": "1.0.0"
+      },
+      "run": {
+        "actor": "developer@example.com",
+        "ref": "refs/heads/main",
+        "run_attempt": "1",
+        "run_id": "1234567890",
+        "sha": "abc123def456789",
+        "workflow": "collect-documentation"
+      },
+      "schema_version": "1.0",
+      "source": {
+        "enterprise": null,
+        "organization": "AbsaOSS",
+        "repositories": [
+          "AbsaOSS/living-doc-project"
+        ],
+        "systems": [
+          "GitHub"
+        ]
+      },
+      "trace": [
+        {
+          "finished_at": "DYNAMIC_TIMESTAMP",
+          "started_at": "DYNAMIC_TIMESTAMP",
+          "step": "normalization",
+          "tool": "living-doc-toolkit",
+          "tool_version": "1.0.0",
+          "warnings": []
+        }
+      ]
+    },
+    "document_title": "Living Documentation - v1.0.0 Test",
+    "document_version": "1.0.0",
+    "generated_at": "DYNAMIC_TIMESTAMP",
+    "run_context": {
+      "branch": "refs/heads/main",
+      "ci_run_id": "1234567890",
+      "commit_sha": "abc123def456789",
+      "triggered_by": "developer@example.com"
+    },
+    "selection_summary": {
+      "excluded_items": 0,
+      "included_items": 15,
+      "total_items": 15
+    },
+    "source_set": [
+      "github:AbsaOSS/living-doc-project"
+    ]
+  },
+  "schema_version": "1.0"
+}
