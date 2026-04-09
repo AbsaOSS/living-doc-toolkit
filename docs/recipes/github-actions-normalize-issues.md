@@ -6,6 +6,19 @@
 
 ---
 
+- [Overview](#overview)
+- [Prerequisites](#prerequisites)
+- [Basic Workflow Setup](#basic-workflow-setup)
+- [Customization Options](#customization-options)
+- [Complete Pipeline: Collector → Builder → Generator](#complete-pipeline-collector--builder--generator)
+- [Pipeline Orchestration Patterns](#pipeline-orchestration-patterns)
+- [Error Handling](#error-handling)
+- [Best Practices](#best-practices)
+- [Troubleshooting](#troubleshooting)
+- [Additional Resources](#additional-resources)
+
+---
+
 ## Overview
 
 This recipe shows how to run the `normalize-issues` service in GitHub Actions, either as a standalone job or as part of a complete living documentation pipeline (Collector → Builder → Generator).

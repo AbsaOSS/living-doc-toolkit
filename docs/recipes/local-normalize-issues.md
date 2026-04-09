@@ -6,6 +6,17 @@
 
 ---
 
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [Example CLI Invocation](#example-cli-invocation)
+- [Expected Output](#expected-output)
+- [How to Verify Output](#how-to-verify-output)
+- [Common Issues and Solutions](#common-issues-and-solutions)
+- [Next Steps](#next-steps)
+- [Additional Resources](#additional-resources)
+
+---
+
 ## Prerequisites
 
 ### Required
@@ -105,7 +116,7 @@ Options:
 
 ## Example CLI Invocation
 
-### Basic Usage (SPEC.md §3.1.1)
+### Basic Usage
 
 Convert `doc-issues.json` to `pdf_ready.json` with auto-detection:
 
@@ -175,7 +186,9 @@ Successfully normalized /path/to/input/doc-issues.json -> /path/to/output/pdf_re
 
 **Exit Code:** `0`
 
-### Output File Structure (SPEC.md §3.3.4)
+### Output File Structure
+
+See [Contracts & Interfaces](../contracts.md#output-contract-pdf_readyjson) for the full schema reference.
 
 The generated `pdf_ready.json` follows this structure:
 
@@ -443,7 +456,7 @@ living-doc normalize-issues \
 
 ## Additional Resources
 
+- **[Contracts & Interfaces](../contracts.md)**: CLI reference, schemas, change control
 - **Cookbook**: `docs/cookbooks/normalize-issues.md` — Detailed service documentation
 - **Troubleshooting**: `docs/troubleshooting.md` — Common errors and solutions
-- **SPEC.md**: Full system specification
 - **GitHub Actions Recipe**: `docs/recipes/github-actions-normalize-issues.yml`
