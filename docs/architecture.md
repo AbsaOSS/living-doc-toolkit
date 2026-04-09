@@ -579,7 +579,8 @@ flowchart TD
 
 ## Additional Resources
 
-- **[Contracts & Interfaces](contracts.md)**: CLI reference, schemas, change control
-- **Cookbook**: `docs/cookbooks/normalize-issues.md`
-- **Recipes**: `docs/recipes/`
-- **Troubleshooting**: `docs/troubleshooting.md`
+- **[Contracts & Interfaces](contracts.md)** — CLI reference, schemas, change control
+- **[Cookbook: normalize-issues](cookbooks/normalize-issues.md)** — How detection, compatibility, and normalization work
+- **[Recipe: Local usage](recipes/local-normalize-issues.md)** — Run the CLI on your machine
+- **[Recipe: GitHub Actions](recipes/github-actions-normalize-issues.md)** — CI/CD workflow integration
+- **[Troubleshooting](troubleshooting.md)** — Exit codes, common errors, FAQ

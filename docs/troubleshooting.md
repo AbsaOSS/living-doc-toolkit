@@ -651,8 +651,8 @@ docker run -v $(pwd):/data living-doc-toolkit \
 
 ## Additional Resources
 
-- **Cookbook**: `docs/cookbooks/normalize-issues.md` — Service documentation
-- **Local Recipe**: `docs/recipes/local-normalize-issues.md` — Local usage guide
-- **GitHub Actions Recipe**: `docs/recipes/github-actions-normalize-issues.yml` — CI/CD integration
-- **[Contracts & Interfaces](contracts.md)**: CLI reference, schemas, change control
-- **GitHub Issues**: https://github.com/AbsaOSS/living-doc-toolkit/issues
+- **[Cookbook: normalize-issues](cookbooks/normalize-issues.md)** — How detection, compatibility, and normalization work
+- **[Recipe: Local usage](recipes/local-normalize-issues.md)** — Run the CLI on your machine
+- **[Recipe: GitHub Actions](recipes/github-actions-normalize-issues.md)** — CI/CD workflow integration
+- **[Contracts & Interfaces](contracts.md)** — CLI reference, schemas, change control
+- **[GitHub Issues](https://github.com/AbsaOSS/living-doc-toolkit/issues)** — Report bugs or request features

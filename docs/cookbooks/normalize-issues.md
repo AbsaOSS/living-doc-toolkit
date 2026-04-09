@@ -20,7 +20,7 @@
 
 ## What It Does (Overview)
 
-The `normalize-issues` service transforms machine-readable artifacts produced by upstream collectors (e.g., `AbsaOSS/living-doc-collector-gh`) into a canonical, PDF-ready JSON format compliant with `AbsaOSS/living-doc-generator-pdf` SPEC v1.0.
+The `normalize-issues` service transforms machine-readable artifacts produced by upstream collectors (e.g., `AbsaOSS/living-doc-collector-gh`) into a canonical, PDF-ready JSON format compliant with [living-doc-generator-pdf](https://github.com/AbsaOSS/living-doc-generator-pdf).
 
 **Pipeline Overview:**
 1. Load and parse input JSON (`doc-issues.json`)
@@ -453,8 +453,8 @@ Pin collector and toolkit versions in CI/CD to ensure reproducibility:
 
 ## Additional Resources
 
-- **[Contracts & Interfaces](../contracts.md)**: CLI reference, schemas, change control
-- **Troubleshooting Guide**: `docs/troubleshooting.md`
-- **Local Usage Recipe**: `docs/recipes/local-normalize-issues.md`
-- **GitHub Actions Recipe**: `docs/recipes/github-actions-normalize-issues.yml`
-- **Architecture Overview**: `docs/architecture.md`
+- **[Contracts & Interfaces](../contracts.md)** — CLI reference, schemas, change control
+- **[Troubleshooting](../troubleshooting.md)** — Exit codes, common errors, FAQ
+- **[Recipe: Local usage](../recipes/local-normalize-issues.md)** — Run the CLI on your machine
+- **[Recipe: GitHub Actions](../recipes/github-actions-normalize-issues.md)** — CI/CD workflow integration
+- **[Architecture](../architecture.md)** — System overview, data flow pipeline

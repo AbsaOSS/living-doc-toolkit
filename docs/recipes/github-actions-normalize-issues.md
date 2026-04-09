@@ -493,7 +493,7 @@ Use `--verbose` flag in workflows for detailed logs:
 
 ## Additional Resources
 
-- **Workflow YAML**: `docs/recipes/github-actions-normalize-issues.yml`
-- **Cookbook**: `docs/cookbooks/normalize-issues.md`
-- **Troubleshooting**: `docs/troubleshooting.md`
-- **GitHub Actions Documentation**: https://docs.github.com/en/actions
+- **[Workflow YAML](github-actions-normalize-issues.yml)** — Ready-to-use workflow file
+- **[Cookbook: normalize-issues](../cookbooks/normalize-issues.md)** — How detection, compatibility, and normalization work
+- **[Troubleshooting](../troubleshooting.md)** — Exit codes, common errors, FAQ
+- **[GitHub Actions Documentation](https://docs.github.com/en/actions)** — Official GitHub Actions docs

@@ -75,7 +75,7 @@ Warning format in audit:
 
 ## Output Contract: `pdf_ready.json`
 
-Target: [living-doc-generator-pdf](https://github.com/AbsaOSS/living-doc-generator-pdf) SPEC v1.0.
+Target: [living-doc-generator-pdf](https://github.com/AbsaOSS/living-doc-generator-pdf).
 
 **Schema version:** `"1.0"` (field `schema_version`)
 

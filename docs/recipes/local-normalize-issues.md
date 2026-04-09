@@ -456,7 +456,7 @@ living-doc normalize-issues \
 
 ## Additional Resources
 
-- **[Contracts & Interfaces](../contracts.md)**: CLI reference, schemas, change control
-- **Cookbook**: `docs/cookbooks/normalize-issues.md` — Detailed service documentation
-- **Troubleshooting**: `docs/troubleshooting.md` — Common errors and solutions
-- **GitHub Actions Recipe**: `docs/recipes/github-actions-normalize-issues.yml`
+- **[Contracts & Interfaces](../contracts.md)** — CLI reference, schemas, change control
+- **[Cookbook: normalize-issues](../cookbooks/normalize-issues.md)** — How detection, compatibility, and normalization work
+- **[Troubleshooting](../troubleshooting.md)** — Exit codes, common errors, FAQ
+- **[Recipe: GitHub Actions](github-actions-normalize-issues.md)** — CI/CD workflow integration

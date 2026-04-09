@@ -62,11 +62,7 @@ living-doc normalize-issues \
 
 ### Use
 
-A **Cookbook** explains *how a service works* — detection logic, compatibility rules, normalization behavior — so you understand what happens under the hood. A **Recipe** is a *step-by-step guide* you can follow to run the service in a specific environment.
-
-- **[Cookbook: normalize-issues](docs/cookbooks/normalize-issues.md)** — How detection, compatibility, and normalization work
-- **[Recipe: Local usage](docs/recipes/local-normalize-issues.md)** — Run the CLI on your machine
-- **[Recipe: GitHub Actions](docs/recipes/github-actions-normalize-issues.md)** — CI/CD workflow integration
+Each service below has a **Cookbook** (explains *how* it works — detection logic, compatibility rules, normalization behavior) and **Recipes** (step-by-step guides to run it in a specific environment). See [Services](#services) for the full list.
 
 ### Maintain
 - **[Troubleshooting](docs/troubleshooting.md)** — Exit codes, common errors, FAQ
@@ -77,6 +73,10 @@ A **Cookbook** explains *how a service works* — detection logic, compatibility
 
 ### `normalize-issues`
 Converts collector output (`doc-issues.json`) into PDF-ready canonical JSON (`pdf_ready.json`) compliant with the PDF generator specification.
+
+- [Cookbook](docs/cookbooks/normalize-issues.md) — How detection, compatibility, and normalization work
+- [Recipe: Local usage](docs/recipes/local-normalize-issues.md) — Run the CLI on your machine
+- [Recipe: GitHub Actions](docs/recipes/github-actions-normalize-issues.md) — CI/CD workflow integration
 
 ## License
 
