@@ -74,11 +74,8 @@ jobs:
       
       - name: Install living-doc-toolkit
         run: |
-          pip install -e packages/core
-          pip install -e packages/datasets_pdf
-          pip install -e packages/adapters/collector_gh
-          pip install -e packages/services/normalize_issues
-          pip install -e apps/cli
+          pip install --upgrade pip
+          pip install -r requirements.txt
       
       - name: Normalize issues
         run: |
@@ -237,7 +234,8 @@ jobs:
       
       - name: Install living-doc-toolkit
         run: |
-          pip install living-doc-toolkit
+          pip install --upgrade pip
+          pip install -r requirements.txt
       
       - name: Normalize issues
         run: |
@@ -457,7 +455,7 @@ Use `--verbose` flag in workflows for detailed logs:
 - name: Install living-doc-toolkit
   run: |
     pip install --upgrade pip
-    pip install living-doc-toolkit
+    pip install -r requirements.txt
 ```
 
 ### Issue: "File not found: doc-issues.json"

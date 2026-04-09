@@ -50,39 +50,18 @@ git clone https://github.com/AbsaOSS/living-doc-toolkit.git
 cd living-doc-toolkit
 ```
 
-### Step 2: Install Core Package
+### Step 2: Create and Activate a Virtual Environment
 
 ```bash
-# Install core utilities
-pip install -e packages/core
+python3 -m venv .venv
+source .venv/bin/activate
 ```
 
-### Step 3: Install Dataset Package
+### Step 3: Install All Packages
 
 ```bash
-# Install PDF dataset models
-pip install -e packages/datasets_pdf
-```
-
-### Step 4: Install Adapter Package
-
-```bash
-# Install collector-gh adapter
-pip install -e packages/adapters/collector_gh
-```
-
-### Step 5: Install Service Package
-
-```bash
-# Install normalize-issues service
-pip install -e packages/services/normalize_issues
-```
-
-### Step 6: Install CLI
-
-```bash
-# Install CLI wrapper
-pip install -e apps/cli
+pip install --upgrade pip
+pip install -r requirements.txt
 ```
 
 ### Verify Installation

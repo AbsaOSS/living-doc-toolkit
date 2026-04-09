@@ -41,6 +41,18 @@ The `normalize-issues` service transforms machine-readable artifacts produced by
 - **Audit trail preservation**: Maintains enterprise-level provenance tracking
 - **Schema validation**: Ensures output conforms to generator contract
 
+**Quick Example:**
+```bash
+living-doc normalize-issues \
+  --input doc-issues.json \
+  --output pdf_ready.json \
+  --source auto \
+  --document-title "Sprint 42 Report" \
+  --document-version "1.0.0"
+```
+
+See [Contracts & Interfaces](../contracts.md#cli-interface) for the full argument reference.
+
 ---
 
 ## How Detection Works (Adapter Selection)
