@@ -2,6 +2,7 @@
 
 - [Get Started](#get-started)
 - [Monorepo Layout](#monorepo-layout)
+- [QA Automation with Make](#qa-automation-with-make)
 - [Running Static Code Analysis](#running-static-code-analysis)
 - [Run Black Tool Locally](#run-black-tool-locally)
 - [Run mypy Tool Locally](#run-mypy-tool-locally)
@@ -57,6 +58,69 @@ pip install -e "apps/cli[dev]"
 Each package has its own `pyproject.toml`, `src/` layout, and `tests/` directory.
 All quality-gate commands below are designed to run **per-package** from within the
 package directory, matching how CI executes them.
+
+## QA Automation with Make
+
+This project includes a `Makefile` to simplify running quality-assurance checks across all
+packages. Use Make targets instead of manual loops.
+
+### Quick Start
+
+First, install all packages with dev dependencies:
+
+```shell
+make install
+```
+
+Then run all QA checks (Black, Pylint, mypy, unit tests) on all packages:
+
+```shell
+make py-qa
+```
+
+Show all available commands:
+
+```shell
+make help
+```
+
+### Common Make Targets
+
+| Target | Purpose |
+|--------|---------|
+| `make py-qa` | Run all QA gates (Black, Pylint, mypy, tests) on all packages |
+| `make black` | Format all packages with Black |
+| `make pylint` | Lint all packages (score ≥ 9.5) |
+| `make mypy` | Type-check all packages |
+| `make pytest-unit` | Run unit tests (coverage ≥ 80%) on all packages |
+
+### Run QA for a Specific Package
+
+Run all QA checks on one package:
+
+```shell
+make py-qa-core                    # packages/core
+make py-qa-datasets-pdf            # packages/datasets_pdf
+make py-qa-collector-gh            # packages/adapters/collector_gh
+make py-qa-normalize               # packages/services/normalize_issues
+make py-qa-cli                     # apps/cli
+```
+
+Run a specific check on one package:
+
+```shell
+make black-core                    # Black on packages/core
+make pylint-packages/core          # Pylint on packages/core
+make mypy-packages/core            # mypy on packages/core
+make pytest-unit-packages/core     # Tests on packages/core
+```
+
+### Quality Gates
+
+- **Black**: Line length 120 characters (configured in each `pyproject.toml`)
+- **Pylint**: Minimum score 9.5 / 10.0
+- **mypy**: Strict type checking (configuration in each `pyproject.toml`)
+- **pytest**: Minimum coverage 80%
 
 ## Running Static Code Analysis
 
