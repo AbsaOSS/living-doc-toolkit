@@ -15,7 +15,7 @@ APPS := apps/cli
 ALL_TARGETS := $(PACKAGES) $(APPS)
 
 # Python and tools
-PYTHON := $(PWD)/.venv/bin/python
+PYTHON ?= python
 MIN_PYLINT_SCORE := 9.5
 MIN_COVERAGE := 80
 
