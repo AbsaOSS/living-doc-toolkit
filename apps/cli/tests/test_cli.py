@@ -169,7 +169,7 @@ def test_normalize_issues_adapter_error(mock_run_service, runner):
     assert result.exit_code == 2
     assert "Adapter error:" in result.output
     assert "No compatible adapter found for input" in result.output
-    assert "Check metadata.generator.name field" in result.output
+    assert "Check metadata.producer.name field" in result.output
 
 
 @patch("living_doc_cli.commands.normalize_issues.run_service")

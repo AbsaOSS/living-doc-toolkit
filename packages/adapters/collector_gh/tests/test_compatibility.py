@@ -30,7 +30,7 @@ class TestCheckCompatibility:
         assert warnings[0].code == "VERSION_MISMATCH"
         assert "0.9.0" in warnings[0].message
         assert ">=1.0.0,<2.0.0" in warnings[0].message
-        assert warnings[0].context == "metadata.generator.version"
+        assert warnings[0].context == "metadata.producer.version"
 
     def test_version_2_0_0_warning(self):
         """Test that version 2.0.0 produces VERSION_MISMATCH warning."""
@@ -39,7 +39,7 @@ class TestCheckCompatibility:
         assert warnings[0].code == "VERSION_MISMATCH"
         assert "2.0.0" in warnings[0].message
         assert ">=1.0.0,<2.0.0" in warnings[0].message
-        assert warnings[0].context == "metadata.generator.version"
+        assert warnings[0].context == "metadata.producer.version"
 
     def test_version_2_1_0_warning(self):
         """Test that version 2.1.0 produces VERSION_MISMATCH warning."""
@@ -60,7 +60,7 @@ class TestCheckCompatibility:
         assert len(warnings) == 1
         assert warnings[0].code == "INVALID_VERSION"
         assert "not-a-version" in warnings[0].message
-        assert warnings[0].context == "metadata.generator.version"
+        assert warnings[0].context == "metadata.producer.version"
 
     def test_empty_version_string(self):
         """Test that empty version string produces INVALID_VERSION warning."""

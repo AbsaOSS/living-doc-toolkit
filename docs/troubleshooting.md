@@ -126,7 +126,7 @@ Invalid input: Malformed JSON in 'doc-issues.json'. Ensure the file contains val
 
 **Message:**
 ```
-Invalid input: Missing required field 'metadata.generator.name'. Check input structure.
+Invalid input: Missing required field 'metadata.producer.name'. Check input structure.
 ```
 
 **Causes:**
@@ -144,7 +144,7 @@ Invalid input: Missing required field 'metadata.generator.name'. Check input str
 
 2. **Verify generator metadata:**
    ```bash
-   jq .metadata.generator doc-issues.json
+   jq .metadata.producer doc-issues.json
    ```
    
    Expected output:

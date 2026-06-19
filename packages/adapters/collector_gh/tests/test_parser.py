@@ -33,7 +33,7 @@ class TestParser:
         """Create a minimal valid payload."""
         return {
             "metadata": {
-                "generator": {"name": "AbsaOSS/living-doc-collector-gh", "version": "1.0.0", "build": "test"},
+                "producer": {"name": "AbsaOSS/living-doc-collector-gh", "version": "1.0.0", "build": "test"},
                 "run": {
                     "run_id": "123",
                     "run_attempt": "1",
@@ -79,8 +79,8 @@ class TestParser:
         assert len(result.warnings) == 0
 
         # Check original metadata is preserved
-        assert "generator" in result.metadata.original_metadata
-        assert result.metadata.original_metadata["generator"]["version"] == "1.0.0"
+        assert "producer" in result.metadata.original_metadata
+        assert result.metadata.original_metadata["producer"]["version"] == "1.0.0"
 
     def test_parse_v1_2_0_fixture(self, fixture_v1_2_0):
         """Test parsing with v1.2.0 fixture."""
@@ -157,10 +157,10 @@ class TestParser:
         result = parse(fixture_v1_0_0)
 
         original = result.metadata.original_metadata
-        assert "generator" in original
+        assert "producer" in original
         assert "run" in original
         assert "source" in original
-        assert original["generator"]["name"] == "AbsaOSS/living-doc-collector-gh"
+        assert original["producer"]["name"] == "AbsaOSS/living-doc-collector-gh"
 
     def test_parse_minimal_payload(self, minimal_payload):
         """Test parsing with minimal payload."""
@@ -196,7 +196,7 @@ class TestParser:
 
     def test_parse_with_incompatible_version(self, minimal_payload):
         """Test parsing with incompatible version generates warnings."""
-        minimal_payload["metadata"]["generator"]["version"] = "2.0.0"
+        minimal_payload["metadata"]["producer"]["version"] = "2.0.0"
         result = parse(minimal_payload)
 
         assert len(result.warnings) == 1

@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "generator": {
+    "producer": {
       "name": "AbsaOSS/living-doc-collector-gh",
       "version": "1.0.0",
       "build": "sha-abc123"

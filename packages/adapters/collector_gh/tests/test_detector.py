@@ -13,12 +13,12 @@ class TestCanHandle:
 
     def test_can_handle_valid_collector_gh_payload(self):
         """Test that can_handle returns True for valid collector-gh payload."""
-        payload = {"metadata": {"generator": {"name": "AbsaOSS/living-doc-collector-gh", "version": "1.0.0"}}}
+        payload = {"metadata": {"producer": {"name": "AbsaOSS/living-doc-collector-gh", "version": "1.0.0"}}}
         assert can_handle(payload) is True
 
     def test_can_handle_different_generator_name(self):
-        """Test that can_handle returns False for different generator name."""
-        payload = {"metadata": {"generator": {"name": "different-generator", "version": "1.0.0"}}}
+        """Test that can_handle returns False for different producer name."""
+        payload = {"metadata": {"producer": {"name": "different-generator", "version": "1.0.0"}}}
         assert can_handle(payload) is False
 
     def test_can_handle_missing_metadata(self):
@@ -27,13 +27,13 @@ class TestCanHandle:
         assert can_handle(payload) is False
 
     def test_can_handle_missing_generator(self):
-        """Test that can_handle returns False when generator is missing."""
+        """Test that can_handle returns False when producer is missing."""
         payload = {"metadata": {}}
         assert can_handle(payload) is False
 
     def test_can_handle_missing_name(self):
         """Test that can_handle returns False when name is missing."""
-        payload = {"metadata": {"generator": {"version": "1.0.0"}}}
+        payload = {"metadata": {"producer": {"version": "1.0.0"}}}
         assert can_handle(payload) is False
 
     def test_can_handle_empty_dict(self):
@@ -41,8 +41,8 @@ class TestCanHandle:
         assert can_handle({}) is False
 
     def test_can_handle_null_generator(self):
-        """Test that can_handle returns False when generator is None."""
-        payload = {"metadata": {"generator": None}}
+        """Test that can_handle returns False when producer is None."""
+        payload = {"metadata": {"producer": None}}
         assert can_handle(payload) is False
 
 
@@ -51,7 +51,7 @@ class TestExtractVersion:
 
     def test_extract_version_valid_payload(self):
         """Test that extract_version returns version string from valid payload."""
-        payload = {"metadata": {"generator": {"name": "AbsaOSS/living-doc-collector-gh", "version": "1.2.3"}}}
+        payload = {"metadata": {"producer": {"name": "AbsaOSS/living-doc-collector-gh", "version": "1.2.3"}}}
         version = extract_version(payload)
         assert version == "1.2.3"
 
@@ -60,32 +60,32 @@ class TestExtractVersion:
         payload = {}
         with pytest.raises(AdapterError) as exc_info:
             extract_version(payload)
-        assert "metadata.generator.version" in str(exc_info.value)
+        assert "metadata.producer.version" in str(exc_info.value)
 
     def test_extract_version_missing_generator(self):
-        """Test that extract_version raises AdapterError when generator is missing."""
+        """Test that extract_version raises AdapterError when producer is missing."""
         payload = {"metadata": {}}
         with pytest.raises(AdapterError) as exc_info:
             extract_version(payload)
-        assert "metadata.generator.version" in str(exc_info.value)
+        assert "metadata.producer.version" in str(exc_info.value)
 
     def test_extract_version_missing_version(self):
         """Test that extract_version raises AdapterError when version is missing."""
-        payload = {"metadata": {"generator": {"name": "AbsaOSS/living-doc-collector-gh"}}}
+        payload = {"metadata": {"producer": {"name": "AbsaOSS/living-doc-collector-gh"}}}
         with pytest.raises(AdapterError) as exc_info:
             extract_version(payload)
-        assert "metadata.generator.version" in str(exc_info.value)
+        assert "metadata.producer.version" in str(exc_info.value)
 
     def test_extract_version_empty_version(self):
         """Test that extract_version raises AdapterError when version is empty."""
-        payload = {"metadata": {"generator": {"name": "AbsaOSS/living-doc-collector-gh", "version": ""}}}
+        payload = {"metadata": {"producer": {"name": "AbsaOSS/living-doc-collector-gh", "version": ""}}}
         with pytest.raises(AdapterError) as exc_info:
             extract_version(payload)
         assert "empty" in str(exc_info.value).lower()
 
     def test_extract_version_null_generator(self):
-        """Test that extract_version raises AdapterError when generator is None."""
-        payload = {"metadata": {"generator": None}}
+        """Test that extract_version raises AdapterError when producer is None."""
+        payload = {"metadata": {"producer": None}}
         with pytest.raises(AdapterError) as exc_info:
             extract_version(payload)
-        assert "metadata.generator.version" in str(exc_info.value)
+        assert "metadata.producer.version" in str(exc_info.value)

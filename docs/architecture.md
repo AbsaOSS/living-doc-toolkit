@@ -80,7 +80,7 @@ flowchart TD
     Start([Start]) --> Load[Load Input JSON]
     Load --> Detect{Auto-detect<br/>Adapter?}
     
-    Detect -->|Yes| AutoDetect[Scan metadata.generator.name]
+    Detect -->|Yes| AutoDetect[Scan metadata.producer.name]
     Detect -->|No| ExplicitAdapter[Use --source adapter]
     
     AutoDetect --> CheckAdapter{Adapter<br/>Found?}
@@ -285,7 +285,7 @@ sequenceDiagram
     alt Auto-detect mode
         Service->>Registry: Find compatible adapter
         Registry->>Adapter: can_handle(payload)?
-        Adapter->>Registry: Yes (metadata.generator.name matches)
+        Adapter->>Registry: Yes (metadata.producer.name matches)
         Registry->>Service: Return CollectorGhAdapter
     else Explicit mode
         Service->>Registry: Get adapter by name
@@ -402,7 +402,7 @@ flowchart LR
             {
               "code": "VERSION_MISMATCH",
               "message": "Producer version 2.1.0 is outside confirmed range",
-              "context": "metadata.generator.version"
+              "context": "metadata.producer.version"
             }
           ]
         }

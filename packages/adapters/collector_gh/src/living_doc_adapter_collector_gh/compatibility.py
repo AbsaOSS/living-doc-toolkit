@@ -68,7 +68,7 @@ def check_compatibility(version: str) -> list[CompatibilityWarning]:
                 message=(
                     f"Producer version {version} is outside confirmed range" f" >={CONFIRMED_MIN},<{CONFIRMED_MAX}"
                 ),
-                context="metadata.generator.version",
+                context="metadata.producer.version",
             )
         ]
     except InvalidVersion:
@@ -76,6 +76,6 @@ def check_compatibility(version: str) -> list[CompatibilityWarning]:
             CompatibilityWarning(
                 code="INVALID_VERSION",
                 message=f"Producer version '{version}' is not a valid semantic version",
-                context="metadata.generator.version",
+                context="metadata.producer.version",
             )
         ]
