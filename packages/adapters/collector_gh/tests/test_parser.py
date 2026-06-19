@@ -49,9 +49,9 @@ class TestParser:
                     "enterprise": None,
                 },
             },
-            "issues": [
-                {
-                    "number": 1,
+            "issues": {
+                "owner/repo/1": {
+                    "issue_number": 1,
                     "title": "Test Issue",
                     "state": "open",
                     "labels": ["test"],
@@ -60,7 +60,7 @@ class TestParser:
                     "updated_at": "2026-01-02T00:00:00Z",
                     "body": "Test body",
                 }
-            ],
+            },
         }
 
     def test_parse_v1_0_0_fixture(self, fixture_v1_0_0):
@@ -172,7 +172,7 @@ class TestParser:
 
     def test_parse_with_missing_labels(self, minimal_payload):
         """Test parsing when labels are missing from issue."""
-        minimal_payload["issues"][0].pop("labels")
+        minimal_payload["issues"]["owner/repo/1"].pop("labels")
         result = parse(minimal_payload)
 
         assert len(result.items) == 1
@@ -180,7 +180,7 @@ class TestParser:
 
     def test_parse_with_missing_body(self, minimal_payload):
         """Test parsing when body is missing from issue."""
-        minimal_payload["issues"][0].pop("body")
+        minimal_payload["issues"]["owner/repo/1"].pop("body")
         result = parse(minimal_payload)
 
         assert len(result.items) == 1
@@ -217,7 +217,7 @@ class TestParser:
     def test_parse_missing_issue_field_raises_error(self, minimal_payload):
         """Test that missing required issue field raises AdapterError."""
         # Remove required field from issue
-        del minimal_payload["issues"][0]["title"]
+        del minimal_payload["issues"]["owner/repo/1"]["title"]
 
         with pytest.raises(AdapterError) as exc_info:
             parse(minimal_payload)
@@ -225,14 +225,14 @@ class TestParser:
 
     def test_parse_missing_metadata_raises_error(self):
         """Test that missing metadata raises AdapterError."""
-        payload = {"issues": []}
+        payload = {"issues": {}}
 
         with pytest.raises(AdapterError):
             parse(payload)
 
-    def test_parse_empty_issues_list(self, minimal_payload):
-        """Test parsing with empty issues list."""
-        minimal_payload["issues"] = []
+    def test_parse_empty_issues_dict(self, minimal_payload):
+        """Test parsing with empty issues dict."""
+        minimal_payload["issues"] = {}
         result = parse(minimal_payload)
 
         assert len(result.items) == 0

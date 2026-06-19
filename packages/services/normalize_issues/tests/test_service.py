@@ -35,9 +35,9 @@ def test_run_service_valid_input(tmp_path):
                 "enterprise": None,
             },
         },
-        "issues": [
-            {
-                "number": 123,
+        "issues": {
+            "owner/repo/123": {
+                "issue_number": 123,
                 "title": "Test Issue",
                 "state": "open",
                 "labels": ["enhancement"],
@@ -46,7 +46,7 @@ def test_run_service_valid_input(tmp_path):
                 "updated_at": "2026-01-02T00:00:00Z",
                 "body": "## Description\nThis is a test issue.",
             }
-        ],
+        },
     }
 
     input_file = tmp_path / "input.json"
@@ -108,7 +108,7 @@ def test_run_service_adapter_detection_failure(tmp_path):
     # Create input with wrong metadata
     input_data = {
         "metadata": {"generator": {"name": "unknown-adapter", "version": "1.0.0"}},
-        "issues": [],
+        "issues": {},
     }
 
     input_file = tmp_path / "input.json"
@@ -138,9 +138,9 @@ def test_run_service_explicit_adapter(tmp_path):
             },
             "source": {"systems": ["github"], "repositories": ["owner/repo"], "organization": None, "enterprise": None},
         },
-        "issues": [
-            {
-                "number": 1,
+        "issues": {
+            "owner/repo/1": {
+                "issue_number": 1,
                 "title": "Test",
                 "state": "open",
                 "labels": [],
@@ -149,7 +149,7 @@ def test_run_service_explicit_adapter(tmp_path):
                 "updated_at": "2026-01-01T00:00:00Z",
                 "body": None,
             }
-        ],
+        },
     }
 
     input_file = tmp_path / "input.json"
@@ -166,7 +166,7 @@ def test_run_service_explicit_adapter(tmp_path):
 
 def test_run_service_unsupported_adapter(tmp_path):
     """Test error handling for unsupported adapter."""
-    input_data = {"metadata": {"generator": {"name": "some-adapter", "version": "1.0.0"}}, "issues": []}
+    input_data = {"metadata": {"generator": {"name": "some-adapter", "version": "1.0.0"}}, "issues": {}}
 
     input_file = tmp_path / "input.json"
     output_file = tmp_path / "output.json"
@@ -197,7 +197,7 @@ def test_run_service_empty_items(tmp_path):
             },
             "source": {"systems": ["github"], "repositories": ["owner/repo"], "organization": None, "enterprise": None},
         },
-        "issues": [],
+        "issues": {},
     }
 
     input_file = tmp_path / "input.json"
@@ -233,9 +233,9 @@ def test_run_service_multiple_items(tmp_path):
             },
             "source": {"systems": ["github"], "repositories": ["owner/repo"], "organization": None, "enterprise": None},
         },
-        "issues": [
-            {
-                "number": i,
+        "issues": {
+            f"owner/repo/{i}": {
+                "issue_number": i,
                 "title": f"Issue {i}",
                 "state": "open",
                 "labels": [],
@@ -245,7 +245,7 @@ def test_run_service_multiple_items(tmp_path):
                 "body": f"## Description\nIssue {i} content.",
             }
             for i in range(1, 4)
-        ],
+        },
     }
 
     input_file = tmp_path / "input.json"

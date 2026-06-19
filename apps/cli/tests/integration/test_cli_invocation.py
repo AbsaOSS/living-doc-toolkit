@@ -40,9 +40,9 @@ def valid_input_data():
                 "enterprise": None,
             },
         },
-        "issues": [
-            {
-                "number": 1,
+        "issues": {
+            "owner/repo/1": {
+                "issue_number": 1,
                 "title": "Test Issue",
                 "state": "open",
                 "labels": ["enhancement"],
@@ -51,7 +51,7 @@ def valid_input_data():
                 "updated_at": "2026-01-02T00:00:00Z",
                 "body": "## Description\nThis is a test issue.\n\n## Acceptance Criteria\n- Criterion 1\n- Criterion 2",
             }
-        ],
+        },
     }
 
 
@@ -119,7 +119,7 @@ def test_cli_invocation_bad_metadata(runner, tmp_path):
     # Create input with bad metadata
     input_data = {
         "metadata": {"generator": {"name": "unknown-adapter", "version": "1.0.0"}},
-        "issues": [],
+        "issues": {},
     }
 
     input_file = tmp_path / "input.json"
