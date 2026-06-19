@@ -75,12 +75,20 @@ def parse(payload: dict) -> AdapterResult:
         )
 
         # Parse issues into adapter items
-        issues = list(payload.get("issues", {}).values())
+        # Support both dict format (keyed by issue ID) and list format
+        issues_data = payload.get("issues", {})
+        if isinstance(issues_data, dict):
+            issues_list = list(issues_data.values())
+        else:
+            issues_list = issues_data if isinstance(issues_data, list) else []
+        
         items = []
-        for issue in issues:
+        for issue in issues_list:
             try:
+                # Support both 'number' and 'issue_number' field names
+                issue_number = issue.get("number") or issue.get("issue_number")
                 item = AdapterItem(
-                    id=f"github:{source_repo}#{issue['issue_number']}",
+                    id=f"github:{source_repo}#{issue_number}",
                     title=issue["title"],
                     state=issue["state"],
                     tags=issue.get("labels", []),
@@ -93,7 +101,8 @@ def parse(payload: dict) -> AdapterResult:
                 )
                 items.append(item)
             except (KeyError, TypeError) as e:
-                raise AdapterError(f"Failed to parse issue {issue.get('issue_number', 'unknown')}: {e}") from e
+                issue_number = issue.get("number") or issue.get("issue_number", "unknown")
+                raise AdapterError(f"Failed to parse issue {issue_number}: {e}") from e
 
         return AdapterResult(items=items, metadata=metadata, warnings=warnings)
 
