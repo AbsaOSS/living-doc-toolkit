@@ -209,3 +209,5 @@ __marimo__/
 # Living Doc Toolkit specific
 outputs/
 .DS_Store
+doc-issues.json
+pdf_ready.json
