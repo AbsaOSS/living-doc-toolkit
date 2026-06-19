@@ -81,7 +81,7 @@ def parse(payload: dict) -> AdapterResult:
             issues_list = list(issues_data.values())
         else:
             issues_list = issues_data if isinstance(issues_data, list) else []
-        
+
         items = []
         for issue in issues_list:
             try:

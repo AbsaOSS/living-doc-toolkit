@@ -112,10 +112,7 @@ black $(git ls-files '*.py')
 From the **repository root**:
 
 ```shell
-for pkg in packages/core packages/datasets_pdf packages/adapters/collector_gh packages/services/normalize_issues apps/cli; do
-  echo "=== Black: $pkg ==="
-  (cd "$pkg" && black $(git ls-files '*.py'))
-done
+Fixed
 ```
 
 ### Check-only mode (no changes)
