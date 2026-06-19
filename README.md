@@ -5,6 +5,16 @@
 
 A monorepo hosting multiple independent Python services that transform and enrich machine-readable artifacts produced by upstream collectors (e.g., [living-doc-collector-gh](https://github.com/AbsaOSS/living-doc-collector-gh)) into datasets consumable by downstream actions (e.g., [living-doc-generator-pdf](https://github.com/AbsaOSS/living-doc-generator-pdf)).
 
+---
+
+- [Overview](#overview)
+- [Quickstart](#quickstart)
+- [Documentation](#documentation)
+- [Services](#services)
+- [License](#license)
+
+---
+
 ## Overview
 
 The Living Documentation Toolkit is a **generic builder** designed to:
@@ -23,8 +33,13 @@ The Living Documentation Toolkit is a **generic builder** designed to:
 git clone https://github.com/AbsaOSS/living-doc-toolkit.git
 cd living-doc-toolkit
 
-# Install dependencies (once available)
-pip install -e .
+# Create and activate a virtual environment
+python3 -m venv .venv
+source .venv/bin/activate
+
+# Install all packages
+pip install --upgrade pip
+pip install -r requirements.txt
 ```
 
 ### Example CLI Usage
@@ -41,14 +56,27 @@ living-doc normalize-issues \
 
 ## Documentation
 
-- **[SPEC.md](SPEC.md)** - System specification and architecture details
-- **[TASKS.md](TASKS.md)** - Implementation roadmap and task tracking
-- **[CHANGELOG.md](CHANGELOG.md)** - Version history and notable changes
+### Understand
+- **[Architecture](docs/architecture.md)** — System overview, data flow pipeline, package structure
+- **[Contracts & Interfaces](docs/contracts.md)** — CLI reference, input/output schemas, audit envelope, change control
+
+### Use
+
+Each service below has a **Cookbook** (explains *how* it works — detection logic, compatibility rules, normalization behavior) and **Recipes** (step-by-step guides to run it in a specific environment). See [Services](#services) for the full list.
+
+### Maintain
+- **[Troubleshooting](docs/troubleshooting.md)** — Exit codes, common errors, FAQ
+- **[Developer Guide](DEVELOPER.md)** — Environment setup, testing, linting, branch conventions
+- **[Changelog](CHANGELOG.md)** — Version history and notable changes
 
 ## Services
 
 ### `normalize-issues`
 Converts collector output (`doc-issues.json`) into PDF-ready canonical JSON (`pdf_ready.json`) compliant with the PDF generator specification.
+
+- [Cookbook](docs/cookbooks/normalize-issues.md) — How detection, compatibility, and normalization work
+- [Recipe: Local usage](docs/recipes/local-normalize-issues.md) — Run the CLI on your machine
+- [Recipe: GitHub Actions](docs/recipes/github-actions-normalize-issues.md) — CI/CD workflow integration
 
 ## License
 

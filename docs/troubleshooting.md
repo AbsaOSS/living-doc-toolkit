@@ -16,7 +16,7 @@
 
 ## Exit Codes Reference
 
-All toolkit services follow the exit code convention defined in SPEC.md §3.1.2:
+All toolkit services follow the exit code convention defined in [Contracts & Interfaces](contracts.md#exit-codes):
 
 | Exit Code | Condition | Error Prefix | Description |
 |-----------|-----------|--------------|-------------|
@@ -310,7 +310,7 @@ Normalization failed: Section mapping failed for issue #42. Unknown heading form
    - Avoid special characters in headings
    - Use consistent heading levels (##, not ###)
 
-3. **Check SPEC.md §3.3.3 for supported heading synonyms**
+3. **Check [Contracts & Interfaces](contracts.md#section-mapping-heading-synonyms) for supported heading synonyms**
 
 ---
 
@@ -497,7 +497,7 @@ Future versions may support multi-source input.
 
 ### Q: Can I customize the section mapping?
 
-**A:** Not directly. The section mapping is defined by SPEC.md §3.3.3. However, you can:
+**A:** Not directly. The section mapping is defined in [Contracts & Interfaces](contracts.md#section-mapping-heading-synonyms). However, you can:
 
 1. Use standard heading names in issue bodies
 2. Unknown headings are appended to `description`
@@ -612,7 +612,7 @@ living-doc normalize-issues \
    jq '.issues | length' doc-issues.json
    ```
 
-2. **Expected performance (SPEC.md §5.5):**
+2. **Expected performance (see [Performance Budgets](contracts.md#performance-budgets)):**
    - 100 issues: < 10 seconds
    - 1000 issues: < 60 seconds
 
@@ -651,8 +651,8 @@ docker run -v $(pwd):/data living-doc-toolkit \
 
 ## Additional Resources
 
-- **Cookbook**: `docs/cookbooks/normalize-issues.md` — Service documentation
-- **Local Recipe**: `docs/recipes/local-normalize-issues.md` — Local usage guide
-- **GitHub Actions Recipe**: `docs/recipes/github-actions-normalize-issues.yml` — CI/CD integration
-- **SPEC.md**: Full system specification
-- **GitHub Issues**: https://github.com/AbsaOSS/living-doc-toolkit/issues
+- **[Cookbook: normalize-issues](cookbooks/normalize-issues.md)** — How detection, compatibility, and normalization work
+- **[Recipe: Local usage](recipes/local-normalize-issues.md)** — Run the CLI on your machine
+- **[Recipe: GitHub Actions](recipes/github-actions-normalize-issues.md)** — CI/CD workflow integration
+- **[Contracts & Interfaces](contracts.md)** — CLI reference, schemas, change control
+- **[GitHub Issues](https://github.com/AbsaOSS/living-doc-toolkit/issues)** — Report bugs or request features

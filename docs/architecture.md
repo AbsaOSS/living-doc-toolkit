@@ -31,7 +31,7 @@ The Living Documentation Toolkit is a **generic builder** that transforms machin
 
 ## Data Flow Pipeline
 
-### High-Level Pipeline (SPEC.md §5.1)
+### High-Level Pipeline
 
 ```mermaid
 graph LR
@@ -122,7 +122,7 @@ flowchart TD
 
 ## Monorepo Package Structure
 
-### Directory Layout (SPEC.md §4.1)
+### Directory Layout
 
 ```mermaid
 graph TD
@@ -517,7 +517,9 @@ graph TB
 
 ## Performance Considerations
 
-### Expected Performance (SPEC.md §5.5)
+### Expected Performance
+
+See [Performance Budgets](contracts.md#performance-budgets) for detailed targets.
 
 | Input Size | Target Time | Maximum Time |
 |------------|-------------|--------------|
@@ -577,8 +579,8 @@ flowchart TD
 
 ## Additional Resources
 
-- **SPEC.md**: Full system specification
-- **TASKS.md**: Implementation roadmap
-- **Cookbook**: `docs/cookbooks/normalize-issues.md`
-- **Recipes**: `docs/recipes/`
-- **Troubleshooting**: `docs/troubleshooting.md`
+- **[Contracts & Interfaces](contracts.md)** — CLI reference, schemas, change control
+- **[Cookbook: normalize-issues](cookbooks/normalize-issues.md)** — How detection, compatibility, and normalization work
+- **[Recipe: Local usage](recipes/local-normalize-issues.md)** — Run the CLI on your machine
+- **[Recipe: GitHub Actions](recipes/github-actions-normalize-issues.md)** — CI/CD workflow integration
+- **[Troubleshooting](troubleshooting.md)** — Exit codes, common errors, FAQ

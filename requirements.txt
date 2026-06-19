@@ -1,0 +1,5 @@
+-e packages/core
+-e packages/datasets_pdf
+-e packages/adapters/collector_gh
+-e packages/services/normalize_issues
+-e apps/cli

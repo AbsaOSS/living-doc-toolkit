@@ -105,7 +105,7 @@ def normalize_issues(  # pylint: disable=too-many-arguments,too-many-positional-
     Normalize collector output into PDF-ready JSON format.
 
     Converts collector-gh output (doc-issues.json) into canonical PDF-ready format
-    (pdf_ready.json) compliant with living-doc-generator-pdf SPEC v1.0.
+    (pdf_ready.json) compliant with living-doc-generator-pdf.
     """
     # Merge verbose flag: local overrides global
     global_verbose = ctx.obj.get("verbose", False) if ctx.obj else False
