@@ -6,11 +6,23 @@
 
 ---
 
+- [What It Does (Overview)](#what-it-does-overview)
+- [How Detection Works (Adapter Selection)](#how-detection-works-adapter-selection)
+- [How Compatibility Checking Works (Version Ranges)](#how-compatibility-checking-works-version-ranges)
+- [How Audit Is Preserved and Augmented (Trace Steps)](#how-audit-is-preserved-and-augmented-trace-steps)
+- [How to Interpret Warnings](#how-to-interpret-warnings)
+- [Troubleshooting (Common Errors)](#troubleshooting-common-errors)
+- [Markdown Normalization Rules](#markdown-normalization-rules)
+- [Best Practices](#best-practices)
+- [Additional Resources](#additional-resources)
+
+---
+
 ## What It Does (Overview)
 
-The `normalize-issues` service transforms machine-readable artifacts produced by upstream collectors (e.g., `AbsaOSS/living-doc-collector-gh`) into a canonical, PDF-ready JSON format compliant with `AbsaOSS/living-doc-generator-pdf` SPEC v1.0.
+The `normalize-issues` service transforms machine-readable artifacts produced by upstream collectors (e.g., `AbsaOSS/living-doc-collector-gh`) into a canonical, PDF-ready JSON format compliant with [living-doc-generator-pdf](https://github.com/AbsaOSS/living-doc-generator-pdf).
 
-**Pipeline Overview (SPEC.md §1.2, §5.1):**
+**Pipeline Overview:**
 1. Load and parse input JSON (`doc-issues.json`)
 2. Detect producer adapter (auto-detection or explicit selection)
 3. Check version compatibility (warn if outside confirmed range)
@@ -29,11 +41,23 @@ The `normalize-issues` service transforms machine-readable artifacts produced by
 - **Audit trail preservation**: Maintains enterprise-level provenance tracking
 - **Schema validation**: Ensures output conforms to generator contract
 
+**Quick Example:**
+```bash
+living-doc normalize-issues \
+  --input doc-issues.json \
+  --output pdf_ready.json \
+  --source auto \
+  --document-title "Sprint 42 Report" \
+  --document-version "1.0.0"
+```
+
+See [Contracts & Interfaces](../contracts.md#cli-interface) for the full argument reference.
+
 ---
 
 ## How Detection Works (Adapter Selection)
 
-### Auto-Detection (SPEC.md §3.2.1, §5.2)
+### Auto-Detection
 
 When `--source auto` is used (default), the service automatically detects the producer by examining the `metadata.generator.name` field in the input JSON:
 
@@ -66,7 +90,7 @@ This is useful when:
 
 ## How Compatibility Checking Works (Version Ranges)
 
-### Confirmed Compatible Range (SPEC.md §3.2.2, §5.4)
+### Confirmed Compatible Range
 
 **Adapter:** `collector-gh`  
 **Confirmed Range:** `>=1.0.0,<2.0.0`
@@ -93,7 +117,7 @@ This policy ensures:
 
 ## How Audit Is Preserved and Augmented (Trace Steps)
 
-### Adapter Mapping (SPEC.md §3.4.3)
+### Adapter Mapping
 
 The adapter maps collector metadata to the audit envelope:
 
@@ -170,7 +194,7 @@ This creates a complete audit trail from collection → normalization → genera
 
 ## How to Interpret Warnings
 
-### VERSION_MISMATCH Warning (SPEC.md §3.2.2, §5.4)
+### VERSION_MISMATCH Warning
 
 When the producer version is outside the confirmed range, a warning is logged and added to the audit trace:
 
@@ -198,7 +222,7 @@ When the producer version is outside the confirmed range, a warning is logged an
 
 ## Troubleshooting (Common Errors)
 
-### Exit Code 1: Invalid Input (SPEC.md §3.1.2)
+### Exit Code 1: Invalid Input
 
 **Error Prefix:** `Invalid input:`
 
@@ -219,7 +243,7 @@ Invalid input: File 'doc-issues.json' not found. Ensure --input points to a vali
 
 ---
 
-### Exit Code 2: Adapter Error (SPEC.md §3.1.2)
+### Exit Code 2: Adapter Error
 
 **Error Prefix:** `Adapter error:`
 
@@ -239,7 +263,7 @@ Adapter error: No compatible adapter found for input. Check metadata.generator.n
 
 ---
 
-### Exit Code 3: Schema Validation Failed (SPEC.md §3.1.2)
+### Exit Code 3: Schema Validation Failed
 
 **Error Prefix:** `Schema validation failed:`
 
@@ -260,7 +284,7 @@ Schema validation failed: Missing required field 'schema_version' in output. Thi
 
 ---
 
-### Exit Code 4: Normalization Failed (SPEC.md §3.1.2)
+### Exit Code 4: Normalization Failed
 
 **Error Prefix:** `Normalization failed:`
 
@@ -280,7 +304,7 @@ Normalization failed: Unable to parse markdown in issue #42 body. Check for malf
 
 ---
 
-### Exit Code 5: File I/O Error (SPEC.md §3.1.2)
+### Exit Code 5: File I/O Error
 
 **Error Prefix:** `File I/O error:`
 
@@ -303,7 +327,9 @@ File I/O error: Cannot write to 'outputs/pdf_ready.json'. Ensure output director
 
 ## Markdown Normalization Rules
 
-### Heading Synonym Mapping (SPEC.md §3.3.3)
+### Heading Synonym Mapping
+
+See also [Contracts & Interfaces](../contracts.md#section-mapping-heading-synonyms) for the full reference.
 
 The service normalizes issue body headings to canonical section keys using case-insensitive matching:
 
@@ -439,8 +465,8 @@ Pin collector and toolkit versions in CI/CD to ensure reproducibility:
 
 ## Additional Resources
 
-- **SPEC.md**: Full system specification
-- **Troubleshooting Guide**: `docs/troubleshooting.md`
-- **Local Usage Recipe**: `docs/recipes/local-normalize-issues.md`
-- **GitHub Actions Recipe**: `docs/recipes/github-actions-normalize-issues.yml`
-- **Architecture Overview**: `docs/architecture.md`
+- **[Contracts & Interfaces](../contracts.md)** — CLI reference, schemas, change control
+- **[Troubleshooting](../troubleshooting.md)** — Exit codes, common errors, FAQ
+- **[Recipe: Local usage](../recipes/local-normalize-issues.md)** — Run the CLI on your machine
+- **[Recipe: GitHub Actions](../recipes/github-actions-normalize-issues.md)** — CI/CD workflow integration
+- **[Architecture](../architecture.md)** — System overview, data flow pipeline

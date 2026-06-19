@@ -6,6 +6,19 @@
 
 ---
 
+- [Overview](#overview)
+- [Prerequisites](#prerequisites)
+- [Basic Workflow Setup](#basic-workflow-setup)
+- [Customization Options](#customization-options)
+- [Complete Pipeline: Collector → Builder → Generator](#complete-pipeline-collector--builder--generator)
+- [Pipeline Orchestration Patterns](#pipeline-orchestration-patterns)
+- [Error Handling](#error-handling)
+- [Best Practices](#best-practices)
+- [Troubleshooting](#troubleshooting)
+- [Additional Resources](#additional-resources)
+
+---
+
 ## Overview
 
 This recipe shows how to run the `normalize-issues` service in GitHub Actions, either as a standalone job or as part of a complete living documentation pipeline (Collector → Builder → Generator).
@@ -61,11 +74,8 @@ jobs:
       
       - name: Install living-doc-toolkit
         run: |
-          pip install -e packages/core
-          pip install -e packages/datasets_pdf
-          pip install -e packages/adapters/collector_gh
-          pip install -e packages/services/normalize_issues
-          pip install -e apps/cli
+          pip install --upgrade pip
+          pip install -r requirements.txt
       
       - name: Normalize issues
         run: |
@@ -224,7 +234,8 @@ jobs:
       
       - name: Install living-doc-toolkit
         run: |
-          pip install living-doc-toolkit
+          pip install --upgrade pip
+          pip install -r requirements.txt
       
       - name: Normalize issues
         run: |
@@ -444,7 +455,7 @@ Use `--verbose` flag in workflows for detailed logs:
 - name: Install living-doc-toolkit
   run: |
     pip install --upgrade pip
-    pip install living-doc-toolkit
+    pip install -r requirements.txt
 ```
 
 ### Issue: "File not found: doc-issues.json"
@@ -480,7 +491,7 @@ Use `--verbose` flag in workflows for detailed logs:
 
 ## Additional Resources
 
-- **Workflow YAML**: `docs/recipes/github-actions-normalize-issues.yml`
-- **Cookbook**: `docs/cookbooks/normalize-issues.md`
-- **Troubleshooting**: `docs/troubleshooting.md`
-- **GitHub Actions Documentation**: https://docs.github.com/en/actions
+- **[Workflow YAML](github-actions-normalize-issues.yml)** — Ready-to-use workflow file
+- **[Cookbook: normalize-issues](../cookbooks/normalize-issues.md)** — How detection, compatibility, and normalization work
+- **[Troubleshooting](../troubleshooting.md)** — Exit codes, common errors, FAQ
+- **[GitHub Actions Documentation](https://docs.github.com/en/actions)** — Official GitHub Actions docs

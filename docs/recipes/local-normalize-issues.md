@@ -6,6 +6,17 @@
 
 ---
 
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [Example CLI Invocation](#example-cli-invocation)
+- [Expected Output](#expected-output)
+- [How to Verify Output](#how-to-verify-output)
+- [Common Issues and Solutions](#common-issues-and-solutions)
+- [Next Steps](#next-steps)
+- [Additional Resources](#additional-resources)
+
+---
+
 ## Prerequisites
 
 ### Required
@@ -39,39 +50,18 @@ git clone https://github.com/AbsaOSS/living-doc-toolkit.git
 cd living-doc-toolkit
 ```
 
-### Step 2: Install Core Package
+### Step 2: Create and Activate a Virtual Environment
 
 ```bash
-# Install core utilities
-pip install -e packages/core
+python3 -m venv .venv
+source .venv/bin/activate
 ```
 
-### Step 3: Install Dataset Package
+### Step 3: Install All Packages
 
 ```bash
-# Install PDF dataset models
-pip install -e packages/datasets_pdf
-```
-
-### Step 4: Install Adapter Package
-
-```bash
-# Install collector-gh adapter
-pip install -e packages/adapters/collector_gh
-```
-
-### Step 5: Install Service Package
-
-```bash
-# Install normalize-issues service
-pip install -e packages/services/normalize_issues
-```
-
-### Step 6: Install CLI
-
-```bash
-# Install CLI wrapper
-pip install -e apps/cli
+pip install --upgrade pip
+pip install -r requirements.txt
 ```
 
 ### Verify Installation
@@ -105,7 +95,7 @@ Options:
 
 ## Example CLI Invocation
 
-### Basic Usage (SPEC.md §3.1.1)
+### Basic Usage
 
 Convert `doc-issues.json` to `pdf_ready.json` with auto-detection:
 
@@ -175,7 +165,9 @@ Successfully normalized /path/to/input/doc-issues.json -> /path/to/output/pdf_re
 
 **Exit Code:** `0`
 
-### Output File Structure (SPEC.md §3.3.4)
+### Output File Structure
+
+See [Contracts & Interfaces](../contracts.md#output-contract-pdf_readyjson) for the full schema reference.
 
 The generated `pdf_ready.json` follows this structure:
 
@@ -443,7 +435,7 @@ living-doc normalize-issues \
 
 ## Additional Resources
 
-- **Cookbook**: `docs/cookbooks/normalize-issues.md` — Detailed service documentation
-- **Troubleshooting**: `docs/troubleshooting.md` — Common errors and solutions
-- **SPEC.md**: Full system specification
-- **GitHub Actions Recipe**: `docs/recipes/github-actions-normalize-issues.yml`
+- **[Contracts & Interfaces](../contracts.md)** — CLI reference, schemas, change control
+- **[Cookbook: normalize-issues](../cookbooks/normalize-issues.md)** — How detection, compatibility, and normalization work
+- **[Troubleshooting](../troubleshooting.md)** — Exit codes, common errors, FAQ
+- **[Recipe: GitHub Actions](github-actions-normalize-issues.md)** — CI/CD workflow integration

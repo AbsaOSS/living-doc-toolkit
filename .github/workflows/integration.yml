@@ -38,10 +38,10 @@ jobs:
 
       - name: Install all packages
         run: |
-          pip install -e packages/core
-          pip install -e packages/datasets_pdf
-          pip install -e packages/adapters/collector_gh
-          pip install -e packages/services/normalize_issues
+          pip install -e packages/core[dev]
+          pip install -e packages/datasets_pdf[dev]
+          pip install -e packages/adapters/collector_gh[dev]
+          pip install -e packages/services/normalize_issues[dev]
           pip install -e "apps/cli[dev]"
 
       - name: Run golden verification

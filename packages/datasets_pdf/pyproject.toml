@@ -11,7 +11,7 @@ license = {text = "Apache-2.0"}
 authors = [
     {name = "AbsaOSS", email = "opensource@absa.africa"}
 ]
-requires-python = ">=3.12"
+requires-python = ">=3.14"
 dependencies = [
     "pydantic>=2.10.0,<3.0.0",
     "jsonschema>=4.20.0,<5.0.0"
@@ -31,7 +31,7 @@ where = ["src"]
 
 [tool.black]
 line-length = 120
-target-version = ['py312']
+target-version = ['py314']
 extend-exclude = '''
 ^(
     tests/
@@ -41,7 +41,7 @@ extend-exclude = '''
 
 [tool.mypy]
 check_untyped_defs = true
-python_version = "3.12"
+python_version = "3.14"
 exclude = '^(tests/|verifications/)'
 
 [tool.pytest.ini_options]
