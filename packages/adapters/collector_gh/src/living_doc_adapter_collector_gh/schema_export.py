@@ -56,8 +56,8 @@ def export_schema(output_path: str | Path | None = None) -> dict:
     # Use default location if not provided
     if output_path is None:
         schemas_dir = get_default_schema_path()
-        schema_version = get_schema_version()
-        output_path = schemas_dir / f"doc-issues-v{schema_version}-schema.json"
+        version_str = get_schema_version()
+        output_path = schemas_dir / f"doc-issues-v{version_str}-schema.json"
 
     output_file = Path(output_path)
     output_file.parent.mkdir(parents=True, exist_ok=True)
@@ -90,5 +90,4 @@ if __name__ == "__main__":
     output = sys.argv[1] if len(sys.argv) > 1 else None
     export_schema(output)
     if output is None:
-        schema_version = get_schema_version()
-        print(f"Default location: {get_default_schema_path() / f'doc-issues-v{schema_version}-schema.json'}")
+        print(f"Default location: {get_default_schema_path() / f'doc-issues-v{get_schema_version()}-schema.json'}")

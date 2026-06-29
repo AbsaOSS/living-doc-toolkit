@@ -25,7 +25,7 @@ To export schema for collector-gh:
 See SCHEMA_SYNC.md for the full synchronization workflow.
 """
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
 class CompatibilityWarning(BaseModel):

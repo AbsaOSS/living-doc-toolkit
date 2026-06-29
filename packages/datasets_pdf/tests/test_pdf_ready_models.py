@@ -102,7 +102,12 @@ def test_valid_pdf_ready_from_spec():
                         "business_value": ["Reduces friction for enterprise users"],
                         "preconditions": ["SSO provider configured"],
                         "acceptance_criteria": [
-                            {"id": "AC-01", "state": "Active", "version": "v1.0.0", "description": "User can click SSO button"},
+                            {
+                                "id": "AC-01",
+                                "state": "Active",
+                                "version": "v1.0.0",
+                                "description": "User can click SSO button",
+                            },
                             {"id": None, "state": None, "version": None, "description": "Redirect to provider"},
                             {"id": None, "state": None, "version": None, "description": "Return with session"},
                         ],
@@ -415,7 +420,9 @@ def test_complete_user_story():
             description="Test description",
             business_value=["Test value"],
             preconditions=["Test preconditions"],
-            acceptance_criteria=[AcceptanceCriterion(id="AC-01", state="Active", version="v1.0.0", description="Test criteria")],
+            acceptance_criteria=[
+                AcceptanceCriterion(id="AC-01", state="Active", version="v1.0.0", description="Test criteria")
+            ],
             user_guide="Test guide",
             connections="Test connections",
             last_edited="Test edit",

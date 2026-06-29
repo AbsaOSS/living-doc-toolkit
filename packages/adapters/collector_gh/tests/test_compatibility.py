@@ -23,22 +23,18 @@ class TestCheckCompatibility:
         warnings = check_compatibility("1.9.9")
         assert len(warnings) == 0
 
-    def test_version_0_9_0_warning(self):
-        """Test that version 0.9.0 produces VERSION_MISMATCH warning."""
+    def test_version_0_9_0_no_warning(self):
+        """Test that version 0.9.0 produces no warnings (within confirmed range >=0.1.0)."""
         warnings = check_compatibility("0.9.0")
-        assert len(warnings) == 1
-        assert warnings[0].code == "VERSION_MISMATCH"
-        assert "0.9.0" in warnings[0].message
-        assert ">=1.0.0,<2.0.0" in warnings[0].message
-        assert warnings[0].context == "metadata.producer.version"
+        assert len(warnings) == 0
 
     def test_version_2_0_0_warning(self):
-        """Test that version 2.0.0 produces VERSION_MISMATCH warning."""
+        """Test that version 2.0.0 produces VERSION_MISMATCH warning (at exclusive upper bound)."""
         warnings = check_compatibility("2.0.0")
         assert len(warnings) == 1
         assert warnings[0].code == "VERSION_MISMATCH"
         assert "2.0.0" in warnings[0].message
-        assert ">=1.0.0,<2.0.0" in warnings[0].message
+        assert ">=0.1.0,<2.0.0" in warnings[0].message
         assert warnings[0].context == "metadata.producer.version"
 
     def test_version_2_1_0_warning(self):

@@ -49,18 +49,20 @@ class TestParser:
                     "enterprise": None,
                 },
             },
-            "issues": {
-                "owner/repo/1": {
-                    "issue_number": 1,
+            "items": [
+                {
+                    "id": "github:owner/repo#1",
                     "title": "Test Issue",
                     "state": "open",
-                    "labels": ["test"],
-                    "html_url": "https://github.com/owner/repo/issues/1",
-                    "created_at": "2026-01-01T00:00:00Z",
-                    "updated_at": "2026-01-02T00:00:00Z",
+                    "tags": ["test"],
+                    "url": "https://github.com/owner/repo/issues/1",
+                    "timestamps": {
+                        "created": "2026-01-01T00:00:00Z",
+                        "updated": "2026-01-02T00:00:00Z",
+                    },
                     "body": "Test body",
                 }
-            },
+            ],
         }
 
     def test_parse_v1_0_0_fixture(self, fixture_v1_0_0):
@@ -171,28 +173,28 @@ class TestParser:
         assert result.items[0].title == "Test Issue"
 
     def test_parse_with_missing_labels(self, minimal_payload):
-        """Test parsing when labels are missing from issue."""
-        minimal_payload["issues"]["owner/repo/1"].pop("labels")
+        """Test parsing when tags are missing from item."""
+        minimal_payload["items"][0].pop("tags")
         result = parse(minimal_payload)
 
         assert len(result.items) == 1
         assert result.items[0].tags == []
 
     def test_parse_with_missing_body(self, minimal_payload):
-        """Test parsing when body is missing from issue."""
-        minimal_payload["issues"]["owner/repo/1"].pop("body")
+        """Test parsing when body is missing from item."""
+        minimal_payload["items"][0].pop("body")
         result = parse(minimal_payload)
 
         assert len(result.items) == 1
         assert result.items[0].body is None
 
     def test_parse_with_no_repositories(self, minimal_payload):
-        """Test parsing when repositories list is empty."""
+        """Test that empty repositories list raises AdapterError (required by schema)."""
         minimal_payload["metadata"]["source"]["repositories"] = []
-        result = parse(minimal_payload)
 
-        # Should use fallback repo name
-        assert result.items[0].id == "github:unknown/repo#1"
+        with pytest.raises(AdapterError) as exc_info:
+            parse(minimal_payload)
+        assert "repositories cannot be empty" in str(exc_info.value)
 
     def test_parse_with_incompatible_version(self, minimal_payload):
         """Test parsing with incompatible version generates warnings."""
@@ -214,25 +216,24 @@ class TestParser:
         closed_item = closed_items[0]
         assert closed_item.state == "closed"
 
-    def test_parse_missing_issue_field_raises_error(self, minimal_payload):
-        """Test that missing required issue field raises AdapterError."""
-        # Remove required field from issue
-        del minimal_payload["issues"]["owner/repo/1"]["title"]
+    def test_parse_missing_item_field_raises_error(self, minimal_payload):
+        """Test that missing required item field raises AdapterError."""
+        del minimal_payload["items"][0]["title"]
 
         with pytest.raises(AdapterError) as exc_info:
             parse(minimal_payload)
-        assert "Failed to parse issue" in str(exc_info.value)
+        assert "missing required field" in str(exc_info.value)
 
     def test_parse_missing_metadata_raises_error(self):
         """Test that missing metadata raises AdapterError."""
-        payload = {"issues": {}}
+        payload = {"items": []}
 
         with pytest.raises(AdapterError):
             parse(payload)
 
-    def test_parse_empty_issues_dict(self, minimal_payload):
-        """Test parsing with empty issues dict."""
-        minimal_payload["issues"] = {}
+    def test_parse_empty_items_list(self, minimal_payload):
+        """Test parsing with empty items list."""
+        minimal_payload["items"] = []
         result = parse(minimal_payload)
 
         assert len(result.items) == 0
@@ -288,7 +289,12 @@ class TestBuildBodyFromStructured:
             "metadata": {
                 "producer": {"name": "AbsaOSS/living-doc-collector-gh", "version": "0.1.1", "build": None},
                 "run": {"run_id": None, "run_attempt": None, "actor": None, "workflow": None, "ref": None, "sha": None},
-                "source": {"systems": ["GitHub"], "repositories": ["owner/repo"], "organization": "owner", "enterprise": None},
+                "source": {
+                    "systems": ["GitHub"],
+                    "repositories": ["owner/repo"],
+                    "organization": "owner",
+                    "enterprise": None,
+                },
                 "original_metadata": {},
             },
             "items": [
@@ -299,7 +305,9 @@ class TestBuildBodyFromStructured:
                     "tags": [],
                     "url": "https://github.com/owner/repo/issues/1",
                     "timestamps": {"created": "2025-01-01T00:00:00+00:00", "updated": "2025-01-01T00:00:00+00:00"},
-                    "acceptance_criteria": [{"id": None, "state": None, "version": None, "description": "Something happens."}],
+                    "acceptance_criteria": [
+                        {"id": None, "state": None, "version": None, "description": "Something happens."}
+                    ],
                 }
             ],
             "warnings": [],
@@ -316,8 +324,12 @@ class TestBuildBodyFromStructured:
             "metadata": {
                 "producer": {"name": "AbsaOSS/living-doc-collector-gh", "version": "0.1.1", "build": None},
                 "run": {
-                    "run_id": None, "run_attempt": None, "actor": None,
-                    "workflow": None, "ref": None, "sha": None,
+                    "run_id": None,
+                    "run_attempt": None,
+                    "actor": None,
+                    "workflow": None,
+                    "ref": None,
+                    "sha": None,
                 },
                 "source": {
                     "systems": ["GitHub"],
@@ -339,7 +351,12 @@ class TestBuildBodyFromStructured:
                     "business_value": ["Streamlines domain details visibility."],
                     "preconditions": ["The user has logged in."],
                     "acceptance_criteria": [
-                        {"id": "GH-28-01", "state": "Active", "version": "v1.5.0", "description": "User can access details."},
+                        {
+                            "id": "GH-28-01",
+                            "state": "Active",
+                            "version": "v1.5.0",
+                            "description": "User can access details.",
+                        },
                     ],
                 }
             ],
@@ -367,8 +384,12 @@ class TestBuildBodyFromStructured:
             "metadata": {
                 "producer": {"name": "AbsaOSS/living-doc-collector-gh", "version": "0.1.1", "build": None},
                 "run": {
-                    "run_id": None, "run_attempt": None, "actor": None,
-                    "workflow": None, "ref": None, "sha": None,
+                    "run_id": None,
+                    "run_attempt": None,
+                    "actor": None,
+                    "workflow": None,
+                    "ref": None,
+                    "sha": None,
                 },
                 "source": {
                     "systems": ["GitHub"],

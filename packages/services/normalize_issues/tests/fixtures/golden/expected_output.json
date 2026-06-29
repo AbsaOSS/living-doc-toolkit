@@ -4,12 +4,42 @@
       {
         "id": "github:AbsaOSS/living-doc-toolkit#1",
         "sections": {
-          "acceptance_criteria": "- User can log in with email and password\n- User can log in with OAuth (Google, GitHub)\n- Session management is secure\n- Password reset functionality works",
-          "business_value": "Provides secure access control and user management capabilities.",
+          "acceptance_criteria": [
+            {
+              "description": "User can log in with email and password",
+              "id": null,
+              "state": null,
+              "version": null
+            },
+            {
+              "description": "User can log in with OAuth (Google, GitHub)",
+              "id": null,
+              "state": null,
+              "version": null
+            },
+            {
+              "description": "Session management is secure",
+              "id": null,
+              "state": null,
+              "version": null
+            },
+            {
+              "description": "Password reset functionality works",
+              "id": null,
+              "state": null,
+              "version": null
+            }
+          ],
+          "business_value": [
+            "Provides secure access control and user management capabilities."
+          ],
           "connections": null,
           "description": "Implement secure user authentication for the application.",
           "last_edited": null,
-          "preconditions": "- Database schema updated\n- OAuth provider configured",
+          "preconditions": [
+            "Database schema updated",
+            "OAuth provider configured"
+          ],
           "user_guide": null
         },
         "state": "open",
@@ -27,8 +57,29 @@
       {
         "id": "github:AbsaOSS/living-doc-toolkit#2",
         "sections": {
-          "acceptance_criteria": "- Theme toggle button in settings\n- All pages support dark mode\n- User preference is saved",
-          "business_value": "Many users prefer dark mode for reduced eye strain.",
+          "acceptance_criteria": [
+            {
+              "description": "Theme toggle button in settings",
+              "id": null,
+              "state": null,
+              "version": null
+            },
+            {
+              "description": "All pages support dark mode",
+              "id": null,
+              "state": null,
+              "version": null
+            },
+            {
+              "description": "User preference is saved",
+              "id": null,
+              "state": null,
+              "version": null
+            }
+          ],
+          "business_value": [
+            "Many users prefer dark mode for reduced eye strain."
+          ],
           "connections": null,
           "description": "Add dark mode theme support to improve user experience.",
           "last_edited": null,
@@ -118,7 +169,7 @@
       "extensions": {
         "collector-gh": {
           "original_metadata": {
-            "generator": {
+            "producer": {
               "name": "AbsaOSS/living-doc-collector-gh",
               "version": "1.0.0"
             },

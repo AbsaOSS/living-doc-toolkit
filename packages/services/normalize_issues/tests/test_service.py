@@ -19,7 +19,7 @@ def test_run_service_valid_input(tmp_path):
     # Create input JSON file
     input_data = {
         "metadata": {
-            "generator": {"name": "AbsaOSS/living-doc-collector-gh", "version": "1.0.0"},
+            "producer": {"name": "AbsaOSS/living-doc-collector-gh", "version": "1.0.0"},
             "run": {
                 "run_id": "123",
                 "run_attempt": "1",
@@ -35,18 +35,17 @@ def test_run_service_valid_input(tmp_path):
                 "enterprise": None,
             },
         },
-        "issues": {
-            "owner/repo/123": {
-                "issue_number": 123,
+        "items": [
+            {
+                "id": "github:owner/repo#123",
                 "title": "Test Issue",
                 "state": "open",
-                "labels": ["enhancement"],
-                "html_url": "https://github.com/owner/repo/issues/123",
-                "created_at": "2026-01-01T00:00:00Z",
-                "updated_at": "2026-01-02T00:00:00Z",
+                "tags": ["enhancement"],
+                "url": "https://github.com/owner/repo/issues/123",
+                "timestamps": {"created": "2026-01-01T00:00:00Z", "updated": "2026-01-02T00:00:00Z"},
                 "body": "## Description\nThis is a test issue.",
             }
-        },
+        ],
     }
 
     input_file = tmp_path / "input.json"
@@ -127,7 +126,7 @@ def test_run_service_explicit_adapter(tmp_path):
     """Test using explicit adapter specification."""
     input_data = {
         "metadata": {
-            "generator": {"name": "AbsaOSS/living-doc-collector-gh", "version": "1.0.0"},
+            "producer": {"name": "AbsaOSS/living-doc-collector-gh", "version": "1.0.0"},
             "run": {
                 "run_id": None,
                 "run_attempt": None,
@@ -138,18 +137,16 @@ def test_run_service_explicit_adapter(tmp_path):
             },
             "source": {"systems": ["github"], "repositories": ["owner/repo"], "organization": None, "enterprise": None},
         },
-        "issues": {
-            "owner/repo/1": {
-                "issue_number": 1,
+        "items": [
+            {
+                "id": "github:owner/repo#1",
                 "title": "Test",
                 "state": "open",
-                "labels": [],
-                "html_url": "https://github.com/owner/repo/issues/1",
-                "created_at": "2026-01-01T00:00:00Z",
-                "updated_at": "2026-01-01T00:00:00Z",
-                "body": None,
+                "tags": [],
+                "url": "https://github.com/owner/repo/issues/1",
+                "timestamps": {"created": "2026-01-01T00:00:00Z", "updated": "2026-01-01T00:00:00Z"},
             }
-        },
+        ],
     }
 
     input_file = tmp_path / "input.json"
@@ -186,7 +183,7 @@ def test_run_service_empty_items(tmp_path):
     """Test handling of input with no items."""
     input_data = {
         "metadata": {
-            "generator": {"name": "AbsaOSS/living-doc-collector-gh", "version": "1.0.0"},
+            "producer": {"name": "AbsaOSS/living-doc-collector-gh", "version": "1.0.0"},
             "run": {
                 "run_id": None,
                 "run_attempt": None,
@@ -197,7 +194,7 @@ def test_run_service_empty_items(tmp_path):
             },
             "source": {"systems": ["github"], "repositories": ["owner/repo"], "organization": None, "enterprise": None},
         },
-        "issues": {},
+        "items": [],
     }
 
     input_file = tmp_path / "input.json"
@@ -222,7 +219,7 @@ def test_run_service_multiple_items(tmp_path):
     """Test processing multiple items."""
     input_data = {
         "metadata": {
-            "generator": {"name": "AbsaOSS/living-doc-collector-gh", "version": "1.0.0"},
+            "producer": {"name": "AbsaOSS/living-doc-collector-gh", "version": "1.0.0"},
             "run": {
                 "run_id": None,
                 "run_attempt": None,
@@ -233,19 +230,18 @@ def test_run_service_multiple_items(tmp_path):
             },
             "source": {"systems": ["github"], "repositories": ["owner/repo"], "organization": None, "enterprise": None},
         },
-        "issues": {
-            f"owner/repo/{i}": {
-                "issue_number": i,
+        "items": [
+            {
+                "id": f"github:owner/repo#{i}",
                 "title": f"Issue {i}",
                 "state": "open",
-                "labels": [],
-                "html_url": f"https://github.com/owner/repo/issues/{i}",
-                "created_at": "2026-01-01T00:00:00Z",
-                "updated_at": "2026-01-01T00:00:00Z",
+                "tags": [],
+                "url": f"https://github.com/owner/repo/issues/{i}",
+                "timestamps": {"created": "2026-01-01T00:00:00Z", "updated": "2026-01-01T00:00:00Z"},
                 "body": f"## Description\nIssue {i} content.",
             }
             for i in range(1, 4)
-        },
+        ],
     }
 
     input_file = tmp_path / "input.json"

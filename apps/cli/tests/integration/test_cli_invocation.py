@@ -24,7 +24,7 @@ def valid_input_data():
     """Create valid collector-gh input data."""
     return {
         "metadata": {
-            "generator": {"name": "AbsaOSS/living-doc-collector-gh", "version": "1.0.0"},
+            "producer": {"name": "AbsaOSS/living-doc-collector-gh", "version": "1.0.0"},
             "run": {
                 "run_id": "test-run",
                 "run_attempt": "1",
@@ -40,18 +40,17 @@ def valid_input_data():
                 "enterprise": None,
             },
         },
-        "issues": {
-            "owner/repo/1": {
-                "issue_number": 1,
+        "items": [
+            {
+                "id": "github:owner/repo#1",
                 "title": "Test Issue",
                 "state": "open",
-                "labels": ["enhancement"],
-                "html_url": "https://github.com/owner/repo/issues/1",
-                "created_at": "2026-01-01T00:00:00Z",
-                "updated_at": "2026-01-02T00:00:00Z",
+                "tags": ["enhancement"],
+                "url": "https://github.com/owner/repo/issues/1",
+                "timestamps": {"created": "2026-01-01T00:00:00Z", "updated": "2026-01-02T00:00:00Z"},
                 "body": "## Description\nThis is a test issue.\n\n## Acceptance Criteria\n- Criterion 1\n- Criterion 2",
             }
-        },
+        ],
     }
 
 
