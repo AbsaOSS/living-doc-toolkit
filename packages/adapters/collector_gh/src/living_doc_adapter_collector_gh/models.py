@@ -43,6 +43,15 @@ class AdapterItemTimestamps(BaseModel):
     updated: str
 
 
+class AdapterItemAcceptanceCriterion(BaseModel):
+    """A single acceptance criterion from the structured input format."""
+
+    id: str | None = None
+    state: str | None = None
+    version: str | None = None
+    description: str
+
+
 class AdapterItem(BaseModel):
     """Represents a single item (issue) from the collector output."""
 
@@ -53,6 +62,10 @@ class AdapterItem(BaseModel):
     url: str
     timestamps: AdapterItemTimestamps
     body: str | None = None
+    # Structured fields present in the new items-array format
+    structured_business_value: list[str] | None = None
+    structured_preconditions: list[str] | None = None
+    structured_acceptance_criteria: list[AdapterItemAcceptanceCriterion] | None = None
 
 
 class AdapterMetadataProducer(BaseModel):

@@ -104,9 +104,10 @@ High value feature.
 
     # Verify normalized sections
     assert story.sections.description == "This is the overview."
-    assert story.sections.business_value == "High value feature."
-    assert "Criterion 1" in story.sections.acceptance_criteria
-    assert "Criterion 2" in story.sections.acceptance_criteria
+    assert story.sections.business_value == ["High value feature."]
+    assert story.sections.acceptance_criteria is not None
+    assert any("Criterion 1" in ac.description for ac in story.sections.acceptance_criteria)
+    assert any("Criterion 2" in ac.description for ac in story.sections.acceptance_criteria)
 
 
 def test_build_pdf_ready_meta_fields():

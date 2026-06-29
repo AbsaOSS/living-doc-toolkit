@@ -237,3 +237,162 @@ class TestParser:
 
         assert len(result.items) == 0
         assert len(result.warnings) == 0
+
+
+class TestBuildBodyFromStructured:
+    """Tests for the _build_body_from_structured helper."""
+
+    def test_all_structured_fields_present(self):
+        """Test markdown body is built only from description when all structured fields are present."""
+        from living_doc_adapter_collector_gh.parser import _build_body_from_structured
+
+        raw_item = {
+            "description": "As a user, I want to view domain details.",
+            "business_value": ["Streamlines domain visibility.", "Improves clarity."],
+            "preconditions": ["User is logged in.", "At least one domain exists."],
+            "acceptance_criteria": [
+                {"id": "GH-28-01", "state": "Active", "version": "v1.5.0", "description": "User can access details."},
+                {"id": "GH-28-02", "state": "Active", "version": "v1.5.0", "description": "Domain card is visible."},
+            ],
+        }
+
+        body = _build_body_from_structured(raw_item)
+
+        # body now only contains description
+        assert body == "## Description\nAs a user, I want to view domain details."
+        # bv/pc/ac are NOT in the body; they flow through structured fields
+        assert "Business Value" not in body
+        assert "Preconditions" not in body
+        assert "Acceptance Criteria" not in body
+
+    def test_only_description_present(self):
+        """Test body built with description only."""
+        from living_doc_adapter_collector_gh.parser import _build_body_from_structured
+
+        body = _build_body_from_structured({"description": "Simple description."})
+
+        assert body == "## Description\nSimple description."
+
+    def test_no_structured_fields_returns_none(self):
+        """Test that None is returned when no structured fields are present."""
+        from living_doc_adapter_collector_gh.parser import _build_body_from_structured
+
+        assert _build_body_from_structured({}) is None
+        assert _build_body_from_structured({"title": "No structured content"}) is None
+
+    def test_acceptance_criteria_without_meta(self):
+        """Test that structured AC entries without state/version still parse cleanly."""
+        from living_doc_adapter_collector_gh.parser import parse
+
+        payload = {
+            "metadata": {
+                "producer": {"name": "AbsaOSS/living-doc-collector-gh", "version": "0.1.1", "build": None},
+                "run": {"run_id": None, "run_attempt": None, "actor": None, "workflow": None, "ref": None, "sha": None},
+                "source": {"systems": ["GitHub"], "repositories": ["owner/repo"], "organization": "owner", "enterprise": None},
+                "original_metadata": {},
+            },
+            "items": [
+                {
+                    "id": "owner/repo/1",
+                    "title": "Test",
+                    "state": "open",
+                    "tags": [],
+                    "url": "https://github.com/owner/repo/issues/1",
+                    "timestamps": {"created": "2025-01-01T00:00:00+00:00", "updated": "2025-01-01T00:00:00+00:00"},
+                    "acceptance_criteria": [{"id": None, "state": None, "version": None, "description": "Something happens."}],
+                }
+            ],
+            "warnings": [],
+        }
+        result = parse(payload)
+        ac = result.items[0].structured_acceptance_criteria
+        assert ac is not None
+        assert ac[0].description == "Something happens."
+        assert ac[0].id is None
+
+    def test_structured_fields_used_when_body_absent(self):
+        """Test that parse populates structured fields from item when body is missing."""
+        payload = {
+            "metadata": {
+                "producer": {"name": "AbsaOSS/living-doc-collector-gh", "version": "0.1.1", "build": None},
+                "run": {
+                    "run_id": None, "run_attempt": None, "actor": None,
+                    "workflow": None, "ref": None, "sha": None,
+                },
+                "source": {
+                    "systems": ["GitHub"],
+                    "repositories": ["owner/repo"],
+                    "organization": "owner",
+                    "enterprise": None,
+                },
+                "original_metadata": {},
+            },
+            "items": [
+                {
+                    "id": "owner/repo/1",
+                    "title": "View domain",
+                    "state": "open",
+                    "tags": ["DocumentedUserStory"],
+                    "url": "https://github.com/owner/repo/issues/1",
+                    "timestamps": {"created": "2025-12-17T11:31:16+00:00", "updated": "2026-04-09T07:10:01+00:00"},
+                    "description": "As a user, I want to view the details of a selected domain.",
+                    "business_value": ["Streamlines domain details visibility."],
+                    "preconditions": ["The user has logged in."],
+                    "acceptance_criteria": [
+                        {"id": "GH-28-01", "state": "Active", "version": "v1.5.0", "description": "User can access details."},
+                    ],
+                }
+            ],
+            "warnings": [],
+        }
+
+        result = parse(payload)
+
+        assert len(result.items) == 1
+        item = result.items[0]
+        # body carries only the description
+        assert item.body == "## Description\nAs a user, I want to view the details of a selected domain."
+        # structured fields are populated directly
+        assert item.structured_business_value == ["Streamlines domain details visibility."]
+        assert item.structured_preconditions == ["The user has logged in."]
+        assert item.structured_acceptance_criteria is not None
+        assert item.structured_acceptance_criteria[0].id == "GH-28-01"
+        assert item.structured_acceptance_criteria[0].state == "Active"
+        assert item.structured_acceptance_criteria[0].version == "v1.5.0"
+        assert item.structured_acceptance_criteria[0].description == "User can access details."
+
+    def test_explicit_body_not_overridden_by_structured_fields(self):
+        """Test that an explicit body field takes precedence over structured fields."""
+        payload = {
+            "metadata": {
+                "producer": {"name": "AbsaOSS/living-doc-collector-gh", "version": "0.1.1", "build": None},
+                "run": {
+                    "run_id": None, "run_attempt": None, "actor": None,
+                    "workflow": None, "ref": None, "sha": None,
+                },
+                "source": {
+                    "systems": ["GitHub"],
+                    "repositories": ["owner/repo"],
+                    "organization": "owner",
+                    "enterprise": None,
+                },
+                "original_metadata": {},
+            },
+            "items": [
+                {
+                    "id": "owner/repo/2",
+                    "title": "Edit domain",
+                    "state": "open",
+                    "tags": [],
+                    "url": "https://github.com/owner/repo/issues/2",
+                    "timestamps": {"created": "2025-12-17T11:31:16+00:00", "updated": "2026-04-09T07:10:01+00:00"},
+                    "body": "## Description\nExplicit markdown body.",
+                    "description": "Should be ignored.",
+                }
+            ],
+            "warnings": [],
+        }
+
+        result = parse(payload)
+
+        assert result.items[0].body == "## Description\nExplicit markdown body."

@@ -17,6 +17,7 @@ from living_doc_adapter_collector_gh.compatibility import check_compatibility
 from living_doc_adapter_collector_gh.detector import extract_version
 from living_doc_adapter_collector_gh.models import (
     AdapterItem,
+    AdapterItemAcceptanceCriterion,
     AdapterItemTimestamps,
     AdapterMetadata,
     AdapterMetadataProducer,
@@ -26,6 +27,26 @@ from living_doc_adapter_collector_gh.models import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+def _build_body_from_structured(raw_item: dict) -> str | None:
+    """
+    Reconstruct a markdown body from structured item fields.
+
+    Handles items that carry explicit JSON fields (description, business_value,
+    preconditions, acceptance_criteria) instead of a pre-rendered markdown body.
+
+    Args:
+        raw_item: Raw item dict from the payload.
+
+    Returns:
+        Markdown string assembled from present structured fields, or None when no
+        structured fields are found.
+    """
+    description = raw_item.get("description")
+    if not description:
+        return None
+    return f"## Description\n{description}"
 
 
 def _validate_schema(payload: dict) -> list[str]:
@@ -222,6 +243,27 @@ def parse(payload: dict) -> AdapterResult:
                 if missing_fields:
                     raise KeyError(f"Missing required fields: {', '.join(missing_fields)}")
 
+                raw_body = raw_item.get("body")
+                if raw_body is None:
+                    raw_body = _build_body_from_structured(raw_item)
+
+                # Structured fields (new items-array format)
+                raw_bv = raw_item.get("business_value")
+                raw_pc = raw_item.get("preconditions")
+                raw_ac = raw_item.get("acceptance_criteria")
+
+                structured_ac = None
+                if raw_ac is not None:
+                    structured_ac = [
+                        AdapterItemAcceptanceCriterion(
+                            id=ac.get("id"),
+                            state=ac.get("state"),
+                            version=ac.get("version"),
+                            description=ac.get("description", ""),
+                        )
+                        for ac in raw_ac
+                    ]
+
                 item = AdapterItem(
                     id=raw_item["id"],
                     title=raw_item["title"],
@@ -232,7 +274,10 @@ def parse(payload: dict) -> AdapterResult:
                         created=raw_item["timestamps"]["created"],
                         updated=raw_item["timestamps"]["updated"],
                     ),
-                    body=raw_item.get("body"),
+                    body=raw_body,
+                    structured_business_value=raw_bv if isinstance(raw_bv, list) else None,
+                    structured_preconditions=raw_pc if isinstance(raw_pc, list) else None,
+                    structured_acceptance_criteria=structured_ac,
                 )
                 items.append(item)
                 logger.debug("Parsed item %s: %s", raw_item["id"], raw_item["title"][:50])
