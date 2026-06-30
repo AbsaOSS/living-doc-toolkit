@@ -51,17 +51,16 @@ graph LR
 
 1. **Collector Action** (`AbsaOSS/living-doc-collector-gh`)
    - Collects issues from GitHub
-   - Outputs: `doc-issues.json`
+   - Outputs: `doc-issues.json`, `doc-source.json`, `ui-tests.json`
 
 2. **Adapter** (`packages/adapters/collector_gh`)
    - Detects producer format
    - Parses input into internal representation
    - Outputs: `AdapterResult`
 
-3. **Service** (`packages/services/normalize_issues`)
-   - Normalizes markdown sections
-   - Builds canonical JSON structure
-   - Outputs: `pdf_ready.json`
+3. **Services** (`packages/services/*`)
+   - `normalize_issues`: Normalizes markdown sections into PDF-ready JSON
+   - `coverage_matrix`: Cross-references User Stories with UI tests into an AC-level coverage matrix
 
 4. **Dataset** (`packages/datasets_pdf`)
    - Validates output against schema
@@ -140,6 +139,7 @@ graph TD
     
     Adapters --> CollectorGH[collector_gh/]
     Services --> NormalizeIssues[normalize_issues/]
+    Services --> CoverageMatrix[coverage_matrix/]
     
     Apps --> CLI[cli/]
     
@@ -165,10 +165,18 @@ graph TD
     ServiceSrc --> Service[service.py]
     ServiceSrc --> Normalizer[normalizer.py]
     ServiceSrc --> Builder[builder.py]
-    
+
+    CoverageMatrix --> CovSrc[src/living_doc_service_coverage_matrix/]
+    CovSrc --> CovService[service.py]
+    CovSrc --> CovLoader[loader.py]
+    CovSrc --> CovMatcher[matcher.py]
+    CovSrc --> CovSummary[summary.py]
+    CovSrc --> CovModel[model/coverage_item.py]
+
     CLI --> CLISrc[src/living_doc_cli/]
     CLISrc --> Main[main.py]
     CLISrc --> Commands[commands/normalize_issues.py]
+    CLISrc --> CovCmd[commands/coverage_matrix.py]
     
     style Root fill:#e1f5ff,stroke:#0288d1
     style Core fill:#fff9c4,stroke:#f57f17
@@ -183,15 +191,18 @@ graph TD
 ```mermaid
 graph TD
     CLI[apps/cli] --> NormalizeService[packages/services/normalize_issues]
+    CLI --> CoverageService[packages/services/coverage_matrix]
     NormalizeService --> Core[packages/core]
     NormalizeService --> Datasets[packages/datasets_pdf]
     NormalizeService --> CollectorGH[packages/adapters/collector_gh]
-    
+    CoverageService --> Core
+
     CollectorGH --> Core
     Datasets --> Core
-    
+
     style CLI fill:#fce4ec,stroke:#c2185b
     style NormalizeService fill:#ffe0b2,stroke:#e64a19
+    style CoverageService fill:#ffe0b2,stroke:#e64a19
     style Core fill:#fff9c4,stroke:#f57f17
     style Datasets fill:#f3e5f5,stroke:#7b1fa2
     style CollectorGH fill:#e8f5e9,stroke:#388e3c
@@ -201,8 +212,8 @@ graph TD
 - **Core** has no dependencies (lowest level)
 - **Datasets** depends only on Core
 - **Adapters** depend on Core
-- **Services** depend on Core, Datasets, and specific Adapters
-- **CLI** depends on Core and specific Services
+- **Services** depend on Core, and optionally Datasets and specific Adapters
+- **CLI** depends on Core and all Services
 
 ---
 
@@ -264,6 +275,54 @@ graph TB
 - **Core utilities**: Reusable helpers (JSON I/O, logging, markdown parsing)
 - **Adapter**: Input detection and parsing
 - **Dataset models**: Schema validation and type safety
+
+---
+
+### Coverage-Matrix Service Components
+
+```mermaid
+graph TB
+    subgraph "Service Package (packages/services/coverage_matrix)"
+        CovService[service.py<br/>Orchestration]
+        CovLoader[loader.py<br/>I/O Boundary]
+        CovMatcher[matcher.py<br/>Pure Matching Logic]
+        CovSummary[summary.py<br/>Pure Tallying]
+        CovModel[model/coverage_item.py<br/>Output Dataclasses]
+    end
+
+    subgraph "Core Package (packages/core)"
+        JsonUtils2[json_utils.py]
+        LoggingConfig2[logging_config.py]
+        Errors2[errors.py]
+    end
+
+    CovService --> CovLoader
+    CovService --> CovMatcher
+    CovMatcher --> CovSummary
+    CovMatcher --> CovModel
+    CovSummary --> CovModel
+    CovService --> JsonUtils2
+    CovService --> LoggingConfig2
+    CovService --> Errors2
+
+    style CovService fill:#ffe0b2,stroke:#e64a19,stroke-width:3px
+    style CovLoader fill:#e3f2fd,stroke:#1976d2
+    style CovMatcher fill:#f3e5f5,stroke:#7b1fa2
+    style CovSummary fill:#e8f5e9,stroke:#388e3c
+```
+
+**Component Responsibilities:**
+
+- **service.py**: Orchestration — loads inputs, calls matcher, writes output, enforces `--fail-under`
+- **loader.py**: Pure I/O — reads `doc-source.json` (bare array or envelope) and `ui-tests.json`
+- **matcher.py**: Pure transformation — builds the `CoverageMatrix` from parsed lists (no I/O)
+- **summary.py**: Pure tallying — `compute_us_summary()` and `compute_summary()` with deprecated-AC exclusion
+- **model/coverage_item.py**: Output dataclasses that serialize to `coverage-matrix.json`
+
+**Key design constraints:**
+- `matcher.py` is a pure function: no I/O, no logging, fully testable without mocks
+- Deprecated ACs are included in the matrix but excluded from `coverage_pct` computation
+- Unresolved `us_id` values land in `unlinked_tests`; unknown `ac_id` references land in `stale_ac_refs`
 
 ---
 

@@ -52,6 +52,13 @@ living-doc normalize-issues \
   --source auto \
   --document-title "Sprint 42 Report" \
   --document-version "1.0.0"
+
+# Generate an AC-level test coverage matrix
+living-doc coverage-matrix \
+  --doc-input  doc-source.json \
+  --tests-input ui-tests.json \
+  --output coverage-matrix.json \
+  --fail-under 80
 ```
 
 ## Documentation
@@ -77,6 +84,11 @@ Converts collector output (`doc-issues.json`) into PDF-ready canonical JSON (`pd
 - [Cookbook](docs/cookbooks/normalize-issues.md) — How detection, compatibility, and normalization work
 - [Recipe: Local usage](docs/recipes/local-normalize-issues.md) — Run the CLI on your machine
 - [Recipe: GitHub Actions](docs/recipes/github-actions-normalize-issues.md) — CI/CD workflow integration
+
+### `coverage-matrix`
+Cross-references a `doc-source.json` (User Stories + acceptance criteria) with a `ui-tests.json` (E2E test scenarios) and produces `coverage-matrix.json`: an AC-level test coverage matrix per User Story.
+
+- [Package README](packages/services/coverage_matrix/README.md) — Matching logic, CLI reference, module layout
 
 ## License
 

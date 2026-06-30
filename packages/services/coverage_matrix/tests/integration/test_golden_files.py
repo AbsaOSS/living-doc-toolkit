@@ -73,4 +73,3 @@ def test_golden_summary_and_buckets(tmp_path):
     assert len(matrix.stale_ac_refs) == 1
     assert matrix.stale_ac_refs[0].stale_ac_id == "US-1-99"
     assert matrix.stale_ac_refs[0].us_id == "US-1"
-

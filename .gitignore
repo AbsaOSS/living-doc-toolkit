@@ -211,3 +211,6 @@ outputs/
 .DS_Store
 doc-issues.json
 pdf_ready.json
+ui-tests.json
+doc-source.json
+spec.md

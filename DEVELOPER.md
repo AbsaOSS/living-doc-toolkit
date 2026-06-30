@@ -39,6 +39,7 @@ pip install -e packages/core[dev]
 pip install -e packages/datasets_pdf[dev]
 pip install -e packages/adapters/collector_gh[dev]
 pip install -e packages/services/normalize_issues[dev]
+pip install -e packages/services/coverage_matrix[dev]
 pip install -e "apps/cli[dev]"
 ```
 
@@ -53,6 +54,7 @@ pip install -e "apps/cli[dev]"
 | `packages/datasets_pdf` | `living-doc-datasets-pdf` | Pydantic models and JSON schemas for PDF contracts |
 | `packages/adapters/collector_gh` | `living-doc-adapter-collector-gh` | Detector and parser for collector-gh output |
 | `packages/services/normalize_issues` | `living-doc-service-normalize-issues` | Issue normalization service |
+| `packages/services/coverage_matrix` | `living-doc-service-coverage-matrix` | AC-level test coverage matrix generator |
 | `apps/cli` | `living-doc-cli` | CLI entry point (`living-doc` command) |
 
 Each package has its own `pyproject.toml`, `src/` layout, and `tests/` directory.
@@ -103,6 +105,7 @@ make py-qa-core                    # packages/core
 make py-qa-datasets-pdf            # packages/datasets_pdf
 make py-qa-collector-gh            # packages/adapters/collector_gh
 make py-qa-normalize               # packages/services/normalize_issues
+make py-qa-coverage                # packages/services/coverage_matrix
 make py-qa-cli                     # apps/cli
 ```
 
@@ -151,7 +154,7 @@ pylint src/living_doc_core/json_utils.py
 From the **repository root**:
 
 ```shell
-for pkg in packages/core packages/datasets_pdf packages/adapters/collector_gh packages/services/normalize_issues apps/cli; do
+for pkg in packages/core packages/datasets_pdf packages/adapters/collector_gh packages/services/normalize_issues packages/services/coverage_matrix apps/cli; do
   echo "=== Pylint: $pkg ==="
   (cd "$pkg" && pylint $(git ls-files '*.py' | grep -v '^tests/'))
 done
@@ -211,7 +214,7 @@ mypy .
 From the **repository root**:
 
 ```shell
-for pkg in packages/core packages/datasets_pdf packages/adapters/collector_gh packages/services/normalize_issues apps/cli; do
+for pkg in packages/core packages/datasets_pdf packages/adapters/collector_gh packages/services/normalize_issues packages/services/coverage_matrix apps/cli; do
   echo "=== mypy: $pkg ==="
   (cd "$pkg" && mypy .)
 done
@@ -242,7 +245,7 @@ pytest --cov=src -v tests/ --cov-fail-under=80
 From the **repository root**:
 
 ```shell
-for pkg in packages/core packages/datasets_pdf packages/adapters/collector_gh packages/services/normalize_issues apps/cli; do
+for pkg in packages/core packages/datasets_pdf packages/adapters/collector_gh packages/services/normalize_issues packages/services/coverage_matrix apps/cli; do
   echo "=== Tests: $pkg ==="
   (cd "$pkg" && pytest --cov=src -v tests/ --cov-fail-under=80)
 done
@@ -304,6 +307,12 @@ living-doc normalize-issues \
   --source auto \
   --document-title "Sprint 42 Report" \
   --document-version "1.0.0"
+
+living-doc coverage-matrix \
+  --doc-input  doc-source.json \
+  --tests-input ui-tests.json \
+  --output coverage-matrix.json \
+  --fail-under 80
 ```
 
 ## Branch Naming Convention (PID:H-1)
