@@ -7,6 +7,7 @@ Main CLI entrypoint for the Living Documentation Toolkit.
 import click
 
 from living_doc_cli import __version__
+from living_doc_cli.commands.coverage_matrix import coverage_matrix
 from living_doc_cli.commands.normalize_issues import normalize_issues
 
 
@@ -27,6 +28,7 @@ def cli(ctx: click.Context, verbose: bool) -> None:
 
 
 cli.add_command(normalize_issues)
+cli.add_command(coverage_matrix)
 
 
 if __name__ == "__main__":

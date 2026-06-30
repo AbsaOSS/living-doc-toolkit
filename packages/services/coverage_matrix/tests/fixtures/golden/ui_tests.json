@@ -1,0 +1,146 @@
+{
+    "items": [
+        {
+            "id": "absa-group/aul-ui/user_login.feature/user-logs-in-with-valid-credentials",
+            "us_id": "US-1",
+            "ac_ids": [
+                "US-1-01",
+                "US-1-02"
+            ],
+            "scenario_name": "User logs in with valid credentials",
+            "scenario_type": "Scenario",
+            "tags": [
+                "Regression"
+            ],
+            "steps": [],
+            "source": {
+                "org": "absa-group",
+                "repo": "aul-ui",
+                "file": "user_login.feature"
+            }
+        },
+        {
+            "id": "absa-group/aul-ui/user_login.feature/legacy-basic-auth-login",
+            "us_id": "US-1",
+            "ac_ids": [
+                "US-1-03"
+            ],
+            "scenario_name": "Legacy basic-auth login",
+            "scenario_type": "Scenario",
+            "tags": [
+                "Regression",
+                "skip"
+            ],
+            "steps": [],
+            "source": {
+                "org": "absa-group",
+                "repo": "aul-ui",
+                "file": "user_login.feature"
+            }
+        },
+        {
+            "id": "absa-group/aul-ui/user_login.feature/login-button-disabled",
+            "us_id": "US-1",
+            "ac_ids": [
+                "US-1-01"
+            ],
+            "scenario_name": "Login button stays disabled until fields are filled",
+            "scenario_type": "Scenario",
+            "tags": [
+                "Smoke"
+            ],
+            "steps": [],
+            "source": {
+                "org": "absa-group",
+                "repo": "aul-ui",
+                "file": "user_login.feature"
+            }
+        },
+        {
+            "id": "absa-group/aul-ui/user_login.feature/references-unknown-ac",
+            "us_id": "US-1",
+            "ac_ids": [
+                "US-1-99"
+            ],
+            "scenario_name": "Scenario referencing an AC that no longer exists",
+            "scenario_type": "Scenario",
+            "tags": [
+                "Regression"
+            ],
+            "steps": [],
+            "source": {
+                "org": "absa-group",
+                "repo": "aul-ui",
+                "file": "user_login.feature"
+            }
+        },
+        {
+            "id": "absa-group/aul-ui/dashboard.feature/user-sees-accessible-domains",
+            "us_id": "US-2",
+            "ac_ids": [
+                "US-2-01"
+            ],
+            "scenario_name": "User sees accessible domains on the dashboard",
+            "scenario_type": "Scenario",
+            "tags": [
+                "Regression"
+            ],
+            "steps": [],
+            "source": {
+                "org": "absa-group",
+                "repo": "aul-ui",
+                "file": "dashboard.feature"
+            }
+        },
+        {
+            "id": "absa-group/aul-ui/orphan.feature/scenario-without-us",
+            "us_id": null,
+            "ac_ids": [],
+            "scenario_name": "Scenario not linked to any user story",
+            "scenario_type": "Scenario",
+            "tags": [],
+            "steps": [],
+            "source": {
+                "org": "absa-group",
+                "repo": "aul-ui",
+                "file": "orphan.feature"
+            }
+        },
+        {
+            "id": "absa-group/aul-ui/unknown.feature/scenario-for-unknown-us",
+            "us_id": "US-99",
+            "ac_ids": [
+                "US-99-01"
+            ],
+            "scenario_name": "Scenario for a user story not in the doc input",
+            "scenario_type": "Scenario",
+            "tags": [
+                "Regression"
+            ],
+            "steps": [],
+            "source": {
+                "org": "absa-group",
+                "repo": "aul-ui",
+                "file": "unknown.feature"
+            }
+        }
+    ],
+    "metadata": {
+        "producer": {
+            "name": "AbsaOSS/living-doc-collector-gh",
+            "version": "0.1.1",
+            "build": null
+        },
+        "source": {
+            "systems": [
+                "GitHub"
+            ],
+            "repositories": [
+                "absa-group/aul-ui"
+            ],
+            "organization": "absa-group",
+            "enterprise": null
+        }
+    },
+    "warnings": []
+}

@@ -1,0 +1,270 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://absaoss.github.io/living-doc-toolkit/schemas/coverage-matrix-v1.0.0-schema.json",
+  "title": "Coverage Matrix",
+  "description": "AC-level test coverage matrix per User Story, produced by the coverage-matrix generator.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "generated_at",
+    "summary",
+    "user_stories",
+    "unlinked_tests",
+    "stale_ac_refs"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "coverage-matrix-v1.0.0"
+    },
+    "generated_at": {
+      "type": "string",
+      "description": "ISO-8601 timestamp of generation."
+    },
+    "summary": {
+      "$ref": "#/$defs/topSummary"
+    },
+    "user_stories": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/userStory"
+      }
+    },
+    "unlinked_tests": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/unlinkedTest"
+      }
+    },
+    "stale_ac_refs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/staleAcRef"
+      }
+    }
+  },
+  "$defs": {
+    "source": {
+      "type": ["object", "null"],
+      "properties": {
+        "org": {
+          "type": ["string", "null"]
+        },
+        "repo": {
+          "type": ["string", "null"]
+        },
+        "file": {
+          "type": ["string", "null"]
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["total_acs", "active_acs", "covered_acs", "coverage_pct"],
+      "properties": {
+        "total_acs": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "active_acs": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "covered_acs": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "coverage_pct": {
+          "type": ["number", "null"]
+        }
+      }
+    },
+    "topSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "total_user_stories",
+        "total_acs",
+        "active_acs",
+        "covered_acs",
+        "coverage_pct"
+      ],
+      "properties": {
+        "total_user_stories": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "total_acs": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "active_acs": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "covered_acs": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "coverage_pct": {
+          "type": ["number", "null"]
+        }
+      }
+    },
+    "testRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "scenario_name", "tags", "source"],
+      "properties": {
+        "id": {
+          "type": ["string", "null"]
+        },
+        "scenario_name": {
+          "type": ["string", "null"]
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "source": {
+          "$ref": "#/$defs/source"
+        }
+      }
+    },
+    "coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "test_count", "tests"],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["covered", "not_covered"]
+        },
+        "test_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "tests": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/testRef"
+          }
+        }
+      }
+    },
+    "acceptanceCriterion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "state", "version", "description", "coverage"],
+      "properties": {
+        "id": {
+          "type": ["string", "null"]
+        },
+        "state": {
+          "type": ["string", "null"]
+        },
+        "version": {
+          "type": ["string", "null"]
+        },
+        "description": {
+          "type": ["string", "null"]
+        },
+        "coverage": {
+          "$ref": "#/$defs/coverage"
+        }
+      }
+    },
+    "userStory": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "full_id",
+        "title",
+        "state",
+        "summary",
+        "acceptance_criteria"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "full_id": {
+          "type": "string"
+        },
+        "title": {
+          "type": ["string", "null"]
+        },
+        "state": {
+          "type": ["string", "null"]
+        },
+        "summary": {
+          "$ref": "#/$defs/summary"
+        },
+        "acceptance_criteria": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/acceptanceCriterion"
+          }
+        }
+      }
+    },
+    "unlinkedTest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "scenario_name", "us_id", "ac_ids", "source"],
+      "properties": {
+        "id": {
+          "type": ["string", "null"]
+        },
+        "scenario_name": {
+          "type": ["string", "null"]
+        },
+        "us_id": {
+          "type": ["string", "null"]
+        },
+        "ac_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "source": {
+          "$ref": "#/$defs/source"
+        }
+      }
+    },
+    "staleAcRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scenario_id",
+        "scenario_name",
+        "us_id",
+        "stale_ac_id",
+        "source"
+      ],
+      "properties": {
+        "scenario_id": {
+          "type": ["string", "null"]
+        },
+        "scenario_name": {
+          "type": ["string", "null"]
+        },
+        "us_id": {
+          "type": ["string", "null"]
+        },
+        "stale_ac_id": {
+          "type": "string"
+        },
+        "source": {
+          "$ref": "#/$defs/source"
+        }
+      }
+    }
+  }
+}

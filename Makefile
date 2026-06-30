@@ -10,7 +10,8 @@
 PACKAGES := packages/core \
             packages/datasets_pdf \
             packages/adapters/collector_gh \
-            packages/services/normalize_issues
+            packages/services/normalize_issues \
+            packages/services/coverage_matrix
 APPS := apps/cli
 ALL_TARGETS := $(PACKAGES) $(APPS)
 
@@ -30,6 +31,7 @@ install: ## Install all packages with [dev] dependencies
 	$(PYTHON) -m pip install -e packages/datasets_pdf[dev]
 	$(PYTHON) -m pip install -e packages/adapters/collector_gh[dev]
 	$(PYTHON) -m pip install -e packages/services/normalize_issues[dev]
+	$(PYTHON) -m pip install -e packages/services/coverage_matrix[dev]
 	$(PYTHON) -m pip install -e "apps/cli[dev]"
 	@echo "$(GREEN)✓ All packages installed$(NC)"
 
@@ -53,6 +55,7 @@ help: ## Show this help message
 	@echo "  make py-qa-datasets-pdf Run all QA on packages/datasets_pdf"
 	@echo "  make py-qa-collector-gh Run all QA on packages/adapters/collector_gh"
 	@echo "  make py-qa-normalize    Run all QA on packages/services/normalize_issues"
+	@echo "  make py-qa-coverage     Run all QA on packages/services/coverage_matrix"
 	@echo "  make py-qa-cli          Run all QA on apps/cli"
 	@echo ""
 	@echo "$(YELLOW)Run individual checks by package:$(NC)"
@@ -62,7 +65,7 @@ help: ## Show this help message
 	@echo "  make pytest-unit-core   Run tests on packages/core"
 	@echo ""
 	@echo "$(YELLOW)Package shortcuts (replace 'core' with any package):$(NC)"
-	@echo "  - datasets_pdf, collector_gh, normalize, cli"
+	@echo "  - datasets_pdf, collector_gh, normalize, coverage, cli"
 
 # ============================================================================
 # ALL PACKAGES: Aggregated QA targets
@@ -110,6 +113,9 @@ py-qa-collector-gh: black-packages/adapters/collector_gh pylint-packages/adapter
 
 py-qa-normalize: black-packages/services/normalize_issues pylint-packages/services/normalize_issues mypy-packages/services/normalize_issues pytest-unit-packages/services/normalize_issues
 	@echo "$(GREEN)✓ All QA checks passed for packages/services/normalize_issues$(NC)"
+
+py-qa-coverage: black-packages/services/coverage_matrix pylint-packages/services/coverage_matrix mypy-packages/services/coverage_matrix pytest-unit-packages/services/coverage_matrix
+	@echo "$(GREEN)✓ All QA checks passed for packages/services/coverage_matrix$(NC)"
 
 py-qa-cli: black-apps/cli pylint-apps/cli mypy-apps/cli pytest-unit-apps/cli
 	@echo "$(GREEN)✓ All QA checks passed for apps/cli$(NC)"

@@ -1,0 +1,90 @@
+{
+    "items": [
+        {
+            "id": "absa-group/aul-ui/US-1",
+            "title": "User Login",
+            "state": "active",
+            "tags": [],
+            "url": "https://github.com/absa-group/aul-ui/issues/2",
+            "timestamps": null,
+            "description": "As a user, I want to log in so that I can access the application.",
+            "business_value": [],
+            "preconditions": [],
+            "acceptance_criteria": [
+                {
+                    "id": "US-1-01",
+                    "state": "Active",
+                    "version": "v1.0.0",
+                    "description": "User can log in with valid credentials."
+                },
+                {
+                    "id": "US-1-02",
+                    "state": "Active",
+                    "version": "v1.0.0",
+                    "description": "Login button is disabled until both fields are filled."
+                },
+                {
+                    "id": "US-1-03",
+                    "state": "Deprecated",
+                    "version": "v0.9.0",
+                    "description": "Legacy basic-auth login (removed)."
+                }
+            ]
+        },
+        {
+            "id": "absa-group/aul-ui/US-2",
+            "title": "View Dashboard",
+            "state": "active",
+            "tags": [],
+            "url": null,
+            "timestamps": null,
+            "description": "As a user, I want a dashboard overview.",
+            "business_value": [],
+            "preconditions": [],
+            "acceptance_criteria": [
+                {
+                    "id": "US-2-01",
+                    "state": "Active",
+                    "version": "v1.0.0",
+                    "description": "User can see accessible domains on the dashboard."
+                },
+                {
+                    "id": "US-2-02",
+                    "state": "Active",
+                    "version": "v1.0.0",
+                    "description": "Dashboard shows an empty state when no domains are accessible."
+                }
+            ]
+        },
+        {
+            "id": "absa-group/aul-ui/US-7",
+            "title": "Delete Domain",
+            "state": "active",
+            "tags": [],
+            "url": null,
+            "timestamps": null,
+            "description": "As a user, I want to delete a domain.",
+            "business_value": [],
+            "preconditions": [],
+            "acceptance_criteria": []
+        }
+    ],
+    "metadata": {
+        "producer": {
+            "name": "AbsaOSS/living-doc-collector-gh",
+            "version": "0.1.1",
+            "build": null
+        },
+        "source": {
+            "systems": [
+                "GitHub"
+            ],
+            "repositories": [
+                "absa-group/aul-ui"
+            ],
+            "organization": "absa-group",
+            "enterprise": null
+        }
+    },
+    "warnings": []
+}
