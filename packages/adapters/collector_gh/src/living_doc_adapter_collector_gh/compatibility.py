@@ -35,7 +35,7 @@ from living_doc_adapter_collector_gh.models import CompatibilityWarning
 # Confirmed compatible version range
 # Maps to producer repo releases:
 # https://github.com/AbsaOSS/living-doc-collector-gh/releases
-CONFIRMED_MIN = "0.1.0"  # Extended to include pre-release versions for testing
+CONFIRMED_MIN = "1.0.0"
 CONFIRMED_MAX = "2.0.0"  # Exclusive upper bound
 
 # Schema version (independent of adapter package version)
