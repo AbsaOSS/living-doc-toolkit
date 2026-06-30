@@ -48,7 +48,7 @@ def format_error_message(error: ToolkitError) -> str:
     # Add actionable guidance based on error type
     guidance_map = {
         InvalidInputError: "Ensure --input points to a valid file.",
-        AdapterError: "Check metadata.generator.name field.",
+        AdapterError: "Check metadata.producer.name field.",
         SchemaValidationError: "Review the output schema requirements.",
         NormalizationError: "Check input data format and content.",
         FileIOError: "Ensure output directory exists and is writable.",

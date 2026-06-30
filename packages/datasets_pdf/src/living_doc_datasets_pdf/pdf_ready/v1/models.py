@@ -32,13 +32,24 @@ class Timestamps(BaseModel):
     model_config = {"extra": "forbid", "strict": True}
 
 
+class AcceptanceCriterion(BaseModel):
+    """A single acceptance criterion entry."""
+
+    id: str | None = Field(None, description="Criterion identifier (e.g. 'GH-28-01')")
+    state: str | None = Field(None, description="State (e.g. 'Active')")
+    version: str | None = Field(None, description="Version when introduced (e.g. 'v1.5.0')")
+    description: str = Field(..., description="Criterion text")
+
+    model_config = {"extra": "forbid", "strict": True}
+
+
 class Sections(BaseModel):
     """User story sections."""
 
     description: str | None = Field(None, description="Description (Markdown)")
-    business_value: str | None = Field(None, description="Business value (Markdown, optional)")
-    preconditions: str | None = Field(None, description="Preconditions (Markdown, optional)")
-    acceptance_criteria: str | None = Field(None, description="Acceptance criteria (Markdown, optional)")
+    business_value: list[str] | None = Field(None, description="Business value items")
+    preconditions: list[str] | None = Field(None, description="Precondition items")
+    acceptance_criteria: list[AcceptanceCriterion] | None = Field(None, description="Acceptance criteria")
     user_guide: str | None = Field(None, description="User guide (Markdown, optional)")
     connections: str | None = Field(None, description="Connections (Markdown, optional)")
     last_edited: str | None = Field(None, description="Last edited (Markdown, optional)")

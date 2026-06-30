@@ -3,8 +3,26 @@
 """
 Pydantic models for the collector-gh adapter.
 
-These models represent the output structure from the adapter after parsing
-input from the living-doc-collector-gh action.
+These models represent the authoritative input contract for doc-issues.json.
+They are the single source of truth for the schema between this repository
+(data consumer / schema producer) and the collector-gh repository
+(data producer / schema consumer).
+
+PYDANTIC-FIRST PATTERN
+======================
+
+This repo:
+- Defines Pydantic models (source of truth)
+- Exports them as JSON Schema for the collector-gh repo to use for validation
+
+Collector-gh repo:
+- Uses our exported JSON Schema to validate doc-issues.json
+- Publishes validated data to us
+
+To export schema for collector-gh:
+    python -m living_doc_adapter_collector_gh.schema_export > doc-issues-schema.json
+
+See SCHEMA_SYNC.md for the full synchronization workflow.
 """
 
 from pydantic import BaseModel
@@ -25,6 +43,15 @@ class AdapterItemTimestamps(BaseModel):
     updated: str
 
 
+class AdapterItemAcceptanceCriterion(BaseModel):
+    """A single acceptance criterion from the structured input format."""
+
+    id: str | None = None
+    state: str | None = None
+    version: str | None = None
+    description: str
+
+
 class AdapterItem(BaseModel):
     """Represents a single item (issue) from the collector output."""
 
@@ -35,6 +62,10 @@ class AdapterItem(BaseModel):
     url: str
     timestamps: AdapterItemTimestamps
     body: str | None = None
+    # Structured fields present in the new items-array format
+    structured_business_value: list[str] | None = None
+    structured_preconditions: list[str] | None = None
+    structured_acceptance_criteria: list[AdapterItemAcceptanceCriterion] | None = None
 
 
 class AdapterMetadataProducer(BaseModel):

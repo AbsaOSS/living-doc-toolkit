@@ -96,6 +96,7 @@
         },
         "generated_at": {
           "description": "ISO 8601 UTC timestamp",
+          "format": "date-time",
           "title": "Generated At",
           "type": "string"
         },

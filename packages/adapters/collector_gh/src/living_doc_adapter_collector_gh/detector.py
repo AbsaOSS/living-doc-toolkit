@@ -21,8 +21,8 @@ def can_handle(payload: dict) -> bool:
         True if the payload is from living-doc-collector-gh, False otherwise
     """
     try:
-        generator_name = payload.get("metadata", {}).get("generator", {}).get("name")
-        return generator_name == "AbsaOSS/living-doc-collector-gh"
+        producer_name = payload.get("metadata", {}).get("producer", {}).get("name")
+        return producer_name == "AbsaOSS/living-doc-collector-gh"
     except Exception:  # pylint: disable=broad-exception-caught
         # Handle AttributeError, TypeError gracefully
         return False
@@ -42,9 +42,9 @@ def extract_version(payload: dict) -> str:
         AdapterError: If the version cannot be extracted
     """
     try:
-        version = payload["metadata"]["generator"]["version"]
+        version = payload["metadata"]["producer"]["version"]
         if not version:
-            raise AdapterError("Producer version is empty in metadata.generator.version")
+            raise AdapterError("Producer version is empty in metadata.producer.version")
         return version
     except (KeyError, TypeError) as e:
-        raise AdapterError(f"Missing or invalid metadata.generator.version in payload: {e}") from e
+        raise AdapterError(f"Missing or invalid metadata.producer.version in payload: {e}") from e

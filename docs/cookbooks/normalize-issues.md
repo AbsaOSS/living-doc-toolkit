@@ -59,7 +59,7 @@ See [Contracts & Interfaces](../contracts.md#cli-interface) for the full argumen
 
 ### Auto-Detection
 
-When `--source auto` is used (default), the service automatically detects the producer by examining the `metadata.generator.name` field in the input JSON:
+When `--source auto` is used (default), the service automatically detects the producer by examining the `metadata.producer.name` field in the input JSON:
 
 ```python
 if payload["metadata"]["generator"]["name"] == "AbsaOSS/living-doc-collector-gh":
@@ -67,8 +67,8 @@ if payload["metadata"]["generator"]["name"] == "AbsaOSS/living-doc-collector-gh"
 ```
 
 **Required Fields for Detection:**
-- `metadata.generator.name` — Producer identifier (e.g., `"AbsaOSS/living-doc-collector-gh"`)
-- `metadata.generator.version` — Producer version (semver format, e.g., `"1.2.0"`)
+- `metadata.producer.name` — Producer identifier (e.g., `"AbsaOSS/living-doc-collector-gh"`)
+- `metadata.producer.version` — Producer version (semver format, e.g., `"1.2.0"`)
 
 ### Explicit Adapter Selection
 
@@ -122,7 +122,7 @@ This policy ensures:
 The adapter maps collector metadata to the audit envelope:
 
 ```
-metadata.generator.*   → audit.producer.*
+metadata.producer.*   → audit.producer.*
 metadata.run.*         → audit.run.*
 metadata.source.*      → audit.source.*
 ```
@@ -202,7 +202,7 @@ When the producer version is outside the confirmed range, a warning is logged an
 {
   "code": "VERSION_MISMATCH",
   "message": "Producer version 2.1.0 is outside confirmed range >=1.0.0,<2.0.0",
-  "context": "metadata.generator.version"
+  "context": "metadata.producer.version"
 }
 ```
 
@@ -229,7 +229,7 @@ When the producer version is outside the confirmed range, a warning is logged an
 **Common Causes:**
 - File not found: `--input` path does not exist
 - Malformed JSON: Syntax errors in input file
-- Missing required fields: Input lacks `metadata.generator.name`
+- Missing required fields: Input lacks `metadata.producer.name`
 
 **Example:**
 ```
@@ -248,16 +248,16 @@ Invalid input: File 'doc-issues.json' not found. Ensure --input points to a vali
 **Error Prefix:** `Adapter error:`
 
 **Common Causes:**
-- No compatible adapter found: `metadata.generator.name` does not match any known producer
-- Missing metadata: Input lacks `metadata.generator` section
+- No compatible adapter found: `metadata.producer.name` does not match any known producer
+- Missing metadata: Input lacks `metadata.producer` section
 
 **Example:**
 ```
-Adapter error: No compatible adapter found for input. Check metadata.generator.name field.
+Adapter error: No compatible adapter found for input. Check metadata.producer.name field.
 ```
 
 **Solutions:**
-- Inspect `metadata.generator.name`: `jq .metadata.generator.name doc-issues.json`
+- Inspect `metadata.producer.name`: `jq .metadata.producer.name doc-issues.json`
 - Verify input is from `AbsaOSS/living-doc-collector-gh`
 - Use `--source collector-gh` to explicitly select adapter
 

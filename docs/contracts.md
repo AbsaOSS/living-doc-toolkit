@@ -49,8 +49,8 @@ Produced by [living-doc-collector-gh](https://github.com/AbsaOSS/living-doc-coll
 ### Producer Detection
 
 Adapter auto-detection checks:
-- `metadata.generator.name` == `"AbsaOSS/living-doc-collector-gh"`
-- `metadata.generator.version` — semver format
+- `metadata.producer.name` == `"AbsaOSS/living-doc-collector-gh"`
+- `metadata.producer.version` — semver format
 
 ### Compatibility Policy
 
@@ -67,7 +67,7 @@ Warning format in audit:
 {
   "code": "VERSION_MISMATCH",
   "message": "Producer version 2.1.0 is outside confirmed range >=1.0.0,<2.0.0",
-  "context": "metadata.generator.version"
+  "context": "metadata.producer.version"
 }
 ```
 
@@ -158,7 +158,7 @@ Each pipeline stage appends a trace entry:
 
 | Collector field | Audit field |
 |-----------------|-------------|
-| `metadata.generator.*` | `audit.producer.*` |
+| `metadata.producer.*` | `audit.producer.*` |
 | `metadata.run.*` | `audit.run.*` |
 | `metadata.source.*` | `audit.source.*` |
 | Full original `metadata` | `audit.extensions["collector-gh"].original_metadata` |

@@ -18,6 +18,7 @@ from living_doc_datasets_pdf.audit.v1.models import (  # type: ignore[import-unt
     TraceStep,
 )
 from living_doc_datasets_pdf.pdf_ready.v1.models import (  # type: ignore[import-untyped]
+    AcceptanceCriterion,
     Content,
     Meta,
     PdfReadyV1,
@@ -29,6 +30,43 @@ from living_doc_datasets_pdf.pdf_ready.v1.models import (  # type: ignore[import
 )
 
 from living_doc_service_normalize_issues.normalizer import normalize_sections
+
+
+def _parse_md_to_list(text: str | None) -> list[str] | None:
+    """Convert a markdown bullet list to a plain list of strings.
+
+    If the text contains no bullet lines, wraps the whole text as a single-item list.
+    Returns None when text is absent or empty.
+    """
+    if not text or not text.strip():
+        return None
+
+    result: list[str] = []
+    for line in text.splitlines():
+        stripped = line.strip()
+        if not stripped:
+            continue
+        if stripped.startswith(("- [ ] ", "- [x] ", "- [X] ")):
+            result.append(stripped[6:].strip())
+        elif stripped.startswith(("- ", "* ")):
+            result.append(stripped[2:].strip())
+        else:
+            # Non-bullet content — return whole text as one item
+            return [text.strip()]
+
+    return result if result else [text.strip()]
+
+
+def _parse_md_to_ac_list(text: str | None) -> list[AcceptanceCriterion] | None:
+    """Convert a markdown bullet list to a list of AcceptanceCriterion objects.
+
+    Each bullet item becomes a criterion with only the description populated.
+    Returns None when text is absent or empty.
+    """
+    items = _parse_md_to_list(text)
+    if items is None:
+        return None
+    return [AcceptanceCriterion(id=None, state=None, version=None, description=item) for item in items]
 
 
 def build_pdf_ready(adapter_result: AdapterResult, options: dict) -> PdfReadyV1:  # pylint: disable=too-many-locals
@@ -48,15 +86,43 @@ def build_pdf_ready(adapter_result: AdapterResult, options: dict) -> PdfReadyV1:
     # Build user stories from adapter items
     user_stories = []
     for item in adapter_result.items:
-        # Normalize markdown sections
+        # Normalize markdown sections (description, user_guide, connections, last_edited)
         normalized = normalize_sections(item.body or "")
+
+        # Structured fields: use explicit values when available, fall back to markdown parsing
+        business_value: list[str] | None
+        preconditions: list[str] | None
+        acceptance_criteria: list[AcceptanceCriterion] | None
+
+        if item.structured_business_value is not None:
+            business_value = item.structured_business_value
+        else:
+            business_value = _parse_md_to_list(normalized.get("business_value"))
+
+        if item.structured_preconditions is not None:
+            preconditions = item.structured_preconditions
+        else:
+            preconditions = _parse_md_to_list(normalized.get("preconditions"))
+
+        if item.structured_acceptance_criteria is not None:
+            acceptance_criteria = [
+                AcceptanceCriterion(
+                    id=ac.id,
+                    state=ac.state,
+                    version=ac.version,
+                    description=ac.description,
+                )
+                for ac in item.structured_acceptance_criteria
+            ]
+        else:
+            acceptance_criteria = _parse_md_to_ac_list(normalized.get("acceptance_criteria"))
 
         # Build Sections object
         sections = Sections(
             description=normalized.get("description"),
-            business_value=normalized.get("business_value"),
-            preconditions=normalized.get("preconditions"),
-            acceptance_criteria=normalized.get("acceptance_criteria"),
+            business_value=business_value,
+            preconditions=preconditions,
+            acceptance_criteria=acceptance_criteria,
             user_guide=normalized.get("user_guide"),
             connections=normalized.get("connections"),
             last_edited=normalized.get("last_edited"),

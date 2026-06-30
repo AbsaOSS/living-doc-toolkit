@@ -33,7 +33,7 @@ class TestParser:
         """Create a minimal valid payload."""
         return {
             "metadata": {
-                "generator": {"name": "AbsaOSS/living-doc-collector-gh", "version": "1.0.0", "build": "test"},
+                "producer": {"name": "AbsaOSS/living-doc-collector-gh", "version": "1.0.0", "build": "test"},
                 "run": {
                     "run_id": "123",
                     "run_attempt": "1",
@@ -49,18 +49,20 @@ class TestParser:
                     "enterprise": None,
                 },
             },
-            "issues": {
-                "owner/repo/1": {
-                    "issue_number": 1,
+            "items": [
+                {
+                    "id": "github:owner/repo#1",
                     "title": "Test Issue",
                     "state": "open",
-                    "labels": ["test"],
-                    "html_url": "https://github.com/owner/repo/issues/1",
-                    "created_at": "2026-01-01T00:00:00Z",
-                    "updated_at": "2026-01-02T00:00:00Z",
+                    "tags": ["test"],
+                    "url": "https://github.com/owner/repo/issues/1",
+                    "timestamps": {
+                        "created": "2026-01-01T00:00:00Z",
+                        "updated": "2026-01-02T00:00:00Z",
+                    },
                     "body": "Test body",
                 }
-            },
+            ],
         }
 
     def test_parse_v1_0_0_fixture(self, fixture_v1_0_0):
@@ -79,8 +81,8 @@ class TestParser:
         assert len(result.warnings) == 0
 
         # Check original metadata is preserved
-        assert "generator" in result.metadata.original_metadata
-        assert result.metadata.original_metadata["generator"]["version"] == "1.0.0"
+        assert "producer" in result.metadata.original_metadata
+        assert result.metadata.original_metadata["producer"]["version"] == "1.0.0"
 
     def test_parse_v1_2_0_fixture(self, fixture_v1_2_0):
         """Test parsing with v1.2.0 fixture."""
@@ -157,10 +159,10 @@ class TestParser:
         result = parse(fixture_v1_0_0)
 
         original = result.metadata.original_metadata
-        assert "generator" in original
+        assert "producer" in original
         assert "run" in original
         assert "source" in original
-        assert original["generator"]["name"] == "AbsaOSS/living-doc-collector-gh"
+        assert original["producer"]["name"] == "AbsaOSS/living-doc-collector-gh"
 
     def test_parse_minimal_payload(self, minimal_payload):
         """Test parsing with minimal payload."""
@@ -171,32 +173,32 @@ class TestParser:
         assert result.items[0].title == "Test Issue"
 
     def test_parse_with_missing_labels(self, minimal_payload):
-        """Test parsing when labels are missing from issue."""
-        minimal_payload["issues"]["owner/repo/1"].pop("labels")
+        """Test parsing when tags are missing from item."""
+        minimal_payload["items"][0].pop("tags")
         result = parse(minimal_payload)
 
         assert len(result.items) == 1
         assert result.items[0].tags == []
 
     def test_parse_with_missing_body(self, minimal_payload):
-        """Test parsing when body is missing from issue."""
-        minimal_payload["issues"]["owner/repo/1"].pop("body")
+        """Test parsing when body is missing from item."""
+        minimal_payload["items"][0].pop("body")
         result = parse(minimal_payload)
 
         assert len(result.items) == 1
         assert result.items[0].body is None
 
     def test_parse_with_no_repositories(self, minimal_payload):
-        """Test parsing when repositories list is empty."""
+        """Test that empty repositories list raises AdapterError (required by schema)."""
         minimal_payload["metadata"]["source"]["repositories"] = []
-        result = parse(minimal_payload)
 
-        # Should use fallback repo name
-        assert result.items[0].id == "github:unknown/repo#1"
+        with pytest.raises(AdapterError) as exc_info:
+            parse(minimal_payload)
+        assert "repositories cannot be empty" in str(exc_info.value)
 
     def test_parse_with_incompatible_version(self, minimal_payload):
         """Test parsing with incompatible version generates warnings."""
-        minimal_payload["metadata"]["generator"]["version"] = "2.0.0"
+        minimal_payload["metadata"]["producer"]["version"] = "2.0.0"
         result = parse(minimal_payload)
 
         assert len(result.warnings) == 1
@@ -214,26 +216,204 @@ class TestParser:
         closed_item = closed_items[0]
         assert closed_item.state == "closed"
 
-    def test_parse_missing_issue_field_raises_error(self, minimal_payload):
-        """Test that missing required issue field raises AdapterError."""
-        # Remove required field from issue
-        del minimal_payload["issues"]["owner/repo/1"]["title"]
+    def test_parse_missing_item_field_raises_error(self, minimal_payload):
+        """Test that missing required item field raises AdapterError."""
+        del minimal_payload["items"][0]["title"]
 
         with pytest.raises(AdapterError) as exc_info:
             parse(minimal_payload)
-        assert "Failed to parse issue" in str(exc_info.value)
+        assert "missing required field" in str(exc_info.value)
 
     def test_parse_missing_metadata_raises_error(self):
         """Test that missing metadata raises AdapterError."""
-        payload = {"issues": {}}
+        payload = {"items": []}
 
         with pytest.raises(AdapterError):
             parse(payload)
 
-    def test_parse_empty_issues_dict(self, minimal_payload):
-        """Test parsing with empty issues dict."""
-        minimal_payload["issues"] = {}
+    def test_parse_empty_items_list(self, minimal_payload):
+        """Test parsing with empty items list."""
+        minimal_payload["items"] = []
         result = parse(minimal_payload)
 
         assert len(result.items) == 0
         assert len(result.warnings) == 0
+
+
+class TestBuildBodyFromStructured:
+    """Tests for the _build_body_from_structured helper."""
+
+    def test_all_structured_fields_present(self):
+        """Test markdown body is built only from description when all structured fields are present."""
+        from living_doc_adapter_collector_gh.parser import _build_body_from_structured
+
+        raw_item = {
+            "description": "As a user, I want to view domain details.",
+            "business_value": ["Streamlines domain visibility.", "Improves clarity."],
+            "preconditions": ["User is logged in.", "At least one domain exists."],
+            "acceptance_criteria": [
+                {"id": "GH-28-01", "state": "Active", "version": "v1.5.0", "description": "User can access details."},
+                {"id": "GH-28-02", "state": "Active", "version": "v1.5.0", "description": "Domain card is visible."},
+            ],
+        }
+
+        body = _build_body_from_structured(raw_item)
+
+        # body now only contains description
+        assert body == "## Description\nAs a user, I want to view domain details."
+        # bv/pc/ac are NOT in the body; they flow through structured fields
+        assert "Business Value" not in body
+        assert "Preconditions" not in body
+        assert "Acceptance Criteria" not in body
+
+    def test_only_description_present(self):
+        """Test body built with description only."""
+        from living_doc_adapter_collector_gh.parser import _build_body_from_structured
+
+        body = _build_body_from_structured({"description": "Simple description."})
+
+        assert body == "## Description\nSimple description."
+
+    def test_no_structured_fields_returns_none(self):
+        """Test that None is returned when no structured fields are present."""
+        from living_doc_adapter_collector_gh.parser import _build_body_from_structured
+
+        assert _build_body_from_structured({}) is None
+        assert _build_body_from_structured({"title": "No structured content"}) is None
+
+    def test_acceptance_criteria_without_meta(self):
+        """Test that structured AC entries without state/version still parse cleanly."""
+        from living_doc_adapter_collector_gh.parser import parse
+
+        payload = {
+            "metadata": {
+                "producer": {"name": "AbsaOSS/living-doc-collector-gh", "version": "0.1.1", "build": None},
+                "run": {"run_id": None, "run_attempt": None, "actor": None, "workflow": None, "ref": None, "sha": None},
+                "source": {
+                    "systems": ["GitHub"],
+                    "repositories": ["owner/repo"],
+                    "organization": "owner",
+                    "enterprise": None,
+                },
+                "original_metadata": {},
+            },
+            "items": [
+                {
+                    "id": "owner/repo/1",
+                    "title": "Test",
+                    "state": "open",
+                    "tags": [],
+                    "url": "https://github.com/owner/repo/issues/1",
+                    "timestamps": {"created": "2025-01-01T00:00:00+00:00", "updated": "2025-01-01T00:00:00+00:00"},
+                    "acceptance_criteria": [
+                        {"id": None, "state": None, "version": None, "description": "Something happens."}
+                    ],
+                }
+            ],
+            "warnings": [],
+        }
+        result = parse(payload)
+        ac = result.items[0].structured_acceptance_criteria
+        assert ac is not None
+        assert ac[0].description == "Something happens."
+        assert ac[0].id is None
+
+    def test_structured_fields_used_when_body_absent(self):
+        """Test that parse populates structured fields from item when body is missing."""
+        payload = {
+            "metadata": {
+                "producer": {"name": "AbsaOSS/living-doc-collector-gh", "version": "0.1.1", "build": None},
+                "run": {
+                    "run_id": None,
+                    "run_attempt": None,
+                    "actor": None,
+                    "workflow": None,
+                    "ref": None,
+                    "sha": None,
+                },
+                "source": {
+                    "systems": ["GitHub"],
+                    "repositories": ["owner/repo"],
+                    "organization": "owner",
+                    "enterprise": None,
+                },
+                "original_metadata": {},
+            },
+            "items": [
+                {
+                    "id": "owner/repo/1",
+                    "title": "View domain",
+                    "state": "open",
+                    "tags": ["DocumentedUserStory"],
+                    "url": "https://github.com/owner/repo/issues/1",
+                    "timestamps": {"created": "2025-12-17T11:31:16+00:00", "updated": "2026-04-09T07:10:01+00:00"},
+                    "description": "As a user, I want to view the details of a selected domain.",
+                    "business_value": ["Streamlines domain details visibility."],
+                    "preconditions": ["The user has logged in."],
+                    "acceptance_criteria": [
+                        {
+                            "id": "GH-28-01",
+                            "state": "Active",
+                            "version": "v1.5.0",
+                            "description": "User can access details.",
+                        },
+                    ],
+                }
+            ],
+            "warnings": [],
+        }
+
+        result = parse(payload)
+
+        assert len(result.items) == 1
+        item = result.items[0]
+        # body carries only the description
+        assert item.body == "## Description\nAs a user, I want to view the details of a selected domain."
+        # structured fields are populated directly
+        assert item.structured_business_value == ["Streamlines domain details visibility."]
+        assert item.structured_preconditions == ["The user has logged in."]
+        assert item.structured_acceptance_criteria is not None
+        assert item.structured_acceptance_criteria[0].id == "GH-28-01"
+        assert item.structured_acceptance_criteria[0].state == "Active"
+        assert item.structured_acceptance_criteria[0].version == "v1.5.0"
+        assert item.structured_acceptance_criteria[0].description == "User can access details."
+
+    def test_explicit_body_not_overridden_by_structured_fields(self):
+        """Test that an explicit body field takes precedence over structured fields."""
+        payload = {
+            "metadata": {
+                "producer": {"name": "AbsaOSS/living-doc-collector-gh", "version": "0.1.1", "build": None},
+                "run": {
+                    "run_id": None,
+                    "run_attempt": None,
+                    "actor": None,
+                    "workflow": None,
+                    "ref": None,
+                    "sha": None,
+                },
+                "source": {
+                    "systems": ["GitHub"],
+                    "repositories": ["owner/repo"],
+                    "organization": "owner",
+                    "enterprise": None,
+                },
+                "original_metadata": {},
+            },
+            "items": [
+                {
+                    "id": "owner/repo/2",
+                    "title": "Edit domain",
+                    "state": "open",
+                    "tags": [],
+                    "url": "https://github.com/owner/repo/issues/2",
+                    "timestamps": {"created": "2025-12-17T11:31:16+00:00", "updated": "2026-04-09T07:10:01+00:00"},
+                    "body": "## Description\nExplicit markdown body.",
+                    "description": "Should be ignored.",
+                }
+            ],
+            "warnings": [],
+        }
+
+        result = parse(payload)
+
+        assert result.items[0].body == "## Description\nExplicit markdown body."

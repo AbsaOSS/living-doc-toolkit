@@ -53,15 +53,20 @@ def test_golden_files(tmp_path):
     story1 = actual["content"]["user_stories"][0]
     assert story1["id"] == "github:AbsaOSS/living-doc-toolkit#1"
     assert story1["sections"]["description"] == "Implement secure user authentication for the application."
-    assert story1["sections"]["business_value"] == "Provides secure access control and user management capabilities."
-    assert story1["sections"]["preconditions"] == "- Database schema updated\n- OAuth provider configured"
-    assert "User can log in with email and password" in story1["sections"]["acceptance_criteria"]
+    assert story1["sections"]["business_value"] == ["Provides secure access control and user management capabilities."]
+    assert story1["sections"]["preconditions"] == ["Database schema updated", "OAuth provider configured"]
+    assert any(
+        ac["description"] == "User can log in with email and password"
+        for ac in story1["sections"]["acceptance_criteria"]
+    )
 
     # Verify second user story uses synonyms
     story2 = actual["content"]["user_stories"][1]
     assert story2["sections"]["description"] == "Add dark mode theme support to improve user experience."
-    assert story2["sections"]["business_value"] == "Many users prefer dark mode for reduced eye strain."
-    assert "Theme toggle button in settings" in story2["sections"]["acceptance_criteria"]
+    assert story2["sections"]["business_value"] == ["Many users prefer dark mode for reduced eye strain."]
+    assert any(
+        ac["description"] == "Theme toggle button in settings" for ac in story2["sections"]["acceptance_criteria"]
+    )
 
     # Verify third user story has no headings (content before first heading)
     story3 = actual["content"]["user_stories"][2]

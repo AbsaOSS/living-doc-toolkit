@@ -39,6 +39,9 @@ extend-exclude = '''
 )
 '''
 
+[tool.pylint.format]
+max-line-length = 120
+
 [tool.mypy]
 check_untyped_defs = true
 python_version = "3.14"

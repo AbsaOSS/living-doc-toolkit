@@ -23,6 +23,7 @@ from pydantic import ValidationError
 
 from living_doc_datasets_pdf.audit.v1.models import AuditEnvelopeV1
 from living_doc_datasets_pdf.pdf_ready.v1.models import (
+    AcceptanceCriterion,
     Content,
     Meta,
     PdfReadyV1,
@@ -98,9 +99,18 @@ def test_valid_pdf_ready_from_spec():
                     "timestamps": {"created": "2026-01-10T08:00:00Z", "updated": "2026-01-20T14:30:00Z"},
                     "sections": {
                         "description": "As a user, I want to log in using SSO...",
-                        "business_value": "Reduces friction for enterprise users",
-                        "preconditions": "SSO provider configured",
-                        "acceptance_criteria": "- User can click SSO button\n- Redirect to provider\n- Return with session",
+                        "business_value": ["Reduces friction for enterprise users"],
+                        "preconditions": ["SSO provider configured"],
+                        "acceptance_criteria": [
+                            {
+                                "id": "AC-01",
+                                "state": "Active",
+                                "version": "v1.0.0",
+                                "description": "User can click SSO button",
+                            },
+                            {"id": None, "state": None, "version": None, "description": "Redirect to provider"},
+                            {"id": None, "state": None, "version": None, "description": "Return with session"},
+                        ],
                         "user_guide": None,
                         "connections": "Related to #41, #43",
                         "last_edited": "Updated by alice@example.com on 2026-01-20",
@@ -408,9 +418,11 @@ def test_complete_user_story():
         timestamps=Timestamps(created="2026-01-01T00:00:00Z", updated="2026-01-02T00:00:00Z"),
         sections=Sections(
             description="Test description",
-            business_value="Test value",
-            preconditions="Test preconditions",
-            acceptance_criteria="Test criteria",
+            business_value=["Test value"],
+            preconditions=["Test preconditions"],
+            acceptance_criteria=[
+                AcceptanceCriterion(id="AC-01", state="Active", version="v1.0.0", description="Test criteria")
+            ],
             user_guide="Test guide",
             connections="Test connections",
             last_edited="Test edit",
@@ -421,4 +433,4 @@ def test_complete_user_story():
     assert story.title == "Test Story"
     assert len(story.tags) == 2
     assert story.sections.description == "Test description"
-    assert story.sections.business_value == "Test value"
+    assert story.sections.business_value == ["Test value"]
