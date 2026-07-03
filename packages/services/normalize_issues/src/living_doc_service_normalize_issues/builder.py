@@ -29,82 +29,26 @@ from living_doc_datasets_pdf.pdf_ready.v1.models import (  # type: ignore[import
     UserStory,
 )
 
-from living_doc_service_normalize_issues.normalizer import normalize_sections
-
-
-def _parse_md_to_list(text: str | None) -> list[str] | None:
-    """Convert a markdown bullet list to a plain list of strings.
-
-    If the text contains no bullet lines, wraps the whole text as a single-item list.
-    Returns None when text is absent or empty.
-    """
-    if not text or not text.strip():
-        return None
-
-    result: list[str] = []
-    for line in text.splitlines():
-        stripped = line.strip()
-        if not stripped:
-            continue
-        if stripped.startswith(("- [ ] ", "- [x] ", "- [X] ")):
-            result.append(stripped[6:].strip())
-        elif stripped.startswith(("- ", "* ")):
-            result.append(stripped[2:].strip())
-        else:
-            # Non-bullet content — return whole text as one item
-            return [text.strip()]
-
-    return result if result else [text.strip()]
-
-
-def _parse_md_to_ac_list(text: str | None) -> list[AcceptanceCriterion] | None:
-    """Convert a markdown bullet list to a list of AcceptanceCriterion objects.
-
-    Each bullet item becomes a criterion with only the description populated.
-    Returns None when text is absent or empty.
-    """
-    items = _parse_md_to_list(text)
-    if items is None:
-        return None
-    return [AcceptanceCriterion(id=None, state=None, version=None, description=item) for item in items]
-
 
 def build_pdf_ready(adapter_result: AdapterResult, options: dict) -> PdfReadyV1:  # pylint: disable=too-many-locals
     """
     Build PDF-ready JSON from adapter result.
 
-    This function transforms AdapterResult into PdfReadyV1 format, normalizing markdown
-    sections, populating metadata, and building the audit trail.
+    This function transforms AdapterResult into PdfReadyV1 format from the structured
+    User Story fields, populating metadata, and building the audit trail.
 
     Args:
-        adapter_result: Parsed adapter result with items and metadata
+        adapter_result: Parsed adapter result with user stories and metadata
         options: Configuration options (document_title, document_version, etc.)
 
     Returns:
         PdfReadyV1 object ready for serialization
     """
-    # Build user stories from adapter items
+    # Build user stories from adapter user stories
     user_stories = []
-    for item in adapter_result.items:
-        # Normalize markdown sections (description, user_guide, connections, last_edited)
-        normalized = normalize_sections(item.body or "")
-
-        # Structured fields: use explicit values when available, fall back to markdown parsing
-        business_value: list[str] | None
-        preconditions: list[str] | None
-        acceptance_criteria: list[AcceptanceCriterion] | None
-
-        if item.structured_business_value is not None:
-            business_value = item.structured_business_value
-        else:
-            business_value = _parse_md_to_list(normalized.get("business_value"))
-
-        if item.structured_preconditions is not None:
-            preconditions = item.structured_preconditions
-        else:
-            preconditions = _parse_md_to_list(normalized.get("preconditions"))
-
-        if item.structured_acceptance_criteria is not None:
+    for item in adapter_result.user_stories:
+        acceptance_criteria: list[AcceptanceCriterion] | None = None
+        if item.acceptance_criteria is not None:
             acceptance_criteria = [
                 AcceptanceCriterion(
                     id=ac.id,
@@ -112,20 +56,18 @@ def build_pdf_ready(adapter_result: AdapterResult, options: dict) -> PdfReadyV1:
                     version=ac.version,
                     description=ac.description,
                 )
-                for ac in item.structured_acceptance_criteria
+                for ac in item.acceptance_criteria
             ]
-        else:
-            acceptance_criteria = _parse_md_to_ac_list(normalized.get("acceptance_criteria"))
 
-        # Build Sections object
+        # Build Sections object from structured fields
         sections = Sections(
-            description=normalized.get("description"),
-            business_value=business_value,
-            preconditions=preconditions,
+            description=item.description,
+            business_value=item.business_value,
+            preconditions=item.preconditions,
             acceptance_criteria=acceptance_criteria,
-            user_guide=normalized.get("user_guide"),
-            connections=normalized.get("connections"),
-            last_edited=normalized.get("last_edited"),
+            user_guide=None,
+            connections=None,
+            last_edited=None,
         )
 
         # Build UserStory object
@@ -147,7 +89,7 @@ def build_pdf_ready(adapter_result: AdapterResult, options: dict) -> PdfReadyV1:
     content = Content(user_stories=user_stories)
 
     # Build SelectionSummary
-    total_items = len(adapter_result.items)
+    total_items = len(adapter_result.user_stories)
     selection_summary = SelectionSummary(
         total_items=total_items,
         included_items=total_items,

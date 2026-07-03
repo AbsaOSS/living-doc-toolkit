@@ -50,8 +50,8 @@ if can_handle(payload):
     # Parse the input
     result = parse(payload)
     
-    # Access parsed items
-    for item in result.items:
+    # Access parsed user stories
+    for item in result.user_stories:
         print(f"ID: {item.id}")
         print(f"Title: {item.title}")
         print(f"State: {item.state}")
@@ -102,7 +102,7 @@ Complete output from the adapter:
 ```python
 @dataclass
 class AdapterResult:
-    items: list[AdapterItem]           # Parsed items/issues
+    user_stories: list[AdapterItem]    # Parsed user stories
     metadata: AdapterMetadata          # Producer metadata
     warnings: list[CompatibilityWarning]  # Compatibility warnings
 ```
@@ -120,7 +120,10 @@ class AdapterItem:
     tags: list[str]                   # Labels/tags
     url: str                          # GitHub issue URL
     timestamps: AdapterItemTimestamps # Created/updated times
-    body: str | None                  # Issue body content
+    description: str | None                       # User story description
+    business_value: list[str] | None              # Business value statements
+    preconditions: list[str] | None               # Preconditions
+    acceptance_criteria: list[AcceptanceCriterion] | None  # Structured ACs
 ```
 
 ### AdapterMetadata

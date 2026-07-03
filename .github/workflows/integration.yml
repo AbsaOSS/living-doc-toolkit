@@ -42,6 +42,7 @@ jobs:
           pip install -e packages/datasets_pdf[dev]
           pip install -e packages/adapters/collector_gh[dev]
           pip install -e packages/services/normalize_issues[dev]
+          pip install -e packages/services/coverage_matrix[dev]
           pip install -e "apps/cli[dev]"
 
       - name: Run golden verification

@@ -24,7 +24,7 @@
       "enterprise": null
     }
   },
-  "items": [
+  "user_stories": [
     {
       "id": "github:AbsaOSS/test-project#1",
       "title": "Implement basic feature",
@@ -37,7 +37,10 @@
         "created": "2026-01-01T10:00:00Z",
         "updated": "2026-01-02T12:00:00Z"
       },
-      "body": "## Description\nImplement a basic feature for testing."
+      "description": "## Description\nImplement a basic feature for testing.",
+      "business_value": null,
+      "preconditions": null,
+      "acceptance_criteria": null
     },
     {
       "id": "github:AbsaOSS/test-project#2",
@@ -51,7 +54,10 @@
         "created": "2026-01-03T14:00:00Z",
         "updated": "2026-01-04T16:00:00Z"
       },
-      "body": "## Summary\nFix a simple bug in the system."
+      "description": "## Summary\nFix a simple bug in the system.",
+      "business_value": null,
+      "preconditions": null,
+      "acceptance_criteria": null
     }
   ]
 }

@@ -221,3 +221,114 @@ def test_normalize_issues_unexpected_error(mock_run_service, runner):
     assert result.exit_code == 1
     assert "Unexpected error:" in result.output
     assert "Unexpected failure" in result.output
+
+
+def test_cli_help_lists_coverage_matrix(runner):
+    """Test that coverage-matrix appears in the top-level help."""
+    result = runner.invoke(cli, ["--help"])
+    assert result.exit_code == 0
+    assert "coverage-matrix" in result.output
+
+
+def test_coverage_matrix_help(runner):
+    """Test that coverage-matrix --help displays usage information."""
+    result = runner.invoke(cli, ["coverage-matrix", "--help"])
+    assert result.exit_code == 0
+    assert "--doc-input" in result.output
+    assert "--tests-input" in result.output
+    assert "--output" in result.output
+    assert "--fail-under" in result.output
+
+
+def test_coverage_matrix_missing_required_args(runner):
+    """Test that missing required arguments shows an error."""
+    result = runner.invoke(cli, ["coverage-matrix"])
+    assert result.exit_code != 0
+    assert "Missing option" in result.output or "Error" in result.output
+
+
+@patch("living_doc_cli.commands.coverage_matrix.run_service")
+def test_coverage_matrix_success(mock_run_service, runner):
+    """Test successful execution of coverage-matrix command."""
+    mock_run_service.return_value = None
+
+    result = runner.invoke(
+        cli,
+        [
+            "coverage-matrix",
+            "--doc-input",
+            "doc.json",
+            "--tests-input",
+            "tests.json",
+            "--output",
+            "out.json",
+        ],
+    )
+
+    assert result.exit_code == 0
+    assert "Successfully generated coverage matrix" in result.output
+    mock_run_service.assert_called_once()
+
+    call_args = mock_run_service.call_args
+    assert call_args[0][0] == "doc.json"
+    assert call_args[0][1] == "tests.json"
+    assert call_args[0][2] == "out.json"
+    options = call_args[0][3]
+    assert options["verbose"] is False
+    assert options["fail_under"] is None
+
+
+@patch("living_doc_cli.commands.coverage_matrix.run_service")
+def test_coverage_matrix_with_fail_under_and_verbose(mock_run_service, runner):
+    """Test coverage-matrix with --fail-under and --verbose options."""
+    mock_run_service.return_value = None
+
+    result = runner.invoke(
+        cli,
+        [
+            "coverage-matrix",
+            "--doc-input",
+            "doc.json",
+            "--tests-input",
+            "tests.json",
+            "--output",
+            "out.json",
+            "--fail-under",
+            "75",
+            "--verbose",
+        ],
+    )
+
+    assert result.exit_code == 0
+    options = mock_run_service.call_args[0][3]
+    assert options["verbose"] is True
+    assert options["fail_under"] == 75.0
+
+
+@patch("living_doc_cli.commands.coverage_matrix.run_service")
+def test_coverage_matrix_toolkit_error_exits_1(mock_run_service, runner):
+    """Test exit code 1 when the service raises a ToolkitError."""
+    mock_run_service.side_effect = InvalidInputError("Doc input must contain an 'items' array")
+
+    result = runner.invoke(
+        cli,
+        ["coverage-matrix", "--doc-input", "doc.json", "--tests-input", "tests.json", "--output", "out.json"],
+    )
+
+    assert result.exit_code == 1
+    assert "Doc input must contain an 'items' array" in result.output
+
+
+@patch("living_doc_cli.commands.coverage_matrix.run_service")
+def test_coverage_matrix_unexpected_error_exits_1(mock_run_service, runner):
+    """Test exit code 1 for unexpected errors."""
+    mock_run_service.side_effect = RuntimeError("boom")
+
+    result = runner.invoke(
+        cli,
+        ["coverage-matrix", "--doc-input", "doc.json", "--tests-input", "tests.json", "--output", "out.json"],
+    )
+
+    assert result.exit_code == 1
+    assert "Unexpected error:" in result.output
+    assert "boom" in result.output

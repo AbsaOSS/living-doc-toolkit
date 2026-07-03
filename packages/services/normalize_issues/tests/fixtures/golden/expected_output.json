@@ -7,27 +7,15 @@
           "acceptance_criteria": [
             {
               "description": "User can log in with email and password",
-              "id": null,
-              "state": null,
-              "version": null
+              "id": "GH-1-01",
+              "state": "Active",
+              "version": "v1.0.0"
             },
             {
               "description": "User can log in with OAuth (Google, GitHub)",
-              "id": null,
-              "state": null,
-              "version": null
-            },
-            {
-              "description": "Session management is secure",
-              "id": null,
-              "state": null,
-              "version": null
-            },
-            {
-              "description": "Password reset functionality works",
-              "id": null,
-              "state": null,
-              "version": null
+              "id": "GH-1-02",
+              "state": "Active",
+              "version": "v1.0.0"
             }
           ],
           "business_value": [
@@ -60,21 +48,9 @@
           "acceptance_criteria": [
             {
               "description": "Theme toggle button in settings",
-              "id": null,
-              "state": null,
-              "version": null
-            },
-            {
-              "description": "All pages support dark mode",
-              "id": null,
-              "state": null,
-              "version": null
-            },
-            {
-              "description": "User preference is saved",
-              "id": null,
-              "state": null,
-              "version": null
+              "id": "GH-2-01",
+              "state": "Active",
+              "version": "v1.0.0"
             }
           ],
           "business_value": [
@@ -123,13 +99,22 @@
       {
         "id": "github:AbsaOSS/living-doc-toolkit#4",
         "sections": {
-          "acceptance_criteria": null,
-          "business_value": null,
-          "connections": "- #1 (authentication)\n- API specification document",
-          "description": "Create comprehensive API documentation.\n\n### Custom Section\nThis is a custom section that should be appended to description.",
+          "acceptance_criteria": [
+            {
+              "description": "All endpoints listed with examples",
+              "id": "GH-4-01",
+              "state": "Active",
+              "version": "v1.0.0"
+            }
+          ],
+          "business_value": [
+            "Improves developer onboarding."
+          ],
+          "connections": null,
+          "description": "Create comprehensive API documentation.",
           "last_edited": null,
           "preconditions": null,
-          "user_guide": "1. List all endpoints with examples\n2. Document request/response formats\n3. Add authentication requirements"
+          "user_guide": null
         },
         "state": "open",
         "tags": [

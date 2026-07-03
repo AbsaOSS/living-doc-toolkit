@@ -1,0 +1,220 @@
+{
+  "features": [],
+  "functionalities": [],
+  "generated_at": "PLACEHOLDER",
+  "schema_version": "coverage-matrix-v1.0.0",
+  "stale_ac_refs": [
+    {
+      "func_id": null,
+      "scenario_id": "absa-group/aul-ui/user_login.feature/references-unknown-ac",
+      "scenario_name": "Scenario referencing an AC that no longer exists",
+      "source": {
+        "file": "user_login.feature",
+        "org": "absa-group",
+        "repo": "aul-ui"
+      },
+      "stale_ac_id": "US-1-99",
+      "us_id": "US-1"
+    }
+  ],
+  "summary": {
+    "active_acs": 4,
+    "coverage_pct": 75.0,
+    "covered_acs": 3,
+    "total_acs": 5,
+    "total_features": 0,
+    "total_functionalities": 0,
+    "total_user_stories": 3
+  },
+  "unlinked_tests": [
+    {
+      "ac_ids": [],
+      "func_id": null,
+      "id": "absa-group/aul-ui/orphan.feature/scenario-without-us",
+      "scenario_name": "Scenario not linked to any user story",
+      "source": {
+        "file": "orphan.feature",
+        "org": "absa-group",
+        "repo": "aul-ui"
+      },
+      "us_id": null
+    },
+    {
+      "ac_ids": [
+        "US-99-01"
+      ],
+      "func_id": null,
+      "id": "absa-group/aul-ui/unknown.feature/scenario-for-unknown-us",
+      "scenario_name": "Scenario for a user story not in the doc input",
+      "source": {
+        "file": "unknown.feature",
+        "org": "absa-group",
+        "repo": "aul-ui"
+      },
+      "us_id": "US-99"
+    }
+  ],
+  "user_stories": [
+    {
+      "acceptance_criteria": [
+        {
+          "coverage": {
+            "status": "covered",
+            "test_count": 2,
+            "tests": [
+              {
+                "id": "absa-group/aul-ui/user_login.feature/user-logs-in-with-valid-credentials",
+                "scenario_name": "User logs in with valid credentials",
+                "source": {
+                  "file": "user_login.feature",
+                  "org": "absa-group",
+                  "repo": "aul-ui"
+                },
+                "tags": [
+                  "Regression"
+                ]
+              },
+              {
+                "id": "absa-group/aul-ui/user_login.feature/login-button-disabled",
+                "scenario_name": "Login button stays disabled until fields are filled",
+                "source": {
+                  "file": "user_login.feature",
+                  "org": "absa-group",
+                  "repo": "aul-ui"
+                },
+                "tags": [
+                  "Smoke"
+                ]
+              }
+            ]
+          },
+          "description": "User can log in with valid credentials.",
+          "id": "US-1-01",
+          "state": "Active",
+          "version": "v1.0.0"
+        },
+        {
+          "coverage": {
+            "status": "covered",
+            "test_count": 1,
+            "tests": [
+              {
+                "id": "absa-group/aul-ui/user_login.feature/user-logs-in-with-valid-credentials",
+                "scenario_name": "User logs in with valid credentials",
+                "source": {
+                  "file": "user_login.feature",
+                  "org": "absa-group",
+                  "repo": "aul-ui"
+                },
+                "tags": [
+                  "Regression"
+                ]
+              }
+            ]
+          },
+          "description": "Login button is disabled until both fields are filled.",
+          "id": "US-1-02",
+          "state": "Active",
+          "version": "v1.0.0"
+        },
+        {
+          "coverage": {
+            "status": "covered",
+            "test_count": 1,
+            "tests": [
+              {
+                "id": "absa-group/aul-ui/user_login.feature/legacy-basic-auth-login",
+                "scenario_name": "Legacy basic-auth login",
+                "source": {
+                  "file": "user_login.feature",
+                  "org": "absa-group",
+                  "repo": "aul-ui"
+                },
+                "tags": [
+                  "Regression",
+                  "skip"
+                ]
+              }
+            ]
+          },
+          "description": "Legacy basic-auth login (removed).",
+          "id": "US-1-03",
+          "state": "Deprecated",
+          "version": "v0.9.0"
+        }
+      ],
+      "full_id": "absa-group/aul-ui/US-1",
+      "id": "US-1",
+      "state": "active",
+      "summary": {
+        "active_acs": 2,
+        "coverage_pct": 100.0,
+        "covered_acs": 2,
+        "total_acs": 3
+      },
+      "title": "User Login"
+    },
+    {
+      "acceptance_criteria": [
+        {
+          "coverage": {
+            "status": "covered",
+            "test_count": 1,
+            "tests": [
+              {
+                "id": "absa-group/aul-ui/dashboard.feature/user-sees-accessible-domains",
+                "scenario_name": "User sees accessible domains on the dashboard",
+                "source": {
+                  "file": "dashboard.feature",
+                  "org": "absa-group",
+                  "repo": "aul-ui"
+                },
+                "tags": [
+                  "Regression"
+                ]
+              }
+            ]
+          },
+          "description": "User can see accessible domains on the dashboard.",
+          "id": "US-2-01",
+          "state": "Active",
+          "version": "v1.0.0"
+        },
+        {
+          "coverage": {
+            "status": "not_covered",
+            "test_count": 0,
+            "tests": []
+          },
+          "description": "Dashboard shows an empty state when no domains are accessible.",
+          "id": "US-2-02",
+          "state": "Active",
+          "version": "v1.0.0"
+        }
+      ],
+      "full_id": "absa-group/aul-ui/US-2",
+      "id": "US-2",
+      "state": "active",
+      "summary": {
+        "active_acs": 2,
+        "coverage_pct": 50.0,
+        "covered_acs": 1,
+        "total_acs": 2
+      },
+      "title": "View Dashboard"
+    },
+    {
+      "acceptance_criteria": [],
+      "full_id": "absa-group/aul-ui/US-7",
+      "id": "US-7",
+      "state": "active",
+      "summary": {
+        "active_acs": 0,
+        "coverage_pct": null,
+        "covered_acs": 0,
+        "total_acs": 0
+      },
+      "title": "Delete Domain"
+    }
+  ]
+}

@@ -23,7 +23,7 @@
       "enterprise": null
     }
   },
-  "items": [
+  "user_stories": [
     {
       "id": "github:AbsaOSS/living-doc-toolkit#1",
       "title": "Implement user authentication",
@@ -37,7 +37,28 @@
         "created": "2026-01-15T10:00:00Z",
         "updated": "2026-01-20T15:30:00Z"
       },
-      "body": "## Overview\nImplement secure user authentication for the application.\n\n## Business Value\nProvides secure access control and user management capabilities.\n\n## Prerequisites\n- Database schema updated\n- OAuth provider configured\n\n## Acceptance Criteria\n- User can log in with email and password\n- User can log in with OAuth (Google, GitHub)\n- Session management is secure\n- Password reset functionality works"
+      "description": "Implement secure user authentication for the application.",
+      "business_value": [
+        "Provides secure access control and user management capabilities."
+      ],
+      "preconditions": [
+        "Database schema updated",
+        "OAuth provider configured"
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "GH-1-01",
+          "state": "Active",
+          "version": "v1.0.0",
+          "description": "User can log in with email and password"
+        },
+        {
+          "id": "GH-1-02",
+          "state": "Active",
+          "version": "v1.0.0",
+          "description": "User can log in with OAuth (Google, GitHub)"
+        }
+      ]
     },
     {
       "id": "github:AbsaOSS/living-doc-toolkit#2",
@@ -52,7 +73,19 @@
         "created": "2026-01-10T09:00:00Z",
         "updated": "2026-01-25T14:00:00Z"
       },
-      "body": "## Summary\nAdd dark mode theme support to improve user experience.\n\n## Why\nMany users prefer dark mode for reduced eye strain.\n\n## Done Criteria\n- Theme toggle button in settings\n- All pages support dark mode\n- User preference is saved"
+      "description": "Add dark mode theme support to improve user experience.",
+      "business_value": [
+        "Many users prefer dark mode for reduced eye strain."
+      ],
+      "preconditions": null,
+      "acceptance_criteria": [
+        {
+          "id": "GH-2-01",
+          "state": "Active",
+          "version": "v1.0.0",
+          "description": "Theme toggle button in settings"
+        }
+      ]
     },
     {
       "id": "github:AbsaOSS/living-doc-toolkit#3",
@@ -66,7 +99,10 @@
         "created": "2026-01-18T11:30:00Z",
         "updated": "2026-01-18T11:30:00Z"
       },
-      "body": "Pagination is not working correctly on the users list page. When clicking page 2, it shows page 1 content."
+      "description": "Pagination is not working correctly on the users list page. When clicking page 2, it shows page 1 content.",
+      "business_value": null,
+      "preconditions": null,
+      "acceptance_criteria": null
     },
     {
       "id": "github:AbsaOSS/living-doc-toolkit#4",
@@ -80,7 +116,19 @@
         "created": "2026-01-22T08:00:00Z",
         "updated": "2026-01-23T16:45:00Z"
       },
-      "body": "## Description\nCreate comprehensive API documentation.\n\n## How To\n1. List all endpoints with examples\n2. Document request/response formats\n3. Add authentication requirements\n\n## Related\n- #1 (authentication)\n- API specification document\n\n## Custom Section\nThis is a custom section that should be appended to description."
+      "description": "Create comprehensive API documentation.",
+      "business_value": [
+        "Improves developer onboarding."
+      ],
+      "preconditions": null,
+      "acceptance_criteria": [
+        {
+          "id": "GH-4-01",
+          "state": "Active",
+          "version": "v1.0.0",
+          "description": "All endpoints listed with examples"
+        }
+      ]
     },
     {
       "id": "github:AbsaOSS/living-doc-toolkit#5",
@@ -91,7 +139,11 @@
       "timestamps": {
         "created": "2026-01-24T12:00:00Z",
         "updated": "2026-01-24T12:00:00Z"
-      }
+      },
+      "description": null,
+      "business_value": null,
+      "preconditions": null,
+      "acceptance_criteria": null
     }
   ]
 }

@@ -40,7 +40,7 @@ def valid_input_data():
                 "enterprise": None,
             },
         },
-        "items": [
+        "user_stories": [
             {
                 "id": "github:owner/repo#1",
                 "title": "Test Issue",
@@ -48,7 +48,11 @@ def valid_input_data():
                 "tags": ["enhancement"],
                 "url": "https://github.com/owner/repo/issues/1",
                 "timestamps": {"created": "2026-01-01T00:00:00Z", "updated": "2026-01-02T00:00:00Z"},
-                "body": "## Description\nThis is a test issue.\n\n## Acceptance Criteria\n- Criterion 1\n- Criterion 2",
+                "description": "This is a test issue.",
+                "acceptance_criteria": [
+                    {"id": "GH-1-01", "state": "Active", "version": "v1.0.0", "description": "Criterion 1"},
+                    {"id": "GH-1-02", "state": "Active", "version": "v1.0.0", "description": "Criterion 2"},
+                ],
             }
         ],
     }

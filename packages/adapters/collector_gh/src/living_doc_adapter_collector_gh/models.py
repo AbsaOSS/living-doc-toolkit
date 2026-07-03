@@ -43,17 +43,17 @@ class AdapterItemTimestamps(BaseModel):
     updated: str
 
 
-class AdapterItemAcceptanceCriterion(BaseModel):
-    """A single acceptance criterion from the structured input format."""
+class AcceptanceCriterion(BaseModel):
+    """A single acceptance criterion attached to a User Story."""
 
-    id: str | None = None
-    state: str | None = None
-    version: str | None = None
+    id: str
+    state: str
+    version: str
     description: str
 
 
 class AdapterItem(BaseModel):
-    """Represents a single item (issue) from the collector output."""
+    """Represents a single User Story from the collector output."""
 
     id: str
     title: str
@@ -61,11 +61,10 @@ class AdapterItem(BaseModel):
     tags: list[str]
     url: str
     timestamps: AdapterItemTimestamps
-    body: str | None = None
-    # Structured fields present in the new items-array format
-    structured_business_value: list[str] | None = None
-    structured_preconditions: list[str] | None = None
-    structured_acceptance_criteria: list[AdapterItemAcceptanceCriterion] | None = None
+    description: str | None = None
+    business_value: list[str] | None = None
+    preconditions: list[str] | None = None
+    acceptance_criteria: list[AcceptanceCriterion] | None = None
 
 
 class AdapterMetadataProducer(BaseModel):
@@ -108,6 +107,6 @@ class AdapterMetadata(BaseModel):
 class AdapterResult(BaseModel):
     """Complete result from adapter parsing."""
 
-    items: list[AdapterItem]
+    user_stories: list[AdapterItem]
     metadata: AdapterMetadata
     warnings: list[CompatibilityWarning]

@@ -15,8 +15,8 @@ from living_doc_core.errors import AdapterError  # type: ignore[import-untyped]
 from living_doc_adapter_collector_gh.compatibility import check_compatibility
 from living_doc_adapter_collector_gh.detector import extract_version
 from living_doc_adapter_collector_gh.models import (
+    AcceptanceCriterion,
     AdapterItem,
-    AdapterItemAcceptanceCriterion,
     AdapterItemTimestamps,
     AdapterMetadata,
     AdapterMetadataProducer,
@@ -26,26 +26,6 @@ from living_doc_adapter_collector_gh.models import (
 )
 
 logger = logging.getLogger(__name__)
-
-
-def _build_body_from_structured(raw_item: dict) -> str | None:
-    """
-    Reconstruct a markdown body from structured item fields.
-
-    Handles items that carry explicit JSON fields (description, business_value,
-    preconditions, acceptance_criteria) instead of a pre-rendered markdown body.
-
-    Args:
-        raw_item: Raw item dict from the payload.
-
-    Returns:
-        Markdown string assembled from present structured fields, or None when no
-        structured fields are found.
-    """
-    description = raw_item.get("description")
-    if not description:
-        return None
-    return f"## Description\n{description}"
 
 
 def _validate_metadata(metadata: dict, errors: list[str]) -> None:
@@ -75,20 +55,20 @@ def _validate_metadata(metadata: dict, errors: list[str]) -> None:
 
 
 def _validate_items(items: list, errors: list[str]) -> None:
-    """Validate the items section of the payload."""
+    """Validate the user_stories section of the payload."""
     item_count = len(items)
     for idx, item in enumerate(items[:5]):
         if not isinstance(item, dict):
-            errors.append(f"Item {idx} must be a dict, got {type(item).__name__}")
+            errors.append(f"User story {idx} must be a dict, got {type(item).__name__}")
             continue
         for field in ["id", "title", "state", "url", "timestamps"]:
             if field not in item:
                 item_id = item.get("id", f"[{idx}]")
-                errors.append(f"Item {item_id} missing required field: '{field}'")
+                errors.append(f"User story {item_id} missing required field: '{field}'")
 
     if item_count > 5:
         logger.info(
-            "Schema validation checked first 5 of %d items; full validation deferred to item parsing",
+            "Schema validation checked first 5 of %d user stories; full validation deferred to item parsing",
             item_count,
         )
 
@@ -114,8 +94,8 @@ def _validate_schema(payload: dict) -> list[str]:
 
     if "metadata" not in payload:
         errors.append("Missing required key: 'metadata'")
-    if "items" not in payload:
-        errors.append("Missing required key: 'items'")
+    if "user_stories" not in payload:
+        errors.append("Missing required key: 'user_stories'")
 
     if "metadata" in payload:
         metadata = payload["metadata"]
@@ -124,10 +104,10 @@ def _validate_schema(payload: dict) -> list[str]:
         else:
             _validate_metadata(metadata, errors)
 
-    if "items" in payload:
-        items = payload["items"]
+    if "user_stories" in payload:
+        items = payload["user_stories"]
         if not isinstance(items, list):
-            errors.append(f"'items' must be a list, got {type(items).__name__}")
+            errors.append(f"'user_stories' must be a list, got {type(items).__name__}")
             return errors
         _validate_items(items, errors)
 
@@ -167,27 +147,23 @@ def _build_metadata(payload: dict) -> AdapterMetadata:
 
 
 def _parse_single_item(raw_item: dict) -> AdapterItem:
-    """Parse a single raw item dict into an AdapterItem."""
+    """Parse a single raw User Story dict into an AdapterItem."""
     missing_fields = [f for f in ["id", "title", "state", "url", "timestamps"] if f not in raw_item]
     if missing_fields:
         raise KeyError(f"Missing required fields: {', '.join(missing_fields)}")
-
-    raw_body = raw_item.get("body")
-    if raw_body is None:
-        raw_body = _build_body_from_structured(raw_item)
 
     raw_bv = raw_item.get("business_value")
     raw_pc = raw_item.get("preconditions")
     raw_ac = raw_item.get("acceptance_criteria")
 
-    structured_ac = None
+    acceptance_criteria = None
     if raw_ac is not None:
-        structured_ac = [
-            AdapterItemAcceptanceCriterion(
-                id=ac.get("id"),
-                state=ac.get("state"),
-                version=ac.get("version"),
-                description=ac.get("description", ""),
+        acceptance_criteria = [
+            AcceptanceCriterion(
+                id=ac["id"],
+                state=ac["state"],
+                version=ac["version"],
+                description=ac["description"],
             )
             for ac in raw_ac
         ]
@@ -202,10 +178,10 @@ def _parse_single_item(raw_item: dict) -> AdapterItem:
             created=raw_item["timestamps"]["created"],
             updated=raw_item["timestamps"]["updated"],
         ),
-        body=raw_body,
-        structured_business_value=raw_bv if isinstance(raw_bv, list) else None,
-        structured_preconditions=raw_pc if isinstance(raw_pc, list) else None,
-        structured_acceptance_criteria=structured_ac,
+        description=raw_item.get("description"),
+        business_value=raw_bv if isinstance(raw_bv, list) else None,
+        preconditions=raw_pc if isinstance(raw_pc, list) else None,
+        acceptance_criteria=acceptance_criteria,
     )
 
 
@@ -220,7 +196,7 @@ def parse(payload: dict) -> AdapterResult:
         payload: Input payload from collector-gh
 
     Returns:
-        AdapterResult with parsed items and metadata
+        AdapterResult with parsed user stories and metadata
 
     Raises:
         AdapterError: If validation or parsing fails
@@ -253,11 +229,11 @@ def parse(payload: dict) -> AdapterResult:
         logger.debug("Extracting metadata")
         metadata = _build_metadata(payload)
 
-        logger.debug("Parsing items")
-        items_data = payload.get("items", [])
+        logger.debug("Parsing user stories")
+        items_data = payload.get("user_stories", [])
         if not isinstance(items_data, list):
             items_data = []
-        logger.debug("Items provided as array with %d items", len(items_data))
+        logger.debug("User stories provided as array with %d items", len(items_data))
 
         items = []
         parse_errors = []
@@ -266,24 +242,24 @@ def parse(payload: dict) -> AdapterResult:
             try:
                 item = _parse_single_item(raw_item)
                 items.append(item)
-                logger.debug("Parsed item %s: %s", raw_item["id"], raw_item["title"][:50])
+                logger.debug("Parsed user story %s: %s", raw_item["id"], raw_item["title"][:50])
             except (KeyError, TypeError, PydanticValidationError) as e:
                 item_id = raw_item.get("id", f"[{idx}]")
-                error_msg = f"Failed to parse item {item_id}: {e}"
+                error_msg = f"Failed to parse user story {item_id}: {e}"
                 logger.error(error_msg)
                 parse_errors.append(error_msg)
 
         if parse_errors:
-            error_summary = f"Failed to parse {len(parse_errors)} item(s):\n"
+            error_summary = f"Failed to parse {len(parse_errors)} user story(ies):\n"
             for error in parse_errors:
                 error_summary += f"  - {error}\n"
             logger.error(error_summary.strip())
             raise AdapterError(error_summary.strip())
 
         logger.info("Parsing input with collector-gh adapter...")
-        logger.info("Parsed %d items", len(items))
+        logger.info("Parsed %d user stories", len(items))
 
-        return AdapterResult(items=items, metadata=metadata, warnings=warnings)
+        return AdapterResult(user_stories=items, metadata=metadata, warnings=warnings)
 
     except AdapterError:
         raise
