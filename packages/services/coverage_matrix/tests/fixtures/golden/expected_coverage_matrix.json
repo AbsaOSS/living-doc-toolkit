@@ -1,8 +1,11 @@
 {
+  "features": [],
+  "functionalities": [],
   "generated_at": "PLACEHOLDER",
   "schema_version": "coverage-matrix-v1.0.0",
   "stale_ac_refs": [
     {
+      "func_id": null,
       "scenario_id": "absa-group/aul-ui/user_login.feature/references-unknown-ac",
       "scenario_name": "Scenario referencing an AC that no longer exists",
       "source": {
@@ -19,11 +22,14 @@
     "coverage_pct": 75.0,
     "covered_acs": 3,
     "total_acs": 5,
+    "total_features": 0,
+    "total_functionalities": 0,
     "total_user_stories": 3
   },
   "unlinked_tests": [
     {
       "ac_ids": [],
+      "func_id": null,
       "id": "absa-group/aul-ui/orphan.feature/scenario-without-us",
       "scenario_name": "Scenario not linked to any user story",
       "source": {
@@ -37,6 +43,7 @@
       "ac_ids": [
         "US-99-01"
       ],
+      "func_id": null,
       "id": "absa-group/aul-ui/unknown.feature/scenario-for-unknown-us",
       "scenario_name": "Scenario for a user story not in the doc input",
       "source": {

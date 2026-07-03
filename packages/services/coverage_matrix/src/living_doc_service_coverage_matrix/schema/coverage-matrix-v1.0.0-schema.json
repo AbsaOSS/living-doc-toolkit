@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://absaoss.github.io/living-doc-toolkit/schemas/coverage-matrix-v1.0.0-schema.json",
   "title": "Coverage Matrix",
-  "description": "AC-level test coverage matrix per User Story, produced by the coverage-matrix generator.",
+  "description": "AC-level test coverage matrix per User Story and Functionality, plus a Feature registry, produced by the coverage-matrix generator.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -10,6 +10,8 @@
     "generated_at",
     "summary",
     "user_stories",
+    "functionalities",
+    "features",
     "unlinked_tests",
     "stale_ac_refs"
   ],
@@ -29,6 +31,18 @@
       "type": "array",
       "items": {
         "$ref": "#/$defs/userStory"
+      }
+    },
+    "functionalities": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/functionality"
+      }
+    },
+    "features": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/feature"
       }
     },
     "unlinked_tests": {
@@ -86,6 +100,8 @@
       "additionalProperties": false,
       "required": [
         "total_user_stories",
+        "total_functionalities",
+        "total_features",
         "total_acs",
         "active_acs",
         "covered_acs",
@@ -93,6 +109,14 @@
       ],
       "properties": {
         "total_user_stories": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "total_functionalities": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "total_features": {
           "type": "integer",
           "minimum": 0
         },
@@ -213,10 +237,115 @@
         }
       }
     },
+    "functionality": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "full_id",
+        "title",
+        "state",
+        "parent",
+        "func_type",
+        "summary",
+        "acceptance_criteria"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "full_id": {
+          "type": "string"
+        },
+        "title": {
+          "type": ["string", "null"]
+        },
+        "state": {
+          "type": ["string", "null"]
+        },
+        "parent": {
+          "type": ["string", "null"]
+        },
+        "func_type": {
+          "type": ["string", "null"]
+        },
+        "summary": {
+          "$ref": "#/$defs/summary"
+        },
+        "acceptance_criteria": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/acceptanceCriterion"
+          }
+        }
+      }
+    },
+    "feature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "full_id",
+        "title",
+        "state",
+        "surface_type",
+        "route",
+        "owners",
+        "purpose",
+        "user_stories",
+        "functionalities",
+        "external_dependencies",
+        "page_object"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "full_id": {
+          "type": "string"
+        },
+        "title": {
+          "type": ["string", "null"]
+        },
+        "state": {
+          "type": ["string", "null"]
+        },
+        "surface_type": {
+          "type": ["string", "null"]
+        },
+        "route": {
+          "type": ["string", "null"]
+        },
+        "owners": {
+          "type": ["string", "null"]
+        },
+        "purpose": {
+          "type": ["string", "null"]
+        },
+        "user_stories": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "functionalities": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "external_dependencies": {
+          "type": ["string", "null"]
+        },
+        "page_object": {
+          "type": ["string", "null"]
+        }
+      }
+    },
     "unlinkedTest": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "scenario_name", "us_id", "ac_ids", "source"],
+      "required": ["id", "scenario_name", "us_id", "func_id", "ac_ids", "source"],
       "properties": {
         "id": {
           "type": ["string", "null"]
@@ -225,6 +354,9 @@
           "type": ["string", "null"]
         },
         "us_id": {
+          "type": ["string", "null"]
+        },
+        "func_id": {
           "type": ["string", "null"]
         },
         "ac_ids": {
@@ -245,6 +377,7 @@
         "scenario_id",
         "scenario_name",
         "us_id",
+        "func_id",
         "stale_ac_id",
         "source"
       ],
@@ -256,6 +389,9 @@
           "type": ["string", "null"]
         },
         "us_id": {
+          "type": ["string", "null"]
+        },
+        "func_id": {
           "type": ["string", "null"]
         },
         "stale_ac_id": {

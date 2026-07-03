@@ -9,6 +9,7 @@ it is Active and covered, so deprecated ACs never inflate ``coverage_pct``.
 
 from living_doc_service_coverage_matrix.model.coverage_item import (
     AcCoverage,
+    FunctionalityCoverage,
     Summary,
     TopSummary,
     UserStoryCoverage,
@@ -31,7 +32,7 @@ def _is_active_covered(ac: AcCoverage) -> bool:
 
 
 def compute_us_summary(acceptance_criteria: list[AcCoverage]) -> Summary:
-    """Compute the coverage summary for a single User Story's acceptance criteria."""
+    """Compute the coverage summary for a single entity's acceptance criteria."""
     total = len(acceptance_criteria)
     active = sum(1 for ac in acceptance_criteria if ac.state == ACTIVE_STATE)
     covered = sum(1 for ac in acceptance_criteria if _is_active_covered(ac))
@@ -43,14 +44,21 @@ def compute_us_summary(acceptance_criteria: list[AcCoverage]) -> Summary:
     )
 
 
-def compute_summary(user_stories: list[UserStoryCoverage]) -> TopSummary:
-    """Compute the top-level coverage summary across all User Stories."""
+def compute_summary(
+    user_stories: list[UserStoryCoverage],
+    functionalities: list[FunctionalityCoverage],
+    feature_count: int,
+) -> TopSummary:
+    """Compute the top-level coverage summary across User Stories and Functionalities."""
     all_acs = [ac for us in user_stories for ac in us.acceptance_criteria]
+    all_acs += [ac for func in functionalities for ac in func.acceptance_criteria]
     total = len(all_acs)
     active = sum(1 for ac in all_acs if ac.state == ACTIVE_STATE)
     covered = sum(1 for ac in all_acs if _is_active_covered(ac))
     return TopSummary(
         total_user_stories=len(user_stories),
+        total_functionalities=len(functionalities),
+        total_features=feature_count,
         total_acs=total,
         active_acs=active,
         covered_acs=covered,

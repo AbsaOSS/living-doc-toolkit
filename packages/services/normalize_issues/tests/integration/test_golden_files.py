@@ -75,13 +75,12 @@ def test_golden_files(tmp_path):
         == "Pagination is not working correctly on the users list page. When clicking page 2, it shows page 1 content."
     )
 
-    # Verify fourth user story has custom section appended to description
+    # Verify fourth user story maps structured fields
     story4 = actual["content"]["user_stories"][3]
-    assert "Create comprehensive API documentation." in story4["sections"]["description"]
-    assert "### Custom Section" in story4["sections"]["description"]
-    assert "This is a custom section that should be appended to description." in story4["sections"]["description"]
-    assert story4["sections"]["user_guide"] is not None
-    assert story4["sections"]["connections"] is not None
+    assert story4["sections"]["description"] == "Create comprehensive API documentation."
+    assert story4["sections"]["business_value"] == ["Improves developer onboarding."]
+    assert story4["sections"]["user_guide"] is None
+    assert story4["sections"]["connections"] is None
 
     # Verify fifth user story with null body
     story5 = actual["content"]["user_stories"][4]

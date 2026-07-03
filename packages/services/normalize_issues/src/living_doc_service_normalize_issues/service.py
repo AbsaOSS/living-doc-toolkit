@@ -76,7 +76,7 @@ def run_service(input_path: str, output_path: str, options: dict) -> None:
         except Exception as e:
             raise NormalizationError(f"Failed to parse input: {e}") from e
 
-        logger.info("Parsed %d items", len(adapter_result.items))
+        logger.info("Parsed %d user stories", len(adapter_result.user_stories))
         if adapter_result.warnings:
             logger.warning("Adapter reported %d warnings", len(adapter_result.warnings))
             for warning in adapter_result.warnings:

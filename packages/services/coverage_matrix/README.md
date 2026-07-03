@@ -12,13 +12,16 @@ per User Story, ready for PDF report generation.
 | `doc-source.json` | living-doc-collector-gh `doc-source` mode | User Stories with acceptance criteria |
 | `ui-tests.json` | living-doc-collector-gh `ui-tests` mode | UI/E2E test scenarios with `us_id` / `ac_ids` |
 
-The doc input may be a bare JSON array of User Story objects or a collector envelope
-exposing an `items` array. The tests input must be an envelope with an `items` array.
+The doc input may be a bare JSON array of User Story objects, a legacy collector
+envelope exposing an `items` array, or a `doc-source` envelope exposing
+`user_stories`, `functionalities`, and `features` arrays. The tests input must be an
+envelope with an `items` array.
 
 ## Output
 
 `coverage-matrix.json`, conforming to
 [`coverage-matrix-v1.0.0-schema.json`](src/living_doc_service_coverage_matrix/schema/coverage-matrix-v1.0.0-schema.json).
+It groups results into `user_stories`, `functionalities`, and `features`.
 
 ## CLI
 

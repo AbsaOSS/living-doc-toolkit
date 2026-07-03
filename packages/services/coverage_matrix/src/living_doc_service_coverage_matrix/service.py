@@ -24,15 +24,27 @@ class CoverageThresholdError(ToolkitError):
     exit_code = 1
 
 
-def _filter_valid_user_stories(doc_items: list[dict], logger) -> list[dict]:
-    """Drop User Stories missing ``id`` or ``acceptance_criteria``, logging each skip."""
+def _filter_valid_entities(items: list[dict], kind: str, logger) -> list[dict]:
+    """Drop entities missing ``id`` or ``acceptance_criteria``, logging each skip."""
     valid: list[dict] = []
-    for us in doc_items:
-        if not isinstance(us, dict) or not us.get("id") or us.get("acceptance_criteria") is None:
-            skipped_id = us.get("id") if isinstance(us, dict) else us
-            logger.warning("Skipping user story missing 'id' or 'acceptance_criteria': %s", skipped_id)
+    for entity in items:
+        if not isinstance(entity, dict) or not entity.get("id") or entity.get("acceptance_criteria") is None:
+            skipped_id = entity.get("id") if isinstance(entity, dict) else entity
+            logger.warning("Skipping %s missing 'id' or 'acceptance_criteria': %s", kind, skipped_id)
             continue
-        valid.append(us)
+        valid.append(entity)
+    return valid
+
+
+def _filter_valid_features(items: list[dict], logger) -> list[dict]:
+    """Drop features missing ``id``, logging each skip."""
+    valid: list[dict] = []
+    for feature in items:
+        if not isinstance(feature, dict) or not feature.get("id"):
+            skipped_id = feature.get("id") if isinstance(feature, dict) else feature
+            logger.warning("Skipping feature missing 'id': %s", skipped_id)
+            continue
+        valid.append(feature)
     return valid
 
 
@@ -63,10 +75,14 @@ def run_service(doc_input: str, tests_input: str, output_path: str, options: dic
     logger.info("Tests input: %s", tests_input)
     logger.info("Output: %s", output_path)
 
-    doc_items = load_doc_input(doc_input)
+    doc_groups = load_doc_input(doc_input)
     test_items = load_tests_input(tests_input)
 
-    valid_doc = _filter_valid_user_stories(doc_items, logger)
+    valid_doc = {
+        "user_stories": _filter_valid_entities(doc_groups["user_stories"], "user story", logger),
+        "functionalities": _filter_valid_entities(doc_groups["functionalities"], "functionality", logger),
+        "features": _filter_valid_features(doc_groups["features"], logger),
+    }
 
     generated_at = datetime.now(timezone.utc).isoformat()
     matrix = build_coverage_matrix(valid_doc, test_items, generated_at)
@@ -77,6 +93,8 @@ def run_service(doc_input: str, tests_input: str, output_path: str, options: dic
     summary = matrix.summary
     logger.info("Coverage matrix written successfully")
     logger.info("  - User stories: %d", summary.total_user_stories)
+    logger.info("  - Functionalities: %d", summary.total_functionalities)
+    logger.info("  - Features: %d", summary.total_features)
     logger.info("  - Total ACs: %d", summary.total_acs)
     logger.info("  - Active ACs: %d", summary.active_acs)
     logger.info("  - Covered ACs: %d", summary.covered_acs)

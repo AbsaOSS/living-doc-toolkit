@@ -13,7 +13,7 @@ from typing import Any, Optional
 
 @dataclass
 class Summary:
-    """AC coverage tallies scoped to a single User Story."""
+    """AC coverage tallies scoped to a single User Story or Functionality."""
 
     total_acs: int
     active_acs: int
@@ -23,9 +23,11 @@ class Summary:
 
 @dataclass
 class TopSummary:
-    """AC coverage tallies aggregated across all User Stories."""
+    """AC coverage tallies aggregated across User Stories and Functionalities."""
 
     total_user_stories: int
+    total_functionalities: int
+    total_features: int
     total_acs: int
     active_acs: int
     covered_acs: int
@@ -75,23 +77,57 @@ class UserStoryCoverage:
 
 
 @dataclass
+class FunctionalityCoverage:
+    """A Functionality with per-AC coverage and a scoped summary."""
+
+    id: str
+    full_id: str
+    title: Optional[str]
+    state: Optional[str]
+    parent: Optional[str]
+    func_type: Optional[str]
+    summary: Summary
+    acceptance_criteria: list[AcCoverage]
+
+
+@dataclass
+class FeatureEntry:
+    """A Feature surface registry entry (no acceptance criteria of its own)."""
+
+    id: str
+    full_id: str
+    title: Optional[str]
+    state: Optional[str]
+    surface_type: Optional[str]
+    route: Optional[str]
+    owners: Optional[str]
+    purpose: Optional[str]
+    user_stories: list[str]
+    functionalities: list[str]
+    external_dependencies: Optional[str]
+    page_object: Optional[str]
+
+
+@dataclass
 class UnlinkedTest:
-    """A scenario whose ``us_id`` is null or does not resolve to a known US."""
+    """A scenario whose ``us_id`` / ``func_id`` is null or does not resolve."""
 
     id: Optional[str]
     scenario_name: Optional[str]
     us_id: Optional[str]
+    func_id: Optional[str]
     ac_ids: list[str]
     source: Optional[dict[str, Any]]
 
 
 @dataclass
 class StaleAcRef:
-    """An ``ac_id`` referenced by a scenario that does not exist on the resolved US."""
+    """An ``ac_id`` referenced by a scenario that does not exist on the resolved entity."""
 
     scenario_id: Optional[str]
     scenario_name: Optional[str]
     us_id: Optional[str]
+    func_id: Optional[str]
     stale_ac_id: str
     source: Optional[dict[str, Any]]
 
@@ -104,6 +140,8 @@ class CoverageMatrix:
     generated_at: str
     summary: TopSummary
     user_stories: list[UserStoryCoverage]
+    functionalities: list[FunctionalityCoverage]
+    features: list[FeatureEntry]
     unlinked_tests: list[UnlinkedTest]
     stale_ac_refs: list[StaleAcRef]
 

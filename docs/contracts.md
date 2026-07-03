@@ -154,15 +154,22 @@ Produced by `living-doc coverage-matrix`. Consumed by downstream PDF / reporting
 coverage-matrix.json
 ├── schema_version: "coverage-matrix-v1.0.0"
 ├── generated_at: ISO-8601 timestamp
-├── summary { total_user_stories, total_acs, active_acs, covered_acs, coverage_pct }
+├── summary { total_user_stories, total_functionalities, total_features, total_acs, active_acs, covered_acs, coverage_pct }
 ├── user_stories[]
 │   ├── id, full_id, title, state
 │   ├── summary { total_acs, active_acs, covered_acs, coverage_pct }
 │   └── acceptance_criteria[]
 │       ├── id, state, version, description
 │       └── coverage { status, test_count, tests[] }
-├── unlinked_tests[]      ← scenarios with null or unresolved us_id
-└── stale_ac_refs[]       ← ac_ids that don't exist on the resolved US
+├── functionalities[]
+│   ├── id, full_id, title, state, parent, func_type
+│   ├── summary { total_acs, active_acs, covered_acs, coverage_pct }
+│   └── acceptance_criteria[]  ← same shape as user_stories
+├── features[]               ← registry surfaces (no acceptance criteria)
+│   └── id, full_id, title, state, surface_type, route, owners, purpose,
+│       user_stories[], functionalities[], external_dependencies, page_object
+├── unlinked_tests[]      ← scenarios with null/unresolved us_id and func_id
+└── stale_ac_refs[]       ← ac_ids that don't exist on the resolved US/Functionality
 ```
 
 ### Coverage Status
@@ -228,6 +235,7 @@ Each pipeline stage appends a trace entry:
 Machine-readable schemas are at:
 - `packages/datasets_pdf/schemas/pdf_ready_v1.schema.json`
 - `packages/datasets_pdf/schemas/audit_envelope_v1.schema.json`
+- `packages/services/coverage_matrix/src/living_doc_service_coverage_matrix/schema/doc-source-v1.0.0-schema.json` (validates the `doc-source.json` input)
 - `packages/services/coverage_matrix/src/living_doc_service_coverage_matrix/schema/coverage-matrix-v1.0.0-schema.json`
 
 Pydantic models (source of truth for PDF contracts):

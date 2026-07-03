@@ -314,15 +314,16 @@ graph TB
 **Component Responsibilities:**
 
 - **service.py**: Orchestration — loads inputs, calls matcher, writes output, enforces `--fail-under`
-- **loader.py**: Pure I/O — reads `doc-source.json` (bare array or envelope) and `ui-tests.json`
-- **matcher.py**: Pure transformation — builds the `CoverageMatrix` from parsed lists (no I/O)
+- **loader.py**: Pure I/O — reads `doc-source.json` (bare array, legacy `items` envelope, or `user_stories`/`functionalities`/`features` envelope) and `ui-tests.json`
+- **matcher.py**: Pure transformation — builds the `CoverageMatrix` from parsed doc groups (no I/O)
 - **summary.py**: Pure tallying — `compute_us_summary()` and `compute_summary()` with deprecated-AC exclusion
 - **model/coverage_item.py**: Output dataclasses that serialize to `coverage-matrix.json`
 
 **Key design constraints:**
 - `matcher.py` is a pure function: no I/O, no logging, fully testable without mocks
+- User Stories and Functionalities are coverage-scored; Features are emitted as a registry group without ACs
 - Deprecated ACs are included in the matrix but excluded from `coverage_pct` computation
-- Unresolved `us_id` values land in `unlinked_tests`; unknown `ac_id` references land in `stale_ac_refs`
+- Unresolved `us_id` / `func_id` values land in `unlinked_tests`; unknown `ac_id` references land in `stale_ac_refs`
 
 ---
 

@@ -20,20 +20,43 @@ def test_load_doc_input_bare_array(tmp_path):
     doc_file = tmp_path / "doc.json"
     _write(doc_file, [{"id": "org/repo/US-1", "acceptance_criteria": []}])
 
-    items = load_doc_input(str(doc_file))
+    result = load_doc_input(str(doc_file))
 
-    assert len(items) == 1
-    assert items[0]["id"] == "org/repo/US-1"
+    assert len(result["user_stories"]) == 1
+    assert result["user_stories"][0]["id"] == "org/repo/US-1"
+    assert result["functionalities"] == []
+    assert result["features"] == []
 
 
-def test_load_doc_input_envelope(tmp_path):
+def test_load_doc_input_legacy_items_envelope(tmp_path):
     doc_file = tmp_path / "doc.json"
     _write(doc_file, {"items": [{"id": "org/repo/US-1", "acceptance_criteria": []}], "metadata": {}})
 
-    items = load_doc_input(str(doc_file))
+    result = load_doc_input(str(doc_file))
 
-    assert len(items) == 1
-    assert items[0]["id"] == "org/repo/US-1"
+    assert len(result["user_stories"]) == 1
+    assert result["user_stories"][0]["id"] == "org/repo/US-1"
+    assert result["functionalities"] == []
+    assert result["features"] == []
+
+
+def test_load_doc_input_doc_source_envelope(tmp_path):
+    doc_file = tmp_path / "doc.json"
+    _write(
+        doc_file,
+        {
+            "user_stories": [{"id": "org/repo/US-1", "acceptance_criteria": []}],
+            "functionalities": [{"id": "org/repo/FUNC-001", "acceptance_criteria": []}],
+            "features": [{"id": "org/repo/FEAT-001"}],
+            "metadata": {},
+        },
+    )
+
+    result = load_doc_input(str(doc_file))
+
+    assert result["user_stories"][0]["id"] == "org/repo/US-1"
+    assert result["functionalities"][0]["id"] == "org/repo/FUNC-001"
+    assert result["features"][0]["id"] == "org/repo/FEAT-001"
 
 
 def test_load_doc_input_invalid_shape(tmp_path):
@@ -41,6 +64,73 @@ def test_load_doc_input_invalid_shape(tmp_path):
     _write(doc_file, {"no_items": True})
 
     with pytest.raises(InvalidInputError):
+        load_doc_input(str(doc_file))
+
+
+def _valid_metadata():
+    return {
+        "producer": {"name": "collector-gh", "version": "1.0.0", "build": None},
+        "run": {
+            "run_id": None,
+            "run_attempt": None,
+            "actor": None,
+            "workflow": None,
+            "ref": None,
+            "sha": None,
+        },
+        "source": {"systems": [], "repositories": [], "organization": None, "enterprise": None},
+        "original_metadata": {},
+    }
+
+
+def _valid_user_story():
+    return {
+        "id": "org/repo/US-1",
+        "repository_name": "org/repo",
+        "title": "A story",
+        "state": "open",
+        "tags": [],
+        "url": None,
+        "timestamps": None,
+        "acceptance_criteria": [],
+    }
+
+
+def test_load_doc_input_doc_source_envelope_schema_valid(tmp_path):
+    doc_file = tmp_path / "doc.json"
+    _write(
+        doc_file,
+        {
+            "user_stories": [_valid_user_story()],
+            "functionalities": [{"id": "org/repo/FUNC-001", "repository_name": "org/repo", "title": "F"}],
+            "features": [{"id": "org/repo/FEAT-001", "repository_name": "org/repo", "title": "Feat"}],
+            "metadata": _valid_metadata(),
+            "warnings": [],
+        },
+    )
+
+    result = load_doc_input(str(doc_file))
+
+    assert result["user_stories"][0]["id"] == "org/repo/US-1"
+    assert result["functionalities"][0]["id"] == "org/repo/FUNC-001"
+    assert result["features"][0]["id"] == "org/repo/FEAT-001"
+
+
+def test_load_doc_input_doc_source_envelope_schema_invalid(tmp_path):
+    doc_file = tmp_path / "doc.json"
+    bad_story = {"id": "org/repo/US-1"}  # missing required fields
+    _write(
+        doc_file,
+        {
+            "user_stories": [bad_story],
+            "functionalities": [],
+            "features": [],
+            "metadata": _valid_metadata(),
+            "warnings": [],
+        },
+    )
+
+    with pytest.raises(InvalidInputError, match="schema validation"):
         load_doc_input(str(doc_file))
 
 

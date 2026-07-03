@@ -1,7 +1,7 @@
 {
   "$defs": {
     "AcceptanceCriterion": {
-      "description": "A single acceptance criterion parsed from the issue body table.",
+      "description": "A single acceptance criterion attached to a User Story.",
       "properties": {
         "id": {
           "title": "Id",
@@ -30,7 +30,7 @@
       "type": "object"
     },
     "AdapterItem": {
-      "description": "Represents a single item (issue) from the collector output.",
+      "description": "Represents a single User Story from the collector output.",
       "properties": {
         "id": {
           "title": "Id",
@@ -368,11 +368,11 @@
   },
   "description": "Complete result from adapter parsing.",
   "properties": {
-    "items": {
+    "user_stories": {
       "items": {
         "$ref": "#/$defs/AdapterItem"
       },
-      "title": "Items",
+      "title": "User Stories",
       "type": "array"
     },
     "metadata": {
@@ -387,7 +387,7 @@
     }
   },
   "required": [
-    "items",
+    "user_stories",
     "metadata",
     "warnings"
   ],

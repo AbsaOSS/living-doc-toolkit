@@ -13,7 +13,8 @@ authors = [
 ]
 requires-python = ">=3.14"
 dependencies = [
-    "living-doc-core"
+    "living-doc-core",
+    "jsonschema>=4.20.0,<5.0.0"
 ]
 
 [project.optional-dependencies]
