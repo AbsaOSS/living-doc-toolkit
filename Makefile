@@ -1,31 +1,71 @@
-.PHONY: help black pylint mypy pytest-unit py-qa \
-        black-all pylint-all mypy-all pytest-unit-all \
-        install \
-        $(patsubst %,black-%,$(PACKAGES) $(APPS)) \
-        $(patsubst %,pylint-%,$(PACKAGES) $(APPS)) \
-        $(patsubst %,mypy-%,$(PACKAGES) $(APPS)) \
-        $(patsubst %,pytest-unit-%,$(PACKAGES) $(APPS))
+# ============================================================================
+# Living Documentation Toolkit — QA command vocabulary
+#
+# Canonical targets (see living-doc/docs/specs/repo-conventions.md §7 "Command
+# vocabulary"):  qa · lint · format · format-check · types · test · coverage
+#
+#   make qa                 Run format-check -> lint -> types -> test on every package
+#   make qa-<alias>         Same, for one package
+#   make lint-<alias>       One gate, one package  (also: format, format-check, types, test, coverage)
+#   make <gate>             One gate, every package
+#
+# Package aliases:  core · datasets-pdf · collector-gh · normalize · coverage · cli
+#
+# The pre-Phase-0 names (py-qa, black, pylint, mypy, pytest-unit and their
+# per-package forms) still work as deprecated aliases for one release — each
+# prints a one-line notice.  .github/workflows/test.yml runs the same targets.
+# ============================================================================
 
-# Packages and apps
-PACKAGES := packages/core \
-            packages/datasets_pdf \
-            packages/adapters/collector_gh \
-            packages/services/normalize_issues \
-            packages/services/coverage_matrix
-APPS := apps/cli
-ALL_TARGETS := $(PACKAGES) $(APPS)
+# --- Package map -----------------------------------------------------------
+ALIASES := core datasets-pdf collector-gh normalize coverage cli
 
-# Python and tools
+dir-core         := packages/core
+dir-datasets-pdf := packages/datasets_pdf
+dir-collector-gh := packages/adapters/collector_gh
+dir-normalize    := packages/services/normalize_issues
+dir-coverage     := packages/services/coverage_matrix
+dir-cli          := apps/cli
+
+# --- Tools / thresholds ------------------------------------------------------
 PYTHON ?= python3
 MIN_PYLINT_SCORE := 9.5
 MIN_COVERAGE := 80
 
-# Color output
 GREEN := \033[0;32m
 YELLOW := \033[0;33m
-NC := \033[0m # No Color
+NC := \033[0m
 
-install: ## Install all packages with [dev] dependencies
+GATES := lint format format-check types test coverage
+DEPRECATED := py-qa black pylint mypy pytest-unit
+
+# Concrete target lists (static pattern rules — GNU Make 3.81 compatible)
+QA_TARGETS      := $(addprefix qa-,$(ALIASES))
+GATE_TARGETS    := $(foreach g,$(GATES),$(addprefix $(g)-,$(ALIASES)))
+DEPREC_TARGETS  := $(DEPRECATED) $(foreach g,$(DEPRECATED),$(addprefix $(g)-,$(ALIASES)))
+
+.PHONY: help install qa $(GATES) $(QA_TARGETS) $(GATE_TARGETS) $(DEPREC_TARGETS)
+
+# ============================================================================
+# Help / install
+# ============================================================================
+
+help: ## Show this help message
+	@echo "$(GREEN)Living Documentation Toolkit — QA commands$(NC)"
+	@echo ""
+	@echo "$(YELLOW)Setup:$(NC)"
+	@echo "  make install                 Install all packages with [dev] dependencies"
+	@echo ""
+	@echo "$(YELLOW)Every package:$(NC)"
+	@echo "  make qa                      format-check -> lint -> types -> test, all packages"
+	@echo "  make lint | format | format-check | types | test | coverage"
+	@echo ""
+	@echo "$(YELLOW)One package (alias: core datasets-pdf collector-gh normalize coverage cli):$(NC)"
+	@echo "  make qa-<alias>              All gates for one package"
+	@echo "  make lint-<alias> | format-<alias> | format-check-<alias> | types-<alias> | test-<alias> | coverage-<alias>"
+	@echo ""
+	@echo "$(YELLOW)Thresholds (match CI):$(NC) Pylint >= $(MIN_PYLINT_SCORE) · Black line length 120 · mypy clean · coverage >= $(MIN_COVERAGE)%"
+
+install: ## Install all packages with [dev] dependencies (dependency order)
 	@echo "$(YELLOW)Installing packages in dependency order...$(NC)"
 	$(PYTHON) -m pip install -e packages/core[dev]
 	$(PYTHON) -m pip install -e packages/datasets_pdf[dev]
@@ -35,120 +75,97 @@ install: ## Install all packages with [dev] dependencies
 	$(PYTHON) -m pip install -e "apps/cli[dev]"
 	@echo "$(GREEN)✓ All packages installed$(NC)"
 
-help: ## Show this help message
-	@echo "$(GREEN)Living Documentation Toolkit - QA Commands$(NC)"
-	@echo ""
-	@echo "$(YELLOW)Setup:$(NC)"
-	@echo "  make install            Install all packages with [dev] dependencies"
-	@echo ""
-	@echo "$(YELLOW)Run all QA checks:$(NC)"
-	@echo "  make py-qa              Run all QA gates on all packages"
-	@echo ""
-	@echo "$(YELLOW)Run QA by check type:$(NC)"
-	@echo "  make black              Run Black formatter on all packages"
-	@echo "  make pylint             Run Pylint on all packages"
-	@echo "  make mypy               Run mypy on all packages"
-	@echo "  make pytest-unit        Run unit tests on all packages"
-	@echo ""
-	@echo "$(YELLOW)Run QA by package:$(NC)"
-	@echo "  make py-qa-core         Run all QA on packages/core"
-	@echo "  make py-qa-datasets-pdf Run all QA on packages/datasets_pdf"
-	@echo "  make py-qa-collector-gh Run all QA on packages/adapters/collector_gh"
-	@echo "  make py-qa-normalize    Run all QA on packages/services/normalize_issues"
-	@echo "  make py-qa-coverage     Run all QA on packages/services/coverage_matrix"
-	@echo "  make py-qa-cli          Run all QA on apps/cli"
-	@echo ""
-	@echo "$(YELLOW)Run individual checks by package:$(NC)"
-	@echo "  make black-core         Run Black on packages/core"
-	@echo "  make pylint-core        Run Pylint on packages/core"
-	@echo "  make mypy-core          Run mypy on packages/core"
-	@echo "  make pytest-unit-core   Run tests on packages/core"
-	@echo ""
-	@echo "$(YELLOW)Package shortcuts (replace 'core' with any package):$(NC)"
-	@echo "  - datasets_pdf, collector_gh, normalize, coverage, cli"
-
 # ============================================================================
-# ALL PACKAGES: Aggregated QA targets
+# Canonical aggregate targets — one gate across every package
 # ============================================================================
 
-black: black-all ## Run Black on all packages
+qa: $(QA_TARGETS) ## format-check -> lint -> types -> test, every package
+	@echo "$(GREEN)✓ QA passed for all packages$(NC)"
 
-pylint: pylint-all ## Run Pylint on all packages
+lint: $(addprefix lint-,$(ALIASES)) ## Ruff + Pylint (score >= 9.5), every package
+	@echo "$(GREEN)✓ Ruff + Pylint passed for all packages (Pylint score >= $(MIN_PYLINT_SCORE))$(NC)"
 
-mypy: mypy-all ## Run mypy on all packages
+format: $(addprefix format-,$(ALIASES)) ## Ruff autofix + Black (rewrite), every package
+	@echo "$(GREEN)✓ Ruff + Black formatting complete for all packages$(NC)"
 
-pytest-unit: pytest-unit-all ## Run unit tests on all packages
+format-check: $(addprefix format-check-,$(ALIASES)) ## Black --check (no writes), every package
+	@echo "$(GREEN)✓ Black check passed for all packages$(NC)"
 
-py-qa: black pylint mypy pytest-unit ## Run all QA gates on all packages
-	@echo "$(GREEN)✓ All QA checks passed!$(NC)"
+types: $(addprefix types-,$(ALIASES)) ## mypy, every package
+	@echo "$(GREEN)✓ mypy passed for all packages$(NC)"
 
-# ============================================================================
-# Aggregated targets for all packages
-# ============================================================================
+test: $(addprefix test-,$(ALIASES)) ## pytest, every package
+	@echo "$(GREEN)✓ Unit tests passed for all packages$(NC)"
 
-black-all: $(patsubst %,black-%,$(ALL_TARGETS))
-	@echo "$(GREEN)✓ Black formatting complete for all packages$(NC)"
-
-pylint-all: $(patsubst %,pylint-%,$(ALL_TARGETS))
-	@echo "$(GREEN)✓ Pylint checks passed for all packages (score >= $(MIN_PYLINT_SCORE))$(NC)"
-
-mypy-all: $(patsubst %,mypy-%,$(ALL_TARGETS))
-	@echo "$(GREEN)✓ mypy type checks passed for all packages$(NC)"
-
-pytest-unit-all: $(patsubst %,pytest-unit-%,$(ALL_TARGETS))
-	@echo "$(GREEN)✓ Unit tests passed for all packages (coverage >= $(MIN_COVERAGE)%)$(NC)"
+coverage: $(addprefix coverage-,$(ALIASES)) ## pytest with coverage gate, every package
+	@echo "$(GREEN)✓ Coverage passed for all packages (>= $(MIN_COVERAGE)%)$(NC)"
 
 # ============================================================================
-# PER-PACKAGE QA targets (all checks for one package)
+# Canonical per-package targets — <gate>-<alias> (static pattern rules)
 # ============================================================================
 
-py-qa-core: black-core pylint-core mypy-core pytest-unit-core
-	@echo "$(GREEN)✓ All QA checks passed for packages/core$(NC)"
+$(QA_TARGETS): qa-%: format-check-% lint-% types-% test-%
+	@echo "$(GREEN)✓ QA passed for $* ($(dir-$*))$(NC)"
 
-py-qa-datasets-pdf: black-packages/datasets_pdf pylint-packages/datasets_pdf mypy-packages/datasets_pdf pytest-unit-packages/datasets_pdf
-	@echo "$(GREEN)✓ All QA checks passed for packages/datasets_pdf$(NC)"
+$(addprefix lint-,$(ALIASES)): lint-%:
+	@echo "$(YELLOW)→ Ruff + Pylint: $* ($(dir-$*), Pylint threshold >= $(MIN_PYLINT_SCORE))$(NC)"
+	cd $(dir-$*) && $(PYTHON) -m ruff check .
+	cd $(dir-$*) && $(PYTHON) -m pylint --fail-under=$(MIN_PYLINT_SCORE) $$(git ls-files '*.py' | grep -v '^tests/')
 
-py-qa-collector-gh: black-packages/adapters/collector_gh pylint-packages/adapters/collector_gh mypy-packages/adapters/collector_gh pytest-unit-packages/adapters/collector_gh
-	@echo "$(GREEN)✓ All QA checks passed for packages/adapters/collector_gh$(NC)"
+$(addprefix format-,$(ALIASES)): format-%:
+	@echo "$(YELLOW)→ Ruff autofix + Black: $* ($(dir-$*))$(NC)"
+	cd $(dir-$*) && $(PYTHON) -m ruff check --fix .
+	cd $(dir-$*) && $(PYTHON) -m black .
 
-py-qa-normalize: black-packages/services/normalize_issues pylint-packages/services/normalize_issues mypy-packages/services/normalize_issues pytest-unit-packages/services/normalize_issues
-	@echo "$(GREEN)✓ All QA checks passed for packages/services/normalize_issues$(NC)"
+$(addprefix format-check-,$(ALIASES)): format-check-%:
+	@echo "$(YELLOW)→ Black --check: $* ($(dir-$*))$(NC)"
+	cd $(dir-$*) && $(PYTHON) -m black --check .
 
-py-qa-coverage: black-packages/services/coverage_matrix pylint-packages/services/coverage_matrix mypy-packages/services/coverage_matrix pytest-unit-packages/services/coverage_matrix
-	@echo "$(GREEN)✓ All QA checks passed for packages/services/coverage_matrix$(NC)"
+$(addprefix types-,$(ALIASES)): types-%:
+	@echo "$(YELLOW)→ mypy: $* ($(dir-$*))$(NC)"
+	cd $(dir-$*) && $(PYTHON) -m mypy .
 
-py-qa-cli: black-apps/cli pylint-apps/cli mypy-apps/cli pytest-unit-apps/cli
-	@echo "$(GREEN)✓ All QA checks passed for apps/cli$(NC)"
+$(addprefix test-,$(ALIASES)): test-%:
+	@echo "$(YELLOW)→ Tests: $* ($(dir-$*))$(NC)"
+	cd $(dir-$*) && $(PYTHON) -m pytest tests/
 
-# ============================================================================
-# BLACK FORMATTER
-# ============================================================================
-
-$(patsubst %,black-%,$(ALL_TARGETS)): black-%:
-	@echo "$(YELLOW)→ Black: $*$(NC)"
-	cd $* && $(PYTHON) -m black .
-
-# ============================================================================
-# PYLINT LINTER
-# ============================================================================
-
-$(patsubst %,pylint-%,$(ALL_TARGETS)): pylint-%:
-	@echo "$(YELLOW)→ Pylint: $* (threshold >= $(MIN_PYLINT_SCORE))$(NC)"
-	cd $* && $(PYTHON) -m pylint --fail-under=$(MIN_PYLINT_SCORE) $$(git ls-files '*.py' | grep -v '^tests/')
+$(addprefix coverage-,$(ALIASES)): coverage-%:
+	@echo "$(YELLOW)→ Coverage: $* ($(dir-$*), >= $(MIN_COVERAGE)%)$(NC)"
+	cd $(dir-$*) && $(PYTHON) -m pytest tests/ --cov=src --cov-fail-under=$(MIN_COVERAGE)
 
 # ============================================================================
-# MYPY TYPE CHECKER
+# Deprecated aliases — pre-Phase-0 names, kept for one release (§7.5)
+# Each prints a one-line notice, then delegates to the canonical target.
 # ============================================================================
 
-$(patsubst %,mypy-%,$(ALL_TARGETS)): mypy-%:
-	@echo "$(YELLOW)→ mypy: $*$(NC)"
-	cd $* && $(PYTHON) -m mypy .
+py-qa:
+	@echo "$(YELLOW)⚠ 'make py-qa' is deprecated — use 'make qa' (repo-conventions.md §7)$(NC)"
+	@$(MAKE) --no-print-directory qa
+black:
+	@echo "$(YELLOW)⚠ 'make black' is deprecated — use 'make format' (repo-conventions.md §7)$(NC)"
+	@$(MAKE) --no-print-directory format
+pylint:
+	@echo "$(YELLOW)⚠ 'make pylint' is deprecated — use 'make lint' (repo-conventions.md §7)$(NC)"
+	@$(MAKE) --no-print-directory lint
+mypy:
+	@echo "$(YELLOW)⚠ 'make mypy' is deprecated — use 'make types' (repo-conventions.md §7)$(NC)"
+	@$(MAKE) --no-print-directory types
+pytest-unit:
+	@echo "$(YELLOW)⚠ 'make pytest-unit' is deprecated — use 'make test' (repo-conventions.md §7)$(NC)"
+	@$(MAKE) --no-print-directory test
 
-# ============================================================================
-# PYTEST UNIT TESTS
-# ============================================================================
-
-$(patsubst %,pytest-unit-%,$(ALL_TARGETS)): pytest-unit-%:
-	@echo "$(YELLOW)→ Tests: $* (coverage >= $(MIN_COVERAGE)%)$(NC)"
-	cd $* && $(PYTHON) -m pytest tests/ --cov=src --cov-fail-under=$(MIN_COVERAGE)
-
+$(addprefix py-qa-,$(ALIASES)): py-qa-%:
+	@echo "$(YELLOW)⚠ 'make py-qa-$*' is deprecated — use 'make qa-$*' (repo-conventions.md §7)$(NC)"
+	@$(MAKE) --no-print-directory qa-$*
+$(addprefix black-,$(ALIASES)): black-%:
+	@echo "$(YELLOW)⚠ 'make black-$*' is deprecated — use 'make format-$*' (repo-conventions.md §7)$(NC)"
+	@$(MAKE) --no-print-directory format-$*
+$(addprefix pylint-,$(ALIASES)): pylint-%:
+	@echo "$(YELLOW)⚠ 'make pylint-$*' is deprecated — use 'make lint-$*' (repo-conventions.md §7)$(NC)"
+	@$(MAKE) --no-print-directory lint-$*
+$(addprefix mypy-,$(ALIASES)): mypy-%:
+	@echo "$(YELLOW)⚠ 'make mypy-$*' is deprecated — use 'make types-$*' (repo-conventions.md §7)$(NC)"
+	@$(MAKE) --no-print-directory types-$*
+$(addprefix pytest-unit-,$(ALIASES)): pytest-unit-%:
+	@echo "$(YELLOW)⚠ 'make pytest-unit-$*' is deprecated — use 'make test-$*' (repo-conventions.md §7)$(NC)"
+	@$(MAKE) --no-print-directory test-$*

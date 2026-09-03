@@ -18,8 +18,8 @@ Audit Envelope v1 JSON Schema export.
 
 from pathlib import Path
 
-from living_doc_datasets_pdf.audit.v1.models import AuditEnvelopeV1
 from living_doc_datasets_pdf._schema_io import write_schema_file
+from living_doc_datasets_pdf.audit.v1.models import AuditEnvelopeV1
 
 
 def export_json_schema(output_path: str | Path | None = None) -> dict:

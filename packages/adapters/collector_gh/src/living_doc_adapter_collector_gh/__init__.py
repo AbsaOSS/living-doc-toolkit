@@ -30,6 +30,11 @@ See SCHEMA_SYNC.md for the complete synchronization workflow and versioning.
 __version__ = "1.0.0"
 
 # Export models
+# Export compatibility checker and schema version
+from living_doc_adapter_collector_gh.compatibility import SCHEMA_VERSION, check_compatibility
+
+# Export detector functions
+from living_doc_adapter_collector_gh.detector import can_handle, extract_version
 from living_doc_adapter_collector_gh.models import (
     AdapterItem,
     AdapterItemTimestamps,
@@ -37,12 +42,6 @@ from living_doc_adapter_collector_gh.models import (
     AdapterResult,
     CompatibilityWarning,
 )
-
-# Export detector functions
-from living_doc_adapter_collector_gh.detector import can_handle, extract_version
-
-# Export compatibility checker and schema version
-from living_doc_adapter_collector_gh.compatibility import check_compatibility, SCHEMA_VERSION
 
 # Export parser
 from living_doc_adapter_collector_gh.parser import parse

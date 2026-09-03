@@ -22,7 +22,8 @@ def _doc_source_validator() -> Draft7Validator:
     """Build (and cache) the Draft-07 validator for the doc-source schema."""
     schema_text = (
         resources.files("living_doc_service_coverage_matrix")
-        .joinpath("schema", _DOC_SOURCE_SCHEMA_FILE)
+        .joinpath("schema")
+        .joinpath(_DOC_SOURCE_SCHEMA_FILE)
         .read_text(encoding="utf-8")
     )
     return Draft7Validator(json.loads(schema_text))

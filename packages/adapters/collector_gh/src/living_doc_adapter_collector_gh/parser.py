@@ -8,9 +8,9 @@ AdapterResult format with schema validation and comprehensive error reporting.
 """
 
 import logging
-from pydantic import ValidationError as PydanticValidationError
 
 from living_doc_core.errors import AdapterError  # type: ignore[import-untyped]
+from pydantic import ValidationError as PydanticValidationError
 
 from living_doc_adapter_collector_gh.compatibility import check_compatibility
 from living_doc_adapter_collector_gh.detector import extract_version
