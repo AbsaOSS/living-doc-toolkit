@@ -213,5 +213,8 @@ doc-issues.json
 pdf_ready.json
 ui-tests.json
 doc-source.json
-spec.md
 coverage-matrix.json
+
+# SPEC.md is a tracked process document (prospective-spec process for new
+# services / adapters — see the file). The pre-Phase-0 implementation spec was
+# consumed into docs/ and this entry ignored the file; it is committed again.

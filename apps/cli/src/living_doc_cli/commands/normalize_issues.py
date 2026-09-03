@@ -8,7 +8,6 @@ import sys
 from typing import Optional
 
 import click
-
 from living_doc_core.errors import (  # type: ignore[import-untyped]
     AdapterError,
     FileIOError,

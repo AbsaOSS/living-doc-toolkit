@@ -7,7 +7,6 @@ coverage-matrix CLI command.
 import sys
 
 import click
-
 from living_doc_core.errors import ToolkitError  # type: ignore[import-untyped]
 from living_doc_service_coverage_matrix.service import run_service  # type: ignore[import-untyped]
 

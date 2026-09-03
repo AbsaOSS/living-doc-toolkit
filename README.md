@@ -5,6 +5,8 @@
 
 A monorepo hosting multiple independent Python services that transform and enrich machine-readable artifacts produced by upstream collectors (e.g., [living-doc-collector-gh](https://github.com/AbsaOSS/living-doc-collector-gh)) into datasets consumable by downstream actions (e.g., [living-doc-generator-pdf](https://github.com/AbsaOSS/living-doc-generator-pdf)).
 
+> *This is a monorepo of multiple services and follows a different README shape than the single-purpose `living-doc-*` action repos ([convention](https://github.com/AbsaOSS/living-doc/blob/master/docs/specs/repo-conventions.md)). If you arrived from an action repo, the `Understand / Use / Maintain` layout below is deliberate.*
+
 ---
 
 - [Overview](#overview)
@@ -16,6 +18,10 @@ A monorepo hosting multiple independent Python services that transform and enric
 ---
 
 ## Overview
+
+**Expected usage: GitHub Actions first.** The `living-doc` CLI is invoked as a step in a GitHub Actions workflow, chained between the upstream `living-doc-*` collector actions and the downstream generator actions. Running `living-doc <service>` locally — the pattern documented in [DEVELOPER.md](DEVELOPER.md) — is a development and debugging affordance only, not a second supported deployment target.
+
+**The Living Documentation pipeline runs AI-free.** Every step — collect → normalize → generate — is deterministic tooling (Python, JSON Schema validation, Jinja2/Markdown templates) with no LLM call anywhere in that path. [`AbsaOSS/agentic-toolkit`](https://github.com/AbsaOSS/agentic-toolkit) can accelerate the upstream *authoring* of GitHub Issues and `.feature` files, but it is never a runtime dependency of this pipeline: a human writing the same input by hand is a fully supported, identical path.
 
 The Living Documentation Toolkit is a **generic builder** designed to:
 - Host multiple independent services with CLI entrypoints
@@ -66,6 +72,7 @@ living-doc coverage-matrix \
 ### Understand
 - **[Architecture](docs/architecture.md)** — System overview, data flow pipeline, package structure
 - **[Contracts & Interfaces](docs/contracts.md)** — CLI reference, input/output schemas, audit envelope, change control
+- **[SPEC.md](SPEC.md)** — How a new service or adapter is specced before it is built (the prospective-spec process for this monorepo)
 
 ### Use
 
@@ -74,7 +81,7 @@ Each service below has a **Cookbook** (explains *how* it works — detection log
 ### Maintain
 - **[Troubleshooting](docs/troubleshooting.md)** — Exit codes, common errors, FAQ
 - **[Developer Guide](DEVELOPER.md)** — Environment setup, testing, linting, branch conventions
-- **[Changelog](CHANGELOG.md)** — Version history and notable changes
+- **[Contribution Guidelines](CONTRIBUTING.md)** — How to report bugs, propose features, and open a PR
 
 ## Services
 

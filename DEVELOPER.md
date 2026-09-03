@@ -23,6 +23,9 @@ cd living-doc-toolkit
 
 ### Set Up Python Environment
 
+The supported floor is **Python 3.10** (`requires-python = ">=3.10"` in every package's
+`pyproject.toml`); CI runs the `3.10`–`3.14` matrix. Use any interpreter in that range.
+
 ```shell
 python3 -m venv .venv
 source .venv/bin/activate
@@ -63,8 +66,10 @@ package directory, matching how CI executes them.
 
 ## QA Automation with Make
 
-This project includes a `Makefile` to simplify running quality-assurance checks across all
-packages. Use Make targets instead of manual loops.
+This project includes a `Makefile` exposing the shared **command vocabulary**
+([`repo-conventions.md` §7](https://github.com/AbsaOSS/living-doc/blob/master/docs/specs/repo-conventions.md)).
+Use the Make targets instead of manual loops — `.github/workflows/test.yml` runs the same
+targets, so local and CI never drift.
 
 ### Quick Start
 
@@ -74,10 +79,10 @@ First, install all packages with dev dependencies:
 make install
 ```
 
-Then run all QA checks (Black, Pylint, mypy, unit tests) on all packages:
+Then run every QA gate (`format-check` → `lint` → `types` → `test`) on all packages:
 
 ```shell
-make py-qa
+make qa
 ```
 
 Show all available commands:
@@ -86,44 +91,49 @@ Show all available commands:
 make help
 ```
 
-### Common Make Targets
+### Canonical targets
 
-| Target | Purpose |
-|--------|---------|
-| `make py-qa` | Run all QA gates (Black, Pylint, mypy, tests) on all packages |
-| `make black` | Format all packages with Black |
-| `make pylint` | Lint all packages (score ≥ 9.5) |
-| `make mypy` | Type-check all packages |
-| `make pytest-unit` | Run unit tests (coverage ≥ 80%) on all packages |
+Seven targets. Each has an **aggregate** form (every package) and a **per-package** form
+`<target>-<alias>`.
 
-### Run QA for a Specific Package
+| Target | Runs | Gate |
+|--------|------|------|
+| `qa` | `format-check` → `lint` → `types` → `test`, failing on the first | all of the below |
+| `lint` | Pylint over tracked `*.py` (tests excluded) | score ≥ **9.5** / 10 |
+| `format` | Black, rewriting files | line length **120** |
+| `format-check` | Black `--check` (no writes) | line length **120** |
+| `types` | mypy | clean |
+| `test` | pytest | pass |
+| `coverage` | pytest with coverage measurement | `--cov-fail-under=80` |
 
-Run all QA checks on one package:
+### Run QA for a specific package
 
-```shell
-make py-qa-core                    # packages/core
-make py-qa-datasets-pdf            # packages/datasets_pdf
-make py-qa-collector-gh            # packages/adapters/collector_gh
-make py-qa-normalize               # packages/services/normalize_issues
-make py-qa-coverage                # packages/services/coverage_matrix
-make py-qa-cli                     # apps/cli
-```
-
-Run a specific check on one package:
+Package aliases: `core`, `datasets-pdf`, `collector-gh`, `normalize`, `coverage`, `cli`.
 
 ```shell
-make black-core                    # Black on packages/core
-make pylint-packages/core          # Pylint on packages/core
-make mypy-packages/core            # mypy on packages/core
-make pytest-unit-packages/core     # Tests on packages/core
+make qa-core                  # all gates for packages/core
+make qa-datasets-pdf          # packages/datasets_pdf
+make qa-collector-gh          # packages/adapters/collector_gh
+make qa-normalize             # packages/services/normalize_issues
+make qa-coverage              # packages/services/coverage_matrix
+make qa-cli                   # apps/cli
 ```
 
-### Quality Gates
+Run one gate on one package:
 
-- **Black**: Line length 120 characters (configured in each `pyproject.toml`)
-- **Pylint**: Minimum score 9.5 / 10.0
-- **mypy**: Strict type checking (configuration in each `pyproject.toml`)
-- **pytest**: Minimum coverage 80%
+```shell
+make format-core              # Black on packages/core
+make lint-core                # Pylint on packages/core
+make types-core               # mypy on packages/core
+make test-core                # tests on packages/core
+make coverage-core            # tests + coverage gate on packages/core
+```
+
+### Deprecated target names
+
+The pre-Phase-0 names still work for one release and print a deprecation notice:
+`py-qa` → `qa`, `black` → `format`, `pylint` → `lint`, `mypy` → `types`,
+`pytest-unit` → `test`, and their `-<alias>` per-package forms.
 
 ## Running Static Code Analysis
 
@@ -134,30 +144,19 @@ quality at or above **9.5**.
 Each package's `pyproject.toml` configures Pylint. CI runs Pylint per-package and
 excludes test files.
 
-### Run Pylint (per-package)
+### Run Pylint
 
-From the **package directory** (e.g., `packages/core`):
+One package (`make lint-<alias>`) or all of them (`make lint`):
 
 ```shell
-cd packages/core
-pylint $(git ls-files '*.py' | grep -v '^tests/')
+make lint-core          # wraps: cd packages/core && pylint --fail-under=9.5 $(git ls-files '*.py' | grep -v '^tests/')
+make lint               # every package
 ```
 
-To run Pylint on a specific file:
+To run Pylint on a specific file, from inside the package directory:
 
 ```shell
-pylint src/living_doc_core/json_utils.py
-```
-
-### Run Pylint (all packages)
-
-From the **repository root**:
-
-```shell
-for pkg in packages/core packages/datasets_pdf packages/adapters/collector_gh packages/services/normalize_issues packages/services/coverage_matrix apps/cli; do
-  echo "=== Pylint: $pkg ==="
-  (cd "$pkg" && pylint $(git ls-files '*.py' | grep -v '^tests/'))
-done
+cd packages/core && pylint src/living_doc_core/json_utils.py
 ```
 
 ## Run Black Tool Locally
@@ -165,28 +164,20 @@ done
 This project uses [Black](https://github.com/psf/black) for code formatting.
 Line length is set to **120 characters** (configured in each package's `pyproject.toml`).
 
-### Run Black (per-package)
+### Run Black
 
-From the **package directory**:
-
-```shell
-cd packages/services/normalize_issues
-black $(git ls-files '*.py')
-```
-
-### Run Black (all packages)
-
-From the **repository root**:
+Rewrite one package (`make format-<alias>`) or all of them (`make format`):
 
 ```shell
-Fixed
+make format-normalize        # wraps: cd packages/services/normalize_issues && black .
+make format                  # every package
 ```
 
 ### Check-only mode (no changes)
 
 ```shell
-cd packages/core
-black --check $(git ls-files '*.py')
+make format-check-core       # wraps: cd packages/core && black --check .
+make format-check            # every package
 ```
 
 ### Expected Output
@@ -200,56 +191,34 @@ All done! ✨ 🍰 ✨
 This project uses [mypy](https://mypy.readthedocs.io/en/stable/) for static type
 checking. Configuration is in each package's `pyproject.toml`.
 
-### Run mypy (per-package)
+### Run mypy
 
-From the **package directory**:
-
-```shell
-cd packages/core
-mypy .
-```
-
-### Run mypy (all packages)
-
-From the **repository root**:
+One package (`make types-<alias>`) or all of them (`make types`):
 
 ```shell
-for pkg in packages/core packages/datasets_pdf packages/adapters/collector_gh packages/services/normalize_issues packages/services/coverage_matrix apps/cli; do
-  echo "=== mypy: $pkg ==="
-  (cd "$pkg" && mypy .)
-done
+make types-core              # wraps: cd packages/core && mypy .
+make types                   # every package
 ```
 
-To type-check a specific file:
-
-```shell
-mypy packages/core/src/living_doc_core/json_utils.py
-```
+Configuration (`[tool.mypy]` in each `pyproject.toml`) sets `python_version = "3.10"` — the
+supported floor — so type checks catch 3.11+-only stdlib use.
 
 ## Running Unit Tests
 
 Unit tests are written using [pytest](https://docs.pytest.org/) and live in each
 package's `tests/` directory.
 
-### Run tests (per-package)
+### Run tests
 
-From the **package directory**:
-
-```shell
-cd packages/services/normalize_issues
-pytest --cov=src -v tests/ --cov-fail-under=80
-```
-
-### Run tests (all packages)
-
-From the **repository root**:
+One package (`make test-<alias>`) or all of them (`make test`):
 
 ```shell
-for pkg in packages/core packages/datasets_pdf packages/adapters/collector_gh packages/services/normalize_issues packages/services/coverage_matrix apps/cli; do
-  echo "=== Tests: $pkg ==="
-  (cd "$pkg" && pytest --cov=src -v tests/ --cov-fail-under=80)
-done
+make test-normalize          # wraps: cd packages/services/normalize_issues && pytest tests/
+make test                    # every package
 ```
+
+`make coverage` / `make coverage-<alias>` adds the explicit `--cov=src --cov-fail-under=80`
+gate that CI enforces.
 
 ## Running Integration Tests
 
@@ -280,19 +249,21 @@ pytest tests/integration/ -v
 
 Code coverage is collected with `pytest-cov`. The minimum threshold is **80 %**.
 
-### Check coverage (per-package)
+### Check coverage
 
 ```shell
-cd packages/core
-pytest --cov=src -v tests/ --cov-fail-under=80
+make coverage-core           # wraps: cd packages/core && pytest tests/ --cov=src --cov-fail-under=80
+make coverage                # every package
 ```
 
 ### Generate HTML report
 
+Each package's `pyproject.toml` sets `--cov-report=html`, so `make coverage-core` also
+writes `packages/core/htmlcov/index.html`:
+
 ```shell
-cd packages/core
-pytest --cov=src -v tests/ --cov-fail-under=80 --cov-report=html
-open htmlcov/index.html
+make coverage-core
+open packages/core/htmlcov/index.html
 ```
 
 ## Run CLI Locally
@@ -316,23 +287,33 @@ living-doc coverage-matrix \
 ```
 
 ## Branch Naming Convention (PID:H-1)
-All work branches MUST use an allowed prefix followed by a concise kebab-case descriptor (optional numeric ID):
+
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the canonical rules — this is a summary.
+
+Every branch is `<prefix>/<issue>-<scope>`: an allowed prefix, then the issue number
+**immediately** after it, then a lowercase kebab-case scope. The `check-pr-requirements`
+CI check rejects a branch with no issue number.
+
 Allowed prefixes:
-- feature/ : new functionality & enhancements
-- fix/     : bug fixes / defect resolutions
-- docs/    : documentation-only updates
-- chore/   : maintenance, CI, dependency bumps, non-behavioral refactors
+- `feature/` : new functionality & enhancements
+- `fix/`     : bug fixes / defect resolutions
+- `docs/`    : documentation-only updates
+- `chore/`   : maintenance, CI, dependency bumps, non-behavioral refactors
+
 Examples:
-- feature/add-hierarchy-support
-- fix/456-null-title-parsing
-- docs/update-readme-quickstart
-- chore/upgrade-pygithub
+- `feature/123-add-hierarchy-support`
+- `fix/456-null-title-parsing`
+- `docs/203-update-readme-quickstart`
+- `chore/318-upgrade-pydantic`
+
 Rules:
-- Prefix mandatory; rename non-compliant branches before PR (`git branch -m feature/<new-name>` etc.).
-- Descriptor lowercase kebab-case; hyphens only; avoid vague terms (`update`, `changes`).
-- Align scope: a docs-only PR MUST use docs/ prefix, not feature/.
-Verification Tip:
+- Prefix and issue number mandatory; rename before pushing (`git branch -m <prefix>/<issue>-<scope>`).
+- Scope lowercase kebab-case; hyphens only; avoid vague terms (`update`, `changes`).
+- Align scope: a docs-only PR MUST use `docs/`, not `feature/`.
+
+Verification tip:
 ```shell
-git rev-parse --abbrev-ref HEAD | grep -E '^(feature|fix|docs|chore)/' || echo 'Branch naming violation (expected allowed prefix)'
+git rev-parse --abbrev-ref HEAD | grep -E '^(feature|fix|docs|chore)/[0-9]+-' \
+  || echo 'Branch naming violation (expected <prefix>/<issue>-<scope>)'
 ```
 Future possible prefixes (not enforced yet): `refactor/`, `perf/`.

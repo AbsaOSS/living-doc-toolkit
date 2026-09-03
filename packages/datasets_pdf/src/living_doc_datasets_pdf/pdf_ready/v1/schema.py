@@ -18,8 +18,8 @@ PDF Ready v1 JSON Schema export.
 
 from pathlib import Path
 
-from living_doc_datasets_pdf.pdf_ready.v1.models import PdfReadyV1
 from living_doc_datasets_pdf._schema_io import write_schema_file
+from living_doc_datasets_pdf.pdf_ready.v1.models import PdfReadyV1
 
 
 def export_json_schema(output_path: str | Path | None = None) -> dict:

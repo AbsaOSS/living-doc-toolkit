@@ -28,7 +28,7 @@ that the producer version is within our confirmed compatible range.
 See SCHEMA_SYNC.md for full synchronization workflow.
 """
 
-from packaging.version import Version, InvalidVersion
+from packaging.version import InvalidVersion, Version
 
 from living_doc_adapter_collector_gh.models import CompatibilityWarning
 
