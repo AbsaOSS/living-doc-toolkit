@@ -14,3 +14,135 @@ updates:
     commit-message:
       prefix: "chore"
       include: "scope"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+
+  # Monorepo adaptation (repo-conventions.md §10.1): one `pip` block per package
+  # directory, each grouped into a single PR.
+  - package-ecosystem: "pip"
+    directory: "/packages/core"
+    target-branch: "master"
+    schedule:
+      interval: "weekly"
+      day: "sunday"
+    labels:
+      - "auto update"
+      - "infrastructure"
+      - "no RN"
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    allow:
+      - dependency-type: "direct"
+    groups:
+      pip-core:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "pip"
+    directory: "/packages/datasets_pdf"
+    target-branch: "master"
+    schedule:
+      interval: "weekly"
+      day: "sunday"
+    labels:
+      - "auto update"
+      - "infrastructure"
+      - "no RN"
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    allow:
+      - dependency-type: "direct"
+    groups:
+      pip-datasets-pdf:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "pip"
+    directory: "/packages/adapters/collector_gh"
+    target-branch: "master"
+    schedule:
+      interval: "weekly"
+      day: "sunday"
+    labels:
+      - "auto update"
+      - "infrastructure"
+      - "no RN"
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    allow:
+      - dependency-type: "direct"
+    groups:
+      pip-collector-gh:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "pip"
+    directory: "/packages/services/normalize_issues"
+    target-branch: "master"
+    schedule:
+      interval: "weekly"
+      day: "sunday"
+    labels:
+      - "auto update"
+      - "infrastructure"
+      - "no RN"
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    allow:
+      - dependency-type: "direct"
+    groups:
+      pip-normalize-issues:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "pip"
+    directory: "/packages/services/coverage_matrix"
+    target-branch: "master"
+    schedule:
+      interval: "weekly"
+      day: "sunday"
+    labels:
+      - "auto update"
+      - "infrastructure"
+      - "no RN"
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    allow:
+      - dependency-type: "direct"
+    groups:
+      pip-coverage-matrix:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "pip"
+    directory: "/apps/cli"
+    target-branch: "master"
+    schedule:
+      interval: "weekly"
+      day: "sunday"
+    labels:
+      - "auto update"
+      - "infrastructure"
+      - "no RN"
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    allow:
+      - dependency-type: "direct"
+    groups:
+      pip-cli:
+        patterns:
+          - "*"

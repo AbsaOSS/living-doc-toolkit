@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-name: "Static analysis & tests"
+name: "Link check"
 
 on:
   push:
@@ -32,10 +32,10 @@ permissions:
 
 jobs:
   detect:
-    name: Detect Python Changes
+    name: Detect Docs Changes
     runs-on: ubuntu-latest
     outputs:
-      python_changed: ${{ steps.changes.outputs.python_changed }}
+      docs_changed: ${{ steps.changes.outputs.docs_changed }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -43,7 +43,7 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Check whether Python-related files changed
+      - name: Check whether Markdown files changed
         id: changes
         shell: bash
         env:
@@ -59,53 +59,40 @@ jobs:
             changed_files=$(git diff --name-only "${{ github.sha }}~1" "${{ github.sha }}")
           fi
 
-          if echo "$changed_files" | grep -E '(\.py$|(^|/)requirements[^/]*\.txt$|(^|/)pyproject\.toml$)' > /dev/null; then
-            echo "python_changed=true" >> "$GITHUB_OUTPUT"
+          if echo "$changed_files" | grep -E '\.md$' > /dev/null; then
+            echo "docs_changed=true" >> "$GITHUB_OUTPUT"
           else
-            echo "python_changed=false" >> "$GITHUB_OUTPUT"
+            echo "docs_changed=false" >> "$GITHUB_OUTPUT"
           fi
 
-  qa:
+  link-check:
     needs: detect
-    if: needs.detect.outputs.python_changed == 'true'
+    if: needs.detect.outputs.docs_changed == 'true'
     runs-on: ubuntu-latest
-    name: QA (Black, Pylint, mypy, Pytest) — Python ${{ matrix.python-version }}
-    defaults:
-      run:
-        shell: bash
-    # The 3.10 leg is advisory until `living-doc-utilities` publishes a release with
-    # `Requires-Python >= 3.10` (it currently pins `>= 3.12`, so `make install` fails
-    # on 3.10). Flip this to a hard gate once that dependency is unblocked.
-    continue-on-error: ${{ matrix.python-version == '3.10' }}
-    strategy:
-      fail-fast: false
-      matrix:
-        # 3.10 is the supported floor (`requires-python` in every package's pyproject.toml);
-        # 3.14 is the version used by the published action image.
-        python-version: [ "3.10", "3.11", "3.12", "3.13", "3.14" ]
+    name: Markdown Link Check
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
-          fetch-depth: 0
           persist-credentials: false
 
-      - name: Set up Python
-        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+      - name: Check cross-reference and cross-repo links
+        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8
         with:
-          python-version: ${{ matrix.python-version }}
-          cache: 'pip'
-
-      - name: Install all packages
-        run: make install
-
-      - name: Run QA checks (per package via the Makefile)
-        run: make qa
+          args: >-
+            --no-progress
+            --include-fragments
+            --max-retries 3
+            --retry-wait-time 5
+            './**/*.md'
+          fail: true
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
 
   noop:
     needs: detect
-    if: needs.detect.outputs.python_changed != 'true'
+    if: needs.detect.outputs.docs_changed != 'true'
     runs-on: ubuntu-latest
-    name: No Python Changes
+    name: No Docs Changes
     steps:
-      - run: echo "No Python-related changes detected — static analysis & tests skipped."
+      - run: echo "No Markdown changes detected — link check skipped."

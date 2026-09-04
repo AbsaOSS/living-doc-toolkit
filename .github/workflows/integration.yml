@@ -20,6 +20,13 @@ on:
     branches: [ "master" ]
     types: [opened, synchronize, reopened]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
 jobs:
   integration-test:
     runs-on: ubuntu-latest
