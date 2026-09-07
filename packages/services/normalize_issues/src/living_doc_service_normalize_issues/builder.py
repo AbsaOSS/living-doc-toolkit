@@ -35,18 +35,18 @@ def build_pdf_ready(adapter_result: AdapterResult, options: dict) -> PdfReadyV1:
     Build PDF-ready JSON from adapter result.
 
     This function transforms AdapterResult into PdfReadyV1 format from the structured
-    User Story fields, populating metadata, and building the audit trail.
+    item fields, populating metadata, and building the audit trail.
 
     Args:
-        adapter_result: Parsed adapter result with user stories and metadata
+        adapter_result: Parsed adapter result with items and metadata
         options: Configuration options (document_title, document_version, etc.)
 
     Returns:
         PdfReadyV1 object ready for serialization
     """
-    # Build user stories from adapter user stories
+    # Build output user stories from the adapter's parsed items
     user_stories = []
-    for item in adapter_result.user_stories:
+    for item in adapter_result.items:
         acceptance_criteria: list[AcceptanceCriterion] | None = None
         if item.acceptance_criteria is not None:
             acceptance_criteria = [
@@ -89,7 +89,7 @@ def build_pdf_ready(adapter_result: AdapterResult, options: dict) -> PdfReadyV1:
     content = Content(user_stories=user_stories)
 
     # Build SelectionSummary
-    total_items = len(adapter_result.user_stories)
+    total_items = len(adapter_result.items)
     selection_summary = SelectionSummary(
         total_items=total_items,
         included_items=total_items,

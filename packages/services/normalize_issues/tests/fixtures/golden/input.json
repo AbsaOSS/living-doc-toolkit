@@ -23,7 +23,7 @@
       "enterprise": null
     }
   },
-  "user_stories": [
+  "items": [
     {
       "id": "github:AbsaOSS/living-doc-toolkit#1",
       "title": "Implement user authentication",

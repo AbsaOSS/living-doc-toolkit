@@ -24,7 +24,7 @@
       "enterprise": null
     }
   },
-  "user_stories": [
+  "items": [
     {
       "id": "github:AbsaOSS/living-doc-v2#201",
       "title": "Implement real-time notifications",

@@ -32,7 +32,7 @@ def test_version_fixture(version: str, expected_warnings: bool) -> bool:
     Test normalization with a specific collector-gh version fixture.
 
     Args:
-        version: Version string (e.g., "v0.9.0", "v1.0.0", "v2.0.0")
+        version: Version string (e.g., "v0.1.0", "v1.0.0", "v2.0.0")
         expected_warnings: Whether VERSION_MISMATCH warnings are expected
 
     Returns:
@@ -118,8 +118,8 @@ def main() -> int:
 
     results = []
 
-    # Test v0.9.0 (below supported range - should warn)
-    results.append(("v0.9.0", test_version_fixture("v0.9.0", expected_warnings=True)))
+    # Test v0.1.0 (below supported range >=0.1.1 - should warn)
+    results.append(("v0.1.0", test_version_fixture("v0.1.0", expected_warnings=True)))
 
     # Test v1.0.0 (within supported range - should not warn)
     results.append(("v1.0.0", test_version_fixture("v1.0.0", expected_warnings=False)))

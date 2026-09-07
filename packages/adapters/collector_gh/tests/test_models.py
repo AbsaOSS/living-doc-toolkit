@@ -135,9 +135,9 @@ class TestAdapterResult:
     """Tests for the AdapterResult model."""
 
     def test_create_result_with_items_and_warnings(self):
-        """Test creating AdapterResult with user stories and warnings."""
+        """Test creating AdapterResult with items and warnings."""
         result = AdapterResult(
-            user_stories=[
+            items=[
                 AdapterItem(
                     id="github:owner/repo#1",
                     title="Test",
@@ -155,14 +155,14 @@ class TestAdapterResult:
             ),
             warnings=[CompatibilityWarning(code="TEST_WARNING", message="Test warning message")],
         )
-        assert len(result.user_stories) == 1
+        assert len(result.items) == 1
         assert len(result.warnings) == 1
         assert result.warnings[0].code == "TEST_WARNING"
 
     def test_create_result_with_empty_warnings(self):
         """Test creating AdapterResult with empty warnings list."""
         result = AdapterResult(
-            user_stories=[],
+            items=[],
             metadata=AdapterMetadata(
                 producer=AdapterMetadataProducer(name="test", version="1.0.0", build=None),
                 run=AdapterMetadataRun(run_id=None, run_attempt=None, actor=None, workflow=None, ref=None, sha=None),
@@ -176,4 +176,4 @@ class TestAdapterResult:
     def test_validation_fails_with_invalid_data(self):
         """Test that validation fails with invalid data."""
         with pytest.raises(ValidationError):
-            AdapterResult(user_stories="not a list", metadata={}, warnings=[])
+            AdapterResult(items="not a list", metadata={}, warnings=[])

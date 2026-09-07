@@ -29,6 +29,13 @@ class TestParser:
             return json.load(f)
 
     @pytest.fixture
+    def fixture_real_v0_1_1(self):
+        """Load a realistic collector-gh doc-issues.json sample at the real package version (0.1.1)."""
+        fixture_path = Path(__file__).parent / "fixtures" / "collector_v0.1.1" / "input" / "doc-issues.json"
+        with open(fixture_path, "r", encoding="utf-8") as f:
+            return json.load(f)
+
+    @pytest.fixture
     def minimal_payload(self):
         """Create a minimal valid payload."""
         return {
@@ -49,7 +56,7 @@ class TestParser:
                     "enterprise": None,
                 },
             },
-            "user_stories": [
+            "items": [
                 {
                     "id": "github:owner/repo#1",
                     "title": "Test Issue",
@@ -65,11 +72,26 @@ class TestParser:
             ],
         }
 
+    def test_parse_real_collector_gh_0_1_1_sample(self, fixture_real_v0_1_1):
+        """Test that a real post-#110 doc-issues.json (top-level items, producer 0.1.1) parses cleanly.
+
+        The array is `items`, the producer version is collector-gh's actual released
+        version, so parsing must succeed with no error and no VERSION_MISMATCH warning.
+        """
+        result = parse(fixture_real_v0_1_1)
+
+        assert result.metadata.producer.version == "0.1.1"
+        assert len(result.items) == 2
+        assert result.items[0].id == "AbsaOSS/living-doc-toolkit#28"
+        assert "DocumentedUserStory" in result.items[0].tags
+        assert result.warnings == []
+        assert not any(w.code == "VERSION_MISMATCH" for w in result.warnings)
+
     def test_parse_v1_0_0_fixture(self, fixture_v1_0_0):
         """Test parsing with v1.0.0 fixture."""
         result = parse(fixture_v1_0_0)
 
-        assert len(result.user_stories) == 12
+        assert len(result.items) == 12
 
         assert result.metadata.producer.name == "AbsaOSS/living-doc-collector-gh"
         assert result.metadata.producer.version == "1.0.0"
@@ -84,7 +106,7 @@ class TestParser:
         """Test parsing with v1.2.0 fixture."""
         result = parse(fixture_v1_2_0)
 
-        assert len(result.user_stories) == 12
+        assert len(result.items) == 12
 
         assert result.metadata.producer.name == "AbsaOSS/living-doc-collector-gh"
         assert result.metadata.producer.version == "1.2.0"
@@ -96,14 +118,14 @@ class TestParser:
         """Test that AdapterItem ID has correct format."""
         result = parse(fixture_v1_0_0)
 
-        assert result.user_stories[0].id == "github:AbsaOSS/example-project#1"
-        assert result.user_stories[1].id == "github:AbsaOSS/example-project#2"
+        assert result.items[0].id == "github:AbsaOSS/example-project#1"
+        assert result.items[1].id == "github:AbsaOSS/example-project#2"
 
     def test_adapter_item_fields_mapped(self, fixture_v1_0_0):
         """Test that AdapterItem fields are correctly mapped."""
         result = parse(fixture_v1_0_0)
 
-        first_item = result.user_stories[0]
+        first_item = result.items[0]
         assert first_item.title == "User Authentication with OAuth2"
         assert first_item.state == "open"
         assert "documentation" in first_item.tags
@@ -118,7 +140,7 @@ class TestParser:
         """Test that structured fields are parsed into the item."""
         result = parse(fixture_v1_0_0)
 
-        first_item = result.user_stories[0]
+        first_item = result.items[0]
         assert first_item.business_value == ["Business value for issue 1."]
         assert first_item.preconditions == ["User is logged in."]
         assert first_item.acceptance_criteria is not None
@@ -170,25 +192,25 @@ class TestParser:
         """Test parsing with minimal payload."""
         result = parse(minimal_payload)
 
-        assert len(result.user_stories) == 1
-        assert result.user_stories[0].id == "github:owner/repo#1"
-        assert result.user_stories[0].title == "Test Issue"
+        assert len(result.items) == 1
+        assert result.items[0].id == "github:owner/repo#1"
+        assert result.items[0].title == "Test Issue"
 
     def test_parse_with_missing_labels(self, minimal_payload):
         """Test parsing when tags are missing from item."""
-        minimal_payload["user_stories"][0].pop("tags")
+        minimal_payload["items"][0].pop("tags")
         result = parse(minimal_payload)
 
-        assert len(result.user_stories) == 1
-        assert result.user_stories[0].tags == []
+        assert len(result.items) == 1
+        assert result.items[0].tags == []
 
     def test_parse_with_missing_description(self, minimal_payload):
         """Test parsing when description is missing from item."""
-        minimal_payload["user_stories"][0].pop("description")
+        minimal_payload["items"][0].pop("description")
         result = parse(minimal_payload)
 
-        assert len(result.user_stories) == 1
-        assert result.user_stories[0].description is None
+        assert len(result.items) == 1
+        assert result.items[0].description is None
 
     def test_parse_with_no_repositories(self, minimal_payload):
         """Test that empty repositories list raises AdapterError (required by schema)."""
@@ -211,13 +233,13 @@ class TestParser:
         """Test parsing includes closed issues."""
         result = parse(fixture_v1_0_0)
 
-        closed_items = [item for item in result.user_stories if item.state == "closed"]
+        closed_items = [item for item in result.items if item.state == "closed"]
         assert len(closed_items) > 0
         assert closed_items[0].state == "closed"
 
     def test_parse_missing_item_field_raises_error(self, minimal_payload):
         """Test that missing required item field raises AdapterError."""
-        del minimal_payload["user_stories"][0]["title"]
+        del minimal_payload["items"][0]["title"]
 
         with pytest.raises(AdapterError) as exc_info:
             parse(minimal_payload)
@@ -225,13 +247,13 @@ class TestParser:
 
     def test_parse_missing_metadata_raises_error(self):
         """Test that missing metadata raises AdapterError."""
-        payload = {"user_stories": []}
+        payload = {"items": []}
 
         with pytest.raises(AdapterError):
             parse(payload)
 
-    def test_parse_missing_user_stories_raises_error(self):
-        """Test that a missing user_stories key raises AdapterError."""
+    def test_parse_missing_items_raises_error(self):
+        """Test that a missing items key raises AdapterError."""
         payload = {
             "metadata": {
                 "producer": {"name": "AbsaOSS/living-doc-collector-gh", "version": "1.0.0", "build": None},
@@ -247,22 +269,22 @@ class TestParser:
 
         with pytest.raises(AdapterError) as exc_info:
             parse(payload)
-        assert "user_stories" in str(exc_info.value)
+        assert "items" in str(exc_info.value)
 
-    def test_parse_empty_user_stories_list(self, minimal_payload):
-        """Test parsing with empty user_stories list."""
-        minimal_payload["user_stories"] = []
+    def test_parse_empty_items_list(self, minimal_payload):
+        """Test parsing with empty items list."""
+        minimal_payload["items"] = []
         result = parse(minimal_payload)
 
-        assert len(result.user_stories) == 0
+        assert len(result.items) == 0
         assert len(result.warnings) == 0
 
     def test_parse_null_acceptance_criteria(self, minimal_payload):
         """Test parsing an item whose acceptance_criteria is null."""
-        minimal_payload["user_stories"][0]["acceptance_criteria"] = None
+        minimal_payload["items"][0]["acceptance_criteria"] = None
         result = parse(minimal_payload)
 
-        assert result.user_stories[0].acceptance_criteria is None
+        assert result.items[0].acceptance_criteria is None
 
 
 class TestParseAcceptanceCriteria:
@@ -281,7 +303,7 @@ class TestParseAcceptanceCriteria:
                 },
                 "original_metadata": {},
             },
-            "user_stories": [item],
+            "items": [item],
             "warnings": [],
         }
 
@@ -304,8 +326,8 @@ class TestParseAcceptanceCriteria:
 
         result = parse(self._payload(item))
 
-        assert len(result.user_stories) == 1
-        story = result.user_stories[0]
+        assert len(result.items) == 1
+        story = result.items[0]
         assert story.description == "As a user, I want to view the details of a selected domain."
         assert story.business_value == ["Streamlines domain details visibility."]
         assert story.preconditions == ["The user has logged in."]
@@ -332,7 +354,7 @@ class TestParseAcceptanceCriteria:
 
         result = parse(self._payload(item))
 
-        story = result.user_stories[0]
+        story = result.items[0]
         assert story.description is None
         assert story.business_value is None
         assert story.preconditions is None

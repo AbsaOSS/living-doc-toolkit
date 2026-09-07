@@ -74,7 +74,11 @@ Adapter auto-detection checks:
 
 ### Compatibility Policy
 
-**Confirmed range:** `>=1.0.0,<2.0.0`
+**Confirmed range:** `>=0.1.1,<2.0.0`
+
+The floor tracks `living-doc-collector-gh`'s current released package version (`0.1.1`); it
+widens to the `1.0.0` line once collector-gh tags `v1.0.0` (see
+`packages/adapters/collector_gh/SCHEMA_SYNC.md`).
 
 | Scenario | Behavior |
 |----------|----------|
@@ -86,7 +90,7 @@ Warning format in audit:
 ```json
 {
   "code": "VERSION_MISMATCH",
-  "message": "Producer version 2.1.0 is outside confirmed range >=1.0.0,<2.0.0",
+  "message": "Producer version 2.1.0 is outside confirmed range >=0.1.1,<2.0.0",
   "context": "metadata.producer.version"
 }
 ```

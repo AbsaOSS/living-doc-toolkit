@@ -61,7 +61,7 @@ def test_build_pdf_ready_basic():
         organization="owner",
     )
 
-    adapter_result = AdapterResult(user_stories=[item], metadata=metadata, warnings=[])
+    adapter_result = AdapterResult(items=[item], metadata=metadata, warnings=[])
 
     options = {"document_title": "Test Document", "document_version": "1.0.0"}
 
@@ -102,7 +102,7 @@ def test_build_pdf_ready_normalized_sections():
 
     metadata = _make_metadata(organization=None)
 
-    adapter_result = AdapterResult(user_stories=[item], metadata=metadata, warnings=[])
+    adapter_result = AdapterResult(items=[item], metadata=metadata, warnings=[])
     options = {}
 
     pdf_ready = build_pdf_ready(adapter_result, options)
@@ -129,7 +129,7 @@ def test_build_pdf_ready_meta_fields():
 
     metadata = _make_metadata(repositories=["github:owner/repo1", "github:owner/repo2"])
 
-    adapter_result = AdapterResult(user_stories=[item], metadata=metadata, warnings=[])
+    adapter_result = AdapterResult(items=[item], metadata=metadata, warnings=[])
     options = {"document_title": "My Doc", "document_version": "2.0.0"}
 
     pdf_ready = build_pdf_ready(adapter_result, options)
@@ -159,7 +159,7 @@ def test_build_pdf_ready_fallback_document_title():
 
     metadata = _make_metadata(repositories=["github:owner/myrepo"])
 
-    adapter_result = AdapterResult(user_stories=[item], metadata=metadata, warnings=[])
+    adapter_result = AdapterResult(items=[item], metadata=metadata, warnings=[])
     options = {}  # No document_title provided
 
     pdf_ready = build_pdf_ready(adapter_result, options)
@@ -189,7 +189,7 @@ def test_build_pdf_ready_audit_envelope():
         original_metadata={"some": "data"},
     )
 
-    adapter_result = AdapterResult(user_stories=[item], metadata=metadata, warnings=[])
+    adapter_result = AdapterResult(items=[item], metadata=metadata, warnings=[])
     options = {}
 
     pdf_ready = build_pdf_ready(adapter_result, options)
@@ -232,7 +232,7 @@ def test_build_pdf_ready_audit_trace_normalization_step():
 
     metadata = _make_metadata()
 
-    adapter_result = AdapterResult(user_stories=[item], metadata=metadata, warnings=[])
+    adapter_result = AdapterResult(items=[item], metadata=metadata, warnings=[])
     options = {}
 
     pdf_ready = build_pdf_ready(adapter_result, options)
@@ -263,7 +263,7 @@ def test_build_pdf_ready_warnings_in_audit():
 
     warning = CompatibilityWarning(code="VERSION_MISMATCH", message="Version mismatch detected", context="v0.9.0")
 
-    adapter_result = AdapterResult(user_stories=[item], metadata=metadata, warnings=[warning])
+    adapter_result = AdapterResult(items=[item], metadata=metadata, warnings=[warning])
     options = {}
 
     pdf_ready = build_pdf_ready(adapter_result, options)
@@ -294,7 +294,7 @@ def test_build_pdf_ready_run_context():
         ),
     )
 
-    adapter_result = AdapterResult(user_stories=[item], metadata=metadata, warnings=[])
+    adapter_result = AdapterResult(items=[item], metadata=metadata, warnings=[])
     options = {}
 
     pdf_ready = build_pdf_ready(adapter_result, options)
@@ -323,7 +323,7 @@ def test_build_pdf_ready_multiple_items():
 
     metadata = _make_metadata()
 
-    adapter_result = AdapterResult(user_stories=items, metadata=metadata, warnings=[])
+    adapter_result = AdapterResult(items=items, metadata=metadata, warnings=[])
     options = {}
 
     pdf_ready = build_pdf_ready(adapter_result, options)

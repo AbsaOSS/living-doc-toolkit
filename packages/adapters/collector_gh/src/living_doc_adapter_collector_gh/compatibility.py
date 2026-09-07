@@ -6,26 +6,11 @@ Version compatibility checking for the collector-gh adapter.
 This module provides functions to check if a producer version is within
 the confirmed compatible range.
 
-SCHEMA SYNCHRONIZATION PATTERN
-===============================
+`living-doc-collector-gh` owns the `doc-issues.json` contract and generates its schema;
+this repo vendors a pinned copy and, when it receives a `doc-issues.json`, checks that the
+producer version (`metadata.producer.version`) is within the confirmed compatible range.
 
-This repo (living-doc-toolkit) is the schema producer:
-
-1. Defines Pydantic models as single source of truth (models.py)
-2. Exports them to JSON Schema (schema_export.py)
-3. Publishes schema as independent artifact
-
-Collector-gh repo (independent):
-
-1. Downloads published schema
-2. Uses it to validate doc-issues.json
-3. Publishes validated data
-4. No direct code dependency
-
-When this repo receives doc-issues.json from collector-gh, we check
-that the producer version is within our confirmed compatible range.
-
-See SCHEMA_SYNC.md for full synchronization workflow.
+See SCHEMA_SYNC.md for the full synchronization workflow.
 """
 
 from packaging.version import InvalidVersion, Version
@@ -35,7 +20,10 @@ from living_doc_adapter_collector_gh.models import CompatibilityWarning
 # Confirmed compatible version range
 # Maps to producer repo releases:
 # https://github.com/AbsaOSS/living-doc-collector-gh/releases
-CONFIRMED_MIN = "1.0.0"
+# TODO(before v1 release): widen to the confirmed 1.0.0 line once collector-gh tags
+# v1.0.0 — see SCHEMA_SYNC.md. The floor tracks collector-gh's current package version
+# (0.1.1); a higher floor flags every real 0.1.x payload with a spurious VERSION_MISMATCH.
+CONFIRMED_MIN = "0.1.1"
 CONFIRMED_MAX = "2.0.0"  # Exclusive upper bound
 
 # Schema version (independent of adapter package version)

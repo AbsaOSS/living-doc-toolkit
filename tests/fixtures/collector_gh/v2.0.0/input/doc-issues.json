@@ -24,7 +24,7 @@
       "enterprise": null
     }
   },
-  "user_stories": [
+  "items": [
     {
       "id": "github:AbsaOSS/future-project#301",
       "title": "AI-powered code review assistant",

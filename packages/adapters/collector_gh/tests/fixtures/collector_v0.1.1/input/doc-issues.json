@@ -1,0 +1,89 @@
+{
+  "items": [
+    {
+      "id": "AbsaOSS/living-doc-toolkit#28",
+      "title": "View domain details",
+      "state": "open",
+      "tags": [
+        "DocumentedUserStory",
+        "priority:high"
+      ],
+      "url": "https://github.com/AbsaOSS/living-doc-toolkit/issues/28",
+      "timestamps": {
+        "created": "2025-12-17T11:31:16+00:00",
+        "updated": "2026-04-09T07:10:01+00:00"
+      },
+      "description": "As a user, I want to view the details of a selected domain.",
+      "business_value": [
+        "Streamlines domain details visibility."
+      ],
+      "preconditions": [
+        "The user has logged in."
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "GH-28-01",
+          "state": "Active",
+          "version": "v1.5.0",
+          "description": "User can access the domain detail view."
+        },
+        {
+          "id": "GH-28-02",
+          "state": "Active",
+          "version": "v1.5.0",
+          "description": "Detail view shows owner, status and last-updated date."
+        }
+      ]
+    },
+    {
+      "id": "AbsaOSS/living-doc-toolkit#15",
+      "title": "Add data feeds registry",
+      "state": "closed",
+      "tags": [
+        "DocumentedFeature"
+      ],
+      "url": "https://github.com/AbsaOSS/living-doc-toolkit/issues/15",
+      "timestamps": {
+        "created": "2025-11-21T10:27:16+00:00",
+        "updated": "2026-03-30T08:41:28+00:00"
+      },
+      "description": null,
+      "business_value": null,
+      "preconditions": null,
+      "acceptance_criteria": null
+    }
+  ],
+  "metadata": {
+    "producer": {
+      "name": "AbsaOSS/living-doc-collector-gh",
+      "version": "0.1.1",
+      "build": null
+    },
+    "run": {
+      "run_id": null,
+      "run_attempt": null,
+      "actor": null,
+      "workflow": null,
+      "ref": null,
+      "sha": null
+    },
+    "source": {
+      "systems": [
+        "GitHub"
+      ],
+      "repositories": [
+        "AbsaOSS/living-doc-toolkit"
+      ],
+      "organization": "AbsaOSS",
+      "enterprise": null
+    },
+    "original_metadata": {
+      "generated_at": "2026-04-09T07:11:00+00:00",
+      "schema_version": "1.0.0",
+      "inputs": {
+        "project_state_mining_enabled": false
+      }
+    }
+  },
+  "warnings": []
+}
