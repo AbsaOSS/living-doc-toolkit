@@ -20,9 +20,11 @@ from living_doc_adapter_collector_gh.models import CompatibilityWarning
 # Confirmed compatible version range
 # Maps to producer repo releases:
 # https://github.com/AbsaOSS/living-doc-collector-gh/releases
-# TODO(before v1 release): widen to the confirmed 1.0.0 line once collector-gh tags
-# v1.0.0 — see SCHEMA_SYNC.md. The floor tracks collector-gh's current package version
-# (0.1.1); a higher floor flags every real 0.1.x payload with a spurious VERSION_MISMATCH.
+# The floor is collector-gh's current package version (0.1.1), so the range already accepts
+# the whole 1.x line; a higher floor would flag every real 0.1.x payload with a spurious
+# VERSION_MISMATCH.
+# TODO(before v1 release): raise the floor to "1.0.0" once collector-gh tags a real v1.0.0
+# — see SCHEMA_SYNC.md.
 CONFIRMED_MIN = "0.1.1"
 CONFIRMED_MAX = "2.0.0"  # Exclusive upper bound
 

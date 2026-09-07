@@ -26,6 +26,41 @@ import json
 import sys
 from pathlib import Path
 
+_FIXTURES_DIR = Path(__file__).parent.parent / "tests" / "fixtures" / "collector_gh"
+
+
+def discover_version_fixtures() -> list[str]:
+    """
+    Discover every collector-gh fixture directory (``tests/fixtures/collector_gh/v*/``).
+
+    Matches the discovery rule documented in ``.claude/agents/test-author.md`` — the version
+    list is never hard-coded here, so a new ``v<X.Y.Z>/`` fixture is picked up automatically.
+
+    Returns:
+        Sorted directory names (e.g. ``["v0.1.0", "v1.0.0", "v1.2.0", "v2.0.0"]``).
+    """
+    return sorted(d.name for d in _FIXTURES_DIR.glob("v*") if (d / "input" / "doc-issues.json").is_file())
+
+
+def expected_warning_for(version_dir: str) -> bool:
+    """
+    Whether the fixture's producer version falls outside the adapter's confirmed range.
+
+    Derived from the live compatibility check (``CONFIRMED_MIN`` / ``CONFIRMED_MAX`` in
+    ``compatibility.py``), so the expectation can never drift from the code under test.
+
+    Args:
+        version_dir: Fixture directory name (e.g. ``"v1.2.0"``).
+
+    Returns:
+        True if a ``VERSION_MISMATCH`` warning is expected for that fixture.
+    """
+    from living_doc_adapter_collector_gh.compatibility import check_compatibility
+
+    payload = json.loads((_FIXTURES_DIR / version_dir / "input" / "doc-issues.json").read_text(encoding="utf-8"))
+    producer_version = payload["metadata"]["producer"]["version"]
+    return any(w.code == "VERSION_MISMATCH" for w in check_compatibility(producer_version))
+
 
 def test_version_fixture(version: str, expected_warnings: bool) -> bool:
     """
@@ -42,8 +77,7 @@ def test_version_fixture(version: str, expected_warnings: bool) -> bool:
     print("-" * 60)
 
     # Define paths
-    repo_root = Path(__file__).parent.parent
-    input_file = repo_root / "tests" / "fixtures" / "collector_gh" / version / "input" / "doc-issues.json"
+    input_file = _FIXTURES_DIR / version / "input" / "doc-issues.json"
     output_file = Path(f"/tmp/test_compatibility_{version}_output.json")
 
     # Verify input file exists
@@ -111,21 +145,31 @@ def test_version_fixture(version: str, expected_warnings: bool) -> bool:
 
 
 def main() -> int:
-    """Run compatibility verification for all test versions."""
+    """Run compatibility verification for every discovered collector-gh fixture."""
     print("=" * 60)
     print("Collector-GH Version Compatibility Verification")
     print("=" * 60)
 
+    version_dirs = discover_version_fixtures()
+    if not version_dirs:
+        print(f"\n✗ No fixtures found under {_FIXTURES_DIR}")
+        return 1
+
+    try:
+        expectations = {v: expected_warning_for(v) for v in version_dirs}
+    except ImportError:
+        print("✗ Cannot import living_doc_adapter_collector_gh")
+        print("  Packages may not be installed. Run:")
+        print("  pip install -e packages/core -e packages/datasets_pdf")
+        print("  pip install -e packages/adapters/collector_gh -e packages/services/normalize_issues")
+        return 1
+
     results = []
-
-    # Test v0.1.0 (below supported range >=0.1.1 - should warn)
-    results.append(("v0.1.0", test_version_fixture("v0.1.0", expected_warnings=True)))
-
-    # Test v1.0.0 (within supported range - should not warn)
-    results.append(("v1.0.0", test_version_fixture("v1.0.0", expected_warnings=False)))
-
-    # Test v2.0.0 (above supported range - should warn)
-    results.append(("v2.0.0", test_version_fixture("v2.0.0", expected_warnings=True)))
+    for version in version_dirs:
+        expected = expectations[version]
+        note = "outside confirmed range - should warn" if expected else "within confirmed range - should not warn"
+        print(f"\n({version}: {note})")
+        results.append((version, test_version_fixture(version, expected_warnings=expected)))
 
     # Summary
     print("\n" + "=" * 60)

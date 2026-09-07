@@ -184,4 +184,4 @@ python -m living_doc_adapter_collector_gh.schema_export schema.json
 
 - **Producer Repo:** https://github.com/AbsaOSS/living-doc-collector-gh
 - **Consumer (This Repo):** https://github.com/AbsaOSS/living-doc-toolkit
-- **Input Contract Docs:** [../../docs/contracts.md](../../docs/contracts.md#input-contract-doc-issuesjson)
+- **Input Contract Docs:** [../../../docs/contracts.md](../../../docs/contracts.md#input-contract-doc-issuesjson)

@@ -16,7 +16,7 @@
 
 ## Exit Codes Reference
 
-All toolkit services follow the exit code convention defined in [Contracts & Interfaces](contracts.md#exit-codes):
+All toolkit services follow the exit code convention defined in [Contracts & Interfaces](contracts.md#exit-codes-normalize-issues):
 
 | Exit Code | Condition | Error Prefix | Description |
 |-----------|-----------|--------------|-------------|

@@ -76,8 +76,9 @@ Adapter auto-detection checks:
 
 **Confirmed range:** `>=0.1.1,<2.0.0`
 
-The floor tracks `living-doc-collector-gh`'s current released package version (`0.1.1`); it
-widens to the `1.0.0` line once collector-gh tags `v1.0.0` (see
+The floor tracks `living-doc-collector-gh`'s current released package version (`0.1.1`), so
+the range already covers the whole `1.x` line. It is raised to the originally-intended
+`>=1.0.0` once collector-gh tags a real `v1.0.0` (see
 `packages/adapters/collector_gh/SCHEMA_SYNC.md`).
 
 | Scenario | Behavior |
