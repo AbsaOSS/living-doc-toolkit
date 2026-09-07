@@ -1,28 +1,17 @@
 # Copyright 2026 ABSA Group Limited. Apache License, Version 2.0.
 
 """
-Pydantic models for the collector-gh adapter.
+Pydantic models for the collector-gh adapter — a consumer-side representation of the
+`doc-issues.json` input contract.
 
-These models represent the authoritative input contract for doc-issues.json.
-They are the single source of truth for the schema between this repository
-(data consumer / schema producer) and the collector-gh repository
-(data producer / schema consumer).
+`living-doc-collector-gh` owns this contract: since its PR #110 it generates
+`doc-issues-v1.0.0-schema.json` from its own `doc_issues/models.py`, and this repo vendors
+a pinned copy of that schema under `schemas/`. The models below mirror the vendored schema
+(field list identical to collector-gh's `doc_issues/models.py`) and are kept in step with it
+via the golden-fixture tests — they are not the source of truth for what a valid
+`doc-issues.json` looks like.
 
-PYDANTIC-FIRST PATTERN
-======================
-
-This repo:
-- Defines Pydantic models (source of truth)
-- Exports them as JSON Schema for the collector-gh repo to use for validation
-
-Collector-gh repo:
-- Uses our exported JSON Schema to validate doc-issues.json
-- Publishes validated data to us
-
-To export schema for collector-gh:
-    python -m living_doc_adapter_collector_gh.schema_export > doc-issues-schema.json
-
-See SCHEMA_SYNC.md for the full synchronization workflow.
+See SCHEMA_SYNC.md for the synchronization workflow.
 """
 
 from pydantic import BaseModel
@@ -44,7 +33,7 @@ class AdapterItemTimestamps(BaseModel):
 
 
 class AcceptanceCriterion(BaseModel):
-    """A single acceptance criterion attached to a User Story."""
+    """A single acceptance-criterion row parsed from an issue body."""
 
     id: str
     state: str
@@ -53,7 +42,7 @@ class AcceptanceCriterion(BaseModel):
 
 
 class AdapterItem(BaseModel):
-    """Represents a single User Story from the collector output."""
+    """A single consolidated issue enriched with parsed body sections."""
 
     id: str
     title: str
@@ -107,6 +96,11 @@ class AdapterMetadata(BaseModel):
 class AdapterResult(BaseModel):
     """Complete result from adapter parsing."""
 
-    user_stories: list[AdapterItem]
+    # `items` holds every collected documentation record regardless of source system or
+    # documentation type — there is no per-type grouping and no `type` field on the item;
+    # the type is carried by the `DocumentedUserStory` / `DocumentedFeature` /
+    # `DocumentedFunctionality` label in `AdapterItem.tags`. Mirrors the top-level array in
+    # collector-gh's `doc_issues/models.py`.
+    items: list[AdapterItem]
     metadata: AdapterMetadata
     warnings: list[CompatibilityWarning]

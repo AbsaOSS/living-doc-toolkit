@@ -5,7 +5,7 @@
 
 A monorepo hosting multiple independent Python services that transform and enrich machine-readable artifacts produced by upstream collectors (e.g., [living-doc-collector-gh](https://github.com/AbsaOSS/living-doc-collector-gh)) into datasets consumable by downstream actions (e.g., [living-doc-generator-pdf](https://github.com/AbsaOSS/living-doc-generator-pdf)).
 
-> *This is a monorepo of multiple services and follows a different README shape than the single-purpose `living-doc-*` action repos ([convention](https://github.com/AbsaOSS/living-doc/blob/master/docs/specs/repo-conventions.md)). If you arrived from an action repo, the `Understand / Use / Maintain` layout below is deliberate.*
+> *This is a monorepo of multiple services and follows a different README shape than the single-purpose `living-doc-*` action repos (per the fleet-wide `repo-conventions.md`). If you arrived from an action repo, the `Understand / Use / Maintain` layout below is deliberate.*
 
 ---
 

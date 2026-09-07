@@ -67,7 +67,7 @@ package directory, matching how CI executes them.
 ## QA Automation with Make
 
 This project includes a `Makefile` exposing the shared **command vocabulary**
-([`repo-conventions.md` §7](https://github.com/AbsaOSS/living-doc/blob/master/docs/specs/repo-conventions.md)).
+(the fleet-wide `repo-conventions.md` §7 "Command vocabulary").
 Use the Make targets instead of manual loops — `.github/workflows/test.yml` runs the same
 targets, so local and CI never drift.
 

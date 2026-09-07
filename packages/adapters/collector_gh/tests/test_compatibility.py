@@ -23,12 +23,12 @@ class TestCheckCompatibility:
         warnings = check_compatibility("1.9.9")
         assert len(warnings) == 0
 
-    def test_version_0_9_0_warning(self):
-        """Test that version 0.9.0 produces VERSION_MISMATCH warning (below confirmed range >=1.0.0)."""
-        warnings = check_compatibility("0.9.0")
+    def test_version_0_1_0_warning(self):
+        """Test that version 0.1.0 produces VERSION_MISMATCH warning (below confirmed range >=0.1.1)."""
+        warnings = check_compatibility("0.1.0")
         assert len(warnings) == 1
         assert warnings[0].code == "VERSION_MISMATCH"
-        assert "0.9.0" in warnings[0].message
+        assert "0.1.0" in warnings[0].message
 
     def test_version_2_0_0_warning(self):
         """Test that version 2.0.0 produces VERSION_MISMATCH warning (at exclusive upper bound)."""
@@ -36,7 +36,7 @@ class TestCheckCompatibility:
         assert len(warnings) == 1
         assert warnings[0].code == "VERSION_MISMATCH"
         assert "2.0.0" in warnings[0].message
-        assert ">=1.0.0,<2.0.0" in warnings[0].message
+        assert ">=0.1.1,<2.0.0" in warnings[0].message
         assert warnings[0].context == "metadata.producer.version"
 
     def test_version_2_1_0_warning(self):
@@ -77,9 +77,15 @@ class TestCheckCompatibility:
         assert len(warnings) == 0
 
     def test_version_at_lower_boundary(self):
-        """Test that version at exact lower boundary (1.0.0) has no warnings."""
-        warnings = check_compatibility("1.0.0")
+        """Test that version at the exact lower boundary (0.1.1) has no warnings."""
+        warnings = check_compatibility("0.1.1")
         assert len(warnings) == 0
+
+    def test_version_just_below_lower_boundary(self):
+        """Test that version just below the lower boundary (0.1.0) produces a warning."""
+        warnings = check_compatibility("0.1.0")
+        assert len(warnings) == 1
+        assert warnings[0].code == "VERSION_MISMATCH"
 
     def test_version_just_below_upper_boundary(self):
         """Test that version just below upper boundary (1.999.999) has no warnings."""

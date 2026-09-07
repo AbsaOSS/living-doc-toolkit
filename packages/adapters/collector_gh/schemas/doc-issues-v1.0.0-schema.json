@@ -1,22 +1,19 @@
 {
+  "$schema_version": "1.0.0",
   "$defs": {
     "AcceptanceCriterion": {
-      "description": "A single acceptance criterion attached to a User Story.",
+      "description": "A single acceptance-criterion row parsed from an issue body.",
       "properties": {
         "id": {
-          "title": "Id",
           "type": "string"
         },
         "state": {
-          "title": "State",
           "type": "string"
         },
         "version": {
-          "title": "Version",
           "type": "string"
         },
         "description": {
-          "title": "Description",
           "type": "string"
         }
       },
@@ -29,113 +26,13 @@
       "title": "AcceptanceCriterion",
       "type": "object"
     },
-    "AdapterItem": {
-      "description": "Represents a single User Story from the collector output.",
-      "properties": {
-        "id": {
-          "title": "Id",
-          "type": "string"
-        },
-        "title": {
-          "title": "Title",
-          "type": "string"
-        },
-        "state": {
-          "title": "State",
-          "type": "string"
-        },
-        "tags": {
-          "items": {
-            "type": "string"
-          },
-          "title": "Tags",
-          "type": "array"
-        },
-        "url": {
-          "title": "Url",
-          "type": "string"
-        },
-        "timestamps": {
-          "$ref": "#/$defs/AdapterItemTimestamps"
-        },
-        "description": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Description"
-        },
-        "business_value": {
-          "anyOf": [
-            {
-              "items": {
-                "type": "string"
-              },
-              "type": "array"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Business Value"
-        },
-        "preconditions": {
-          "anyOf": [
-            {
-              "items": {
-                "type": "string"
-              },
-              "type": "array"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Preconditions"
-        },
-        "acceptance_criteria": {
-          "anyOf": [
-            {
-              "items": {
-                "$ref": "#/$defs/AcceptanceCriterion"
-              },
-              "type": "array"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Acceptance Criteria"
-        }
-      },
-      "required": [
-        "id",
-        "title",
-        "state",
-        "tags",
-        "url",
-        "timestamps"
-      ],
-      "title": "AdapterItem",
-      "type": "object"
-    },
     "AdapterItemTimestamps": {
-      "description": "Timestamps for an adapter item.",
+      "description": "Creation/update timestamps for an adapter item.",
       "properties": {
         "created": {
-          "title": "Created",
           "type": "string"
         },
         "updated": {
-          "title": "Updated",
           "type": "string"
         }
       },
@@ -146,42 +43,13 @@
       "title": "AdapterItemTimestamps",
       "type": "object"
     },
-    "AdapterMetadata": {
-      "description": "Metadata information from the adapter.",
-      "properties": {
-        "producer": {
-          "$ref": "#/$defs/AdapterMetadataProducer"
-        },
-        "run": {
-          "$ref": "#/$defs/AdapterMetadataRun"
-        },
-        "source": {
-          "$ref": "#/$defs/AdapterMetadataSource"
-        },
-        "original_metadata": {
-          "additionalProperties": true,
-          "title": "Original Metadata",
-          "type": "object"
-        }
-      },
-      "required": [
-        "producer",
-        "run",
-        "source",
-        "original_metadata"
-      ],
-      "title": "AdapterMetadata",
-      "type": "object"
-    },
     "AdapterMetadataProducer": {
-      "description": "Producer information for adapter metadata.",
+      "description": "Identifies the tool that produced the output file.",
       "properties": {
         "name": {
-          "title": "Name",
           "type": "string"
         },
         "version": {
-          "title": "Version",
           "type": "string"
         },
         "build": {
@@ -192,8 +60,7 @@
             {
               "type": "null"
             }
-          ],
-          "title": "Build"
+          ]
         }
       },
       "required": [
@@ -205,7 +72,7 @@
       "type": "object"
     },
     "AdapterMetadataRun": {
-      "description": "Run information for adapter metadata.",
+      "description": "GitHub Actions workflow run information, when available.",
       "properties": {
         "run_id": {
           "anyOf": [
@@ -215,8 +82,7 @@
             {
               "type": "null"
             }
-          ],
-          "title": "Run Id"
+          ]
         },
         "run_attempt": {
           "anyOf": [
@@ -226,8 +92,7 @@
             {
               "type": "null"
             }
-          ],
-          "title": "Run Attempt"
+          ]
         },
         "actor": {
           "anyOf": [
@@ -237,8 +102,7 @@
             {
               "type": "null"
             }
-          ],
-          "title": "Actor"
+          ]
         },
         "workflow": {
           "anyOf": [
@@ -248,8 +112,7 @@
             {
               "type": "null"
             }
-          ],
-          "title": "Workflow"
+          ]
         },
         "ref": {
           "anyOf": [
@@ -259,8 +122,7 @@
             {
               "type": "null"
             }
-          ],
-          "title": "Ref"
+          ]
         },
         "sha": {
           "anyOf": [
@@ -270,8 +132,7 @@
             {
               "type": "null"
             }
-          ],
-          "title": "Sha"
+          ]
         }
       },
       "required": [
@@ -286,20 +147,18 @@
       "type": "object"
     },
     "AdapterMetadataSource": {
-      "description": "Source information for adapter metadata.",
+      "description": "Source system and repository information.",
       "properties": {
         "systems": {
           "items": {
             "type": "string"
           },
-          "title": "Systems",
           "type": "array"
         },
         "repositories": {
           "items": {
             "type": "string"
           },
-          "title": "Repositories",
           "type": "array"
         },
         "organization": {
@@ -310,8 +169,7 @@
             {
               "type": "null"
             }
-          ],
-          "title": "Organization"
+          ]
         },
         "enterprise": {
           "anyOf": [
@@ -321,8 +179,7 @@
             {
               "type": "null"
             }
-          ],
-          "title": "Enterprise"
+          ]
         }
       },
       "required": [
@@ -334,15 +191,39 @@
       "title": "AdapterMetadataSource",
       "type": "object"
     },
+    "AdapterMetadata": {
+      "description": "File-level provenance and audit metadata.",
+      "properties": {
+        "producer": {
+          "$ref": "#/$defs/AdapterMetadataProducer"
+        },
+        "run": {
+          "$ref": "#/$defs/AdapterMetadataRun"
+        },
+        "source": {
+          "$ref": "#/$defs/AdapterMetadataSource"
+        },
+        "original_metadata": {
+          "additionalProperties": true,
+          "type": "object"
+        }
+      },
+      "required": [
+        "producer",
+        "run",
+        "source",
+        "original_metadata"
+      ],
+      "title": "AdapterMetadata",
+      "type": "object"
+    },
     "CompatibilityWarning": {
-      "description": "Represents a compatibility warning during adapter processing.",
+      "description": "A non-fatal compatibility warning surfaced to downstream consumers.",
       "properties": {
         "code": {
-          "title": "Code",
           "type": "string"
         },
         "message": {
-          "title": "Message",
           "type": "string"
         },
         "context": {
@@ -354,8 +235,7 @@
               "type": "null"
             }
           ],
-          "default": null,
-          "title": "Context"
+          "default": null
         }
       },
       "required": [
@@ -364,15 +244,105 @@
       ],
       "title": "CompatibilityWarning",
       "type": "object"
+    },
+    "AdapterItem": {
+      "description": "A single consolidated issue enriched with parsed body sections.",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "url": {
+          "type": "string"
+        },
+        "timestamps": {
+          "$ref": "#/$defs/AdapterItemTimestamps"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "business_value": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "preconditions": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "acceptance_criteria": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/AcceptanceCriterion"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "state",
+        "tags",
+        "url",
+        "timestamps"
+      ],
+      "title": "AdapterItem",
+      "type": "object"
     }
   },
+  "title": "AdapterResult",
   "description": "Complete result from adapter parsing.",
+  "type": "object",
   "properties": {
-    "user_stories": {
+    "items": {
       "items": {
         "$ref": "#/$defs/AdapterItem"
       },
-      "title": "User Stories",
       "type": "array"
     },
     "metadata": {
@@ -382,16 +352,12 @@
       "items": {
         "$ref": "#/$defs/CompatibilityWarning"
       },
-      "title": "Warnings",
       "type": "array"
     }
   },
   "required": [
-    "user_stories",
+    "items",
     "metadata",
     "warnings"
-  ],
-  "title": "AdapterResult",
-  "type": "object",
-  "$schema_version": "1.0.0"
+  ]
 }

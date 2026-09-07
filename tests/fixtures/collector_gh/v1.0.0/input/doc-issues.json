@@ -24,7 +24,7 @@
       "enterprise": null
     }
   },
-  "user_stories": [
+  "items": [
     {
       "id": "github:AbsaOSS/living-doc-project#101",
       "title": "Implement user authentication with SSO",

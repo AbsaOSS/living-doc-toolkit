@@ -40,7 +40,7 @@ def valid_input_data():
                 "enterprise": None,
             },
         },
-        "user_stories": [
+        "items": [
             {
                 "id": "github:owner/repo#1",
                 "title": "Test Issue",

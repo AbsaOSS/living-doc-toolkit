@@ -35,7 +35,7 @@ def test_run_service_valid_input(tmp_path):
                 "enterprise": None,
             },
         },
-        "user_stories": [
+        "items": [
             {
                 "id": "github:owner/repo#123",
                 "title": "Test Issue",
@@ -137,7 +137,7 @@ def test_run_service_explicit_adapter(tmp_path):
             },
             "source": {"systems": ["github"], "repositories": ["owner/repo"], "organization": None, "enterprise": None},
         },
-        "user_stories": [
+        "items": [
             {
                 "id": "github:owner/repo#1",
                 "title": "Test",
@@ -194,7 +194,7 @@ def test_run_service_empty_items(tmp_path):
             },
             "source": {"systems": ["github"], "repositories": ["owner/repo"], "organization": None, "enterprise": None},
         },
-        "user_stories": [],
+        "items": [],
     }
 
     input_file = tmp_path / "input.json"
@@ -230,7 +230,7 @@ def test_run_service_multiple_items(tmp_path):
             },
             "source": {"systems": ["github"], "repositories": ["owner/repo"], "organization": None, "enterprise": None},
         },
-        "user_stories": [
+        "items": [
             {
                 "id": f"github:owner/repo#{i}",
                 "title": f"Issue {i}",

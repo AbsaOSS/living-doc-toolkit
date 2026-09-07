@@ -1,45 +1,38 @@
 # Input Schema Artifacts
 
-This directory contains the exported JSON Schema for the input contract.
+This directory holds a **vendored, pinned copy** of the `doc-issues.json` input-contract
+schema.
 
 ## Schema File
 
-- **`doc-issues-v1.0.0-schema.json`** — JSON Schema for doc-issues.json input data (schema version 1.0.0)
+- **`doc-issues-v1.0.0-schema.json`** — JSON Schema for `doc-issues.json` input data
+  (schema version `1.0.0`).
 
-## How to Generate
+## Ownership
 
-From the package root (`packages/adapters/collector_gh/`):
+`living-doc-collector-gh` **owns** this contract. It generates
+`doc-issues-v1.0.0-schema.json` from its own Pydantic models
+(`doc_issues/models.py` → `doc_issues/schema_export.py`) and is the schema **and** data
+producer. This repository is the schema **and** data consumer: it vendors the file below
+verbatim and keeps `src/living_doc_adapter_collector_gh/models.py` in step with it via the
+golden-fixture tests.
 
-```bash
-# Generate and save to default location (this directory)
-python -m living_doc_adapter_collector_gh.schema_export
+## How to Update
 
-# Or specify a custom output location
-python -m living_doc_adapter_collector_gh.schema_export /path/to/custom-schema.json
-```
+This is a manual sync until the pin-and-vendor automation lands (roadmap Phase 5):
+
+1. Take `doc_issues/schema/doc-issues-v1.0.0-schema.json` from `living-doc-collector-gh` at
+   the pinned commit / tag.
+2. Copy it here byte-for-byte (do not reformat or re-key it).
+3. Re-run the adapter golden tests and `verifications/verify_golden.py` /
+   `verifications/verify_compatibility.py`.
+
+See `../SCHEMA_SYNC.md` for the full consumer-side synchronization workflow.
 
 ## Usage
 
-Downstream consumers (e.g., collector-gh repo) independently:
-1. Obtain the published schema from this directory
-2. Use it in their validation pipeline
-3. Validate input data against the schema
-
-Example with `ajv-cli`:
+Downstream tooling can validate a `doc-issues.json` against this file, e.g. with `ajv-cli`:
 
 ```bash
 ajv validate -s doc-issues-v1.0.0-schema.json -d /path/to/doc-issues.json
 ```
-
-## Schema Updates
-
-When Pydantic models change:
-
-1. Pydantic models in `src/living_doc_adapter_collector_gh/models.py` are updated
-2. Run `python -m living_doc_adapter_collector_gh.schema_export` to regenerate
-3. New versioned file is created: `doc-issues-v{VERSION}-schema.json`
-4. Commit updated schema
-5. Release as new version
-6. Downstream consumers obtain and use updated schema
-
-See `SCHEMA_SYNC.md` for complete synchronization workflow.

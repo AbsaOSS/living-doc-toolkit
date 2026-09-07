@@ -13,7 +13,7 @@ This adapter is part of the Living Documentation Toolkit and is used by the norm
 ## Features
 
 - **Producer Detection**: Automatically detects if input is from collector-gh
-- **Version Compatibility**: Validates producer version against confirmed range (>=1.0.0, <2.0.0)
+- **Version Compatibility**: Validates producer version against confirmed range (>=0.1.1, <2.0.0)
 - **Input Parsing**: Transforms collector-gh output into structured `AdapterResult` format
 - **Metadata Preservation**: Maintains original metadata for audit trail
 - **Type Safety**: Full Pydantic model validation with type hints
@@ -50,8 +50,8 @@ if can_handle(payload):
     # Parse the input
     result = parse(payload)
     
-    # Access parsed user stories
-    for item in result.user_stories:
+    # Access parsed items
+    for item in result.items:
         print(f"ID: {item.id}")
         print(f"Title: {item.title}")
         print(f"State: {item.state}")
@@ -102,9 +102,9 @@ Complete output from the adapter:
 ```python
 @dataclass
 class AdapterResult:
-    user_stories: list[AdapterItem]    # Parsed user stories
-    metadata: AdapterMetadata          # Producer metadata
-    warnings: list[CompatibilityWarning]  # Compatibility warnings
+    items: list[AdapterItem]               # Parsed items (one flat, type-neutral array)
+    metadata: AdapterMetadata              # Producer metadata
+    warnings: list[CompatibilityWarning]   # Compatibility warnings
 ```
 
 ### AdapterItem
@@ -120,7 +120,7 @@ class AdapterItem:
     tags: list[str]                   # Labels/tags
     url: str                          # GitHub issue URL
     timestamps: AdapterItemTimestamps # Created/updated times
-    description: str | None                       # User story description
+    description: str | None                       # Item description
     business_value: list[str] | None              # Business value statements
     preconditions: list[str] | None               # Preconditions
     acceptance_criteria: list[AcceptanceCriterion] | None  # Structured ACs
@@ -154,7 +154,7 @@ class CompatibilityWarning:
 ## Version Compatibility
 
 The adapter is confirmed compatible with:
-- **collector-gh versions**: `>=1.0.0, <2.0.0`
+- **collector-gh versions**: `>=0.1.1, <2.0.0`
 
 Versions outside this range will generate a `VERSION_MISMATCH` warning, but parsing will still be attempted.
 
