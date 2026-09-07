@@ -9,7 +9,7 @@ on:
 
 jobs:
   normalize-issues:
-    name: Normalize Issues to PDF-Ready Format
+    name: Normalize Issues to Generator-Ready Format
     runs-on: ubuntu-latest
     
     steps:
@@ -29,7 +29,7 @@ jobs:
         run: |
           # Install all packages
           pip install -e packages/core
-          pip install -e packages/datasets_pdf
+          pip install -e packages/datasets_generator_ready
           pip install -e packages/adapters/collector_gh
           pip install -e packages/services/normalize_issues
           pip install -e apps/cli
@@ -41,17 +41,17 @@ jobs:
         run: |
           living-doc normalize-issues \
             --input doc-issues.json \
-            --output pdf_ready.json \
+            --output generator-ready.json \
             --document-title "Product Requirements" \
             --document-version "${{ github.ref_name }}" \
             --verbose
       
       # Step 5: Upload artifacts
-      - name: Upload PDF-ready JSON
+      - name: Upload generator-ready JSON
         uses: actions/upload-artifact@v4
         with:
-          name: pdf-ready-json
-          path: pdf_ready.json
+          name: generator-ready-json
+          path: generator-ready.json
           retention-days: 30
 
   # ============================================================================
@@ -67,11 +67,11 @@ jobs:
   # 2. BUILDER (this workflow): Normalize issues
   #    - Tool: living-doc-toolkit normalize-issues
   #    - Input: doc-issues.json
-  #    - Output: pdf_ready.json
+  #    - Output: generator-ready.json
   # 
   # 3. GENERATOR: Generate PDF document
   #    - Action: AbsaOSS/living-doc-generator-pdf@v1
-  #    - Input: pdf_ready.json
+  #    - Input: generator-ready.json
   #    - Output: living-documentation.pdf
   # 
   # Example full pipeline:
@@ -105,11 +105,11 @@ jobs:
   #           pip install living-doc-toolkit
   #           living-doc normalize-issues \
   #             --input doc-issues.json \
-  #             --output pdf_ready.json
+  #             --output generator-ready.json
   #       - uses: actions/upload-artifact@v4
   #         with:
-  #           name: pdf-ready-json
-  #           path: pdf_ready.json
+  #           name: generator-ready-json
+  #           path: generator-ready.json
   # 
   #   generate:
   #     needs: normalize
@@ -118,10 +118,10 @@ jobs:
   #       - uses: actions/checkout@v4
   #       - uses: actions/download-artifact@v4
   #         with:
-  #           name: pdf-ready-json
+  #           name: generator-ready-json
   #       - uses: AbsaOSS/living-doc-generator-pdf@v1
   #         with:
-  #           input-file: pdf_ready.json
+  #           input-file: generator-ready.json
   #           output-file: living-documentation.pdf
   #       - uses: actions/upload-artifact@v4
   #         with:

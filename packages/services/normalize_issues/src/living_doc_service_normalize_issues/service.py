@@ -35,7 +35,7 @@ def run_service(input_path: str, output_path: str, options: dict) -> None:
 
     Args:
         input_path: Path to input JSON file (collector-gh output)
-        output_path: Path to output JSON file (pdf_ready.json)
+        output_path: Path to output JSON file (generator-ready.json)
         options: Configuration options (document_title, document_version, source, etc.)
 
     Raises:

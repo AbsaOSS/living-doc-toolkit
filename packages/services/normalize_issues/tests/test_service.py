@@ -65,7 +65,7 @@ def test_run_service_valid_input(tmp_path):
     with open(output_file, "r", encoding="utf-8") as f:
         output_data = json.load(f)
 
-    assert output_data["schema_version"] == "1.0"
+    assert output_data["schema_version"] == "generator-ready-v1.0.0"
     assert output_data["meta"]["document_title"] == "Test Doc"
     assert output_data["meta"]["document_version"] == "1.0.0"
     assert len(output_data["content"]["user_stories"]) == 1

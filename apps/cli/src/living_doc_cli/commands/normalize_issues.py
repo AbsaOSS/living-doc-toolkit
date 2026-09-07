@@ -5,6 +5,7 @@ normalize-issues CLI command.
 """
 
 import sys
+from pathlib import Path
 from typing import Optional
 
 import click
@@ -17,6 +18,11 @@ from living_doc_core.errors import (  # type: ignore[import-untyped]
     ToolkitError,
 )
 from living_doc_service_normalize_issues.service import run_service  # type: ignore[import-untyped]
+
+# The canonical output name is generator-ready.json; pdf_ready.json is still
+# accepted for one or two minor versions and emits a deprecation notice.
+DEPRECATED_OUTPUT_NAME = "pdf_ready.json"
+CANONICAL_OUTPUT_NAME = "generator-ready.json"
 
 # Error prefix mapping per SPEC.md 3.1.2
 ERROR_PREFIXES = {
@@ -71,7 +77,7 @@ def format_error_message(error: ToolkitError) -> str:
     "output_path",
     required=True,
     type=click.Path(),
-    help="Path for output JSON file",
+    help="Path for output JSON file (e.g. generator-ready.json; pdf_ready.json still accepted, deprecated)",
 )
 @click.option(
     "--source",
@@ -101,14 +107,21 @@ def normalize_issues(  # pylint: disable=too-many-arguments,too-many-positional-
     verbose: bool,
 ) -> None:
     """
-    Normalize collector output into PDF-ready JSON format.
+    Normalize collector output into the canonical generator-ready JSON dataset.
 
-    Converts collector-gh output (doc-issues.json) into canonical PDF-ready format
-    (pdf_ready.json) compliant with living-doc-generator-pdf.
+    Converts collector-gh output (doc-issues.json) into generator-ready.json, the
+    canonical dataset consumed by living-doc generators. The legacy output name
+    pdf_ready.json is still accepted but deprecated.
     """
     # Merge verbose flag: local overrides global
     global_verbose = ctx.obj.get("verbose", False) if ctx.obj else False
     effective_verbose = verbose or global_verbose
+
+    if Path(output_path).name == DEPRECATED_OUTPUT_NAME:
+        click.echo(
+            f"Warning: '{DEPRECATED_OUTPUT_NAME}' is a deprecated output name; use '{CANONICAL_OUTPUT_NAME}'.",
+            err=True,
+        )
 
     # Build options dictionary
     options = {

@@ -103,7 +103,7 @@ Repo specifics
   | Version-compatibility warning | set `metadata.producer.version` outside the confirmed range; assert a `VERSION_MISMATCH` entry in `audit.trace[].warnings[]`, not a raise | `packages/adapters/collector_gh/tests/` |
   | collector-gh schema compatibility across versions | golden fixtures under `tests/fixtures/collector_gh/v*` — one directory per supported schema version, discovered (not hard-coded) | repo-root `tests/`, `verifications/verify_compatibility.py` |
   | Golden output regression | compare the built output to `tests/fixtures/golden/v<X.Y.Z>/expected_output.json` | `packages/services/coverage_matrix/tests/integration/test_golden_files.py`, `verifications/verify_golden.py` |
-  | Pydantic model / dataclass round-trip | build the object, serialize, assert on keys/structure and `schema_version`; no I/O | `packages/datasets_pdf/tests/` |
+  | Pydantic model / dataclass round-trip | build the object, serialize, assert on keys/structure and `schema_version`; no I/O | `packages/datasets_generator_ready/tests/` |
   | CLI invocation + exit code | `click.testing.CliRunner().invoke(cli, [...])`, assert `result.exit_code` and `result.output` prefix | `apps/cli/tests/test_cli.py`, `tests/integration/test_cli_invocation.py` |
   | Clocks (`datetime.now`) | `mocker.patch("<module>.datetime")` and set `.now.return_value`; keep `generated_at` deterministic in golden comparisons | `packages/services/*/tests/` |
 

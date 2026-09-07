@@ -9,7 +9,7 @@ This module builds PdfReadyV1 objects from AdapterResult data with normalized se
 from datetime import datetime, timezone
 
 from living_doc_adapter_collector_gh.models import AdapterResult  # type: ignore[import-untyped]
-from living_doc_datasets_pdf.audit.v1.models import (  # type: ignore[import-untyped]
+from living_doc_datasets_generator_ready.audit.v1.models import (  # type: ignore[import-untyped]
     AuditEnvelopeV1,
     AuditWarning,
     Producer,
@@ -17,7 +17,7 @@ from living_doc_datasets_pdf.audit.v1.models import (  # type: ignore[import-unt
     Source,
     TraceStep,
 )
-from living_doc_datasets_pdf.pdf_ready.v1.models import (  # type: ignore[import-untyped]
+from living_doc_datasets_generator_ready.generator_ready.v1.models import (  # type: ignore[import-untyped]
     AcceptanceCriterion,
     Content,
     Meta,
@@ -147,7 +147,7 @@ def build_pdf_ready(adapter_result: AdapterResult, options: dict) -> PdfReadyV1:
     )
 
     # Build PdfReadyV1
-    pdf_ready = PdfReadyV1(schema_version="1.0", meta=meta, content=content)
+    pdf_ready = PdfReadyV1(schema_version="generator-ready-v1.0.0", meta=meta, content=content)
 
     return pdf_ready
 

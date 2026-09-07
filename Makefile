@@ -9,7 +9,7 @@
 #   make lint-<alias>       One gate, one package  (also: format, format-check, types, test, coverage)
 #   make <gate>             One gate, every package
 #
-# Package aliases:  core · datasets-pdf · collector-gh · normalize · coverage · cli
+# Package aliases:  core · datasets-generator-ready · collector-gh · normalize · coverage · cli
 #
 # The pre-Phase-0 names (py-qa, black, pylint, mypy, pytest-unit and their
 # per-package forms) still work as deprecated aliases for one release — each
@@ -17,14 +17,14 @@
 # ============================================================================
 
 # --- Package map -----------------------------------------------------------
-ALIASES := core datasets-pdf collector-gh normalize coverage cli
+ALIASES := core datasets-generator-ready collector-gh normalize coverage cli
 
-dir-core         := packages/core
-dir-datasets-pdf := packages/datasets_pdf
-dir-collector-gh := packages/adapters/collector_gh
-dir-normalize    := packages/services/normalize_issues
-dir-coverage     := packages/services/coverage_matrix
-dir-cli          := apps/cli
+dir-core                     := packages/core
+dir-datasets-generator-ready := packages/datasets_generator_ready
+dir-collector-gh             := packages/adapters/collector_gh
+dir-normalize                := packages/services/normalize_issues
+dir-coverage                 := packages/services/coverage_matrix
+dir-cli                      := apps/cli
 
 # --- Tools / thresholds ------------------------------------------------------
 PYTHON ?= python3
@@ -59,7 +59,7 @@ help: ## Show this help message
 	@echo "  make qa                      format-check -> lint -> types -> test, all packages"
 	@echo "  make lint | format | format-check | types | test | coverage"
 	@echo ""
-	@echo "$(YELLOW)One package (alias: core datasets-pdf collector-gh normalize coverage cli):$(NC)"
+	@echo "$(YELLOW)One package (alias: core datasets-generator-ready collector-gh normalize coverage cli):$(NC)"
 	@echo "  make qa-<alias>              All gates for one package"
 	@echo "  make lint-<alias> | format-<alias> | format-check-<alias> | types-<alias> | test-<alias> | coverage-<alias>"
 	@echo ""
@@ -68,7 +68,7 @@ help: ## Show this help message
 install: ## Install all packages with [dev] dependencies (dependency order)
 	@echo "$(YELLOW)Installing packages in dependency order...$(NC)"
 	$(PYTHON) -m pip install -e packages/core[dev]
-	$(PYTHON) -m pip install -e packages/datasets_pdf[dev]
+	$(PYTHON) -m pip install -e packages/datasets_generator_ready[dev]
 	$(PYTHON) -m pip install -e packages/adapters/collector_gh[dev]
 	$(PYTHON) -m pip install -e packages/services/normalize_issues[dev]
 	$(PYTHON) -m pip install -e packages/services/coverage_matrix[dev]

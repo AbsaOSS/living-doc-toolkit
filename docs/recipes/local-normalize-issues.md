@@ -1,6 +1,6 @@
 # Recipe: Local Normalize-Issues Usage
 
-**Goal:** Run the `normalize-issues` service locally to convert collector output into PDF-ready JSON.
+**Goal:** Run the `normalize-issues` service locally to convert collector output into the canonical generator-ready JSON dataset.
 
 **Estimated Time:** 10 minutes
 
@@ -78,7 +78,7 @@ living-doc normalize-issues --help
 ```
 Usage: living-doc normalize-issues [OPTIONS]
 
-  Normalize collector output into PDF-ready JSON format.
+  Normalize collector output into the canonical generator-ready JSON dataset.
 
 Options:
   --input PATH                Path to input JSON file  [required]
@@ -97,12 +97,12 @@ Options:
 
 ### Basic Usage
 
-Convert `doc-issues.json` to `pdf_ready.json` with auto-detection:
+Convert `doc-issues.json` to `generator-ready.json` with auto-detection:
 
 ```bash
 living-doc normalize-issues \
   --input doc-issues.json \
-  --output pdf_ready.json
+  --output generator-ready.json
 ```
 
 ### With Custom Document Metadata
@@ -112,7 +112,7 @@ Override document title and version:
 ```bash
 living-doc normalize-issues \
   --input doc-issues.json \
-  --output pdf_ready.json \
+  --output generator-ready.json \
   --document-title "Product Requirements - Release 2.1" \
   --document-version "2.1.0"
 ```
@@ -124,7 +124,7 @@ Explicitly specify the collector-gh adapter:
 ```bash
 living-doc normalize-issues \
   --input doc-issues.json \
-  --output pdf_ready.json \
+  --output generator-ready.json \
   --source collector-gh
 ```
 
@@ -135,7 +135,7 @@ Enable detailed logging for debugging:
 ```bash
 living-doc normalize-issues \
   --input doc-issues.json \
-  --output pdf_ready.json \
+  --output generator-ready.json \
   --verbose
 ```
 
@@ -144,7 +144,7 @@ living-doc normalize-issues \
 ```bash
 living-doc normalize-issues \
   --input /path/to/input/doc-issues.json \
-  --output /path/to/output/pdf_ready.json \
+  --output /path/to/output/generator-ready.json \
   --source auto \
   --document-title "Sprint 5 User Stories" \
   --document-version "1.5.0" \
@@ -160,20 +160,20 @@ living-doc normalize-issues \
 When processing completes successfully:
 
 ```
-Successfully normalized /path/to/input/doc-issues.json -> /path/to/output/pdf_ready.json
+Successfully normalized /path/to/input/doc-issues.json -> /path/to/output/generator-ready.json
 ```
 
 **Exit Code:** `0`
 
 ### Output File Structure
 
-See [Contracts & Interfaces](../contracts.md#output-contract-pdf_readyjson) for the full schema reference.
+See [Contracts & Interfaces](../contracts.md#output-contract-generator-readyjson) for the full schema reference.
 
-The generated `pdf_ready.json` follows this structure:
+The generated `generator-ready.json` follows this structure:
 
 ```json
 {
-  "schema_version": "1.0",
+  "schema_version": "generator-ready-v1.0.0",
   "meta": {
     "document_title": "Product Requirements - Release 2.1",
     "document_version": "2.1.0",
@@ -267,16 +267,16 @@ Use `jq` to inspect the output:
 
 ```bash
 # View schema version
-jq .schema_version pdf_ready.json
+jq .schema_version generator-ready.json
 
 # View document metadata
-jq .meta pdf_ready.json
+jq .meta generator-ready.json
 
 # Count user stories
-jq '.content.user_stories | length' pdf_ready.json
+jq '.content.user_stories | length' generator-ready.json
 
 # View first user story
-jq '.content.user_stories[0]' pdf_ready.json
+jq '.content.user_stories[0]' generator-ready.json
 ```
 
 ### Method 2: Schema Validation (Python)
@@ -284,11 +284,11 @@ jq '.content.user_stories[0]' pdf_ready.json
 Validate the output against the `PdfReadyV1` model:
 
 ```python
-from living_doc_datasets_pdf.pdf_ready.v1.models import PdfReadyV1
+from living_doc_datasets_generator_ready.generator_ready.v1.models import PdfReadyV1
 import json
 
 # Load the output
-with open('pdf_ready.json', 'r') as f:
+with open('generator-ready.json', 'r') as f:
     data = json.load(f)
 
 # Validate against schema
@@ -307,10 +307,10 @@ Verify the audit trace contains normalization step:
 
 ```bash
 # View audit trace
-jq .meta.audit.trace pdf_ready.json
+jq .meta.audit.trace generator-ready.json
 
 # Check for warnings
-jq '.meta.audit.trace[].warnings' pdf_ready.json
+jq '.meta.audit.trace[].warnings' generator-ready.json
 ```
 
 **Expected Trace:**
@@ -362,7 +362,7 @@ ls -l doc-issues.json
 # Use absolute path
 living-doc normalize-issues \
   --input "$(pwd)/doc-issues.json" \
-  --output pdf_ready.json
+  --output generator-ready.json
 ```
 
 ---
@@ -393,8 +393,8 @@ jq .metadata.generator.name doc-issues.json
 **Cause:** Collector version is outside confirmed range
 
 **Solution:**
-- Check the output is still valid: `jq .meta.audit.trace pdf_ready.json`
-- Review warnings: `jq '.meta.audit.trace[].warnings' pdf_ready.json`
+- Check the output is still valid: `jq .meta.audit.trace generator-ready.json`
+- Review warnings: `jq '.meta.audit.trace[].warnings' generator-ready.json`
 - Update collector to compatible version if needed
 
 ---
@@ -409,7 +409,7 @@ After normalization, generate a PDF document:
 # Run normalize-issues
 living-doc normalize-issues \
   --input doc-issues.json \
-  --output pdf_ready.json
+  --output generator-ready.json
 
 # Use output with living-doc-generator-pdf
 # (See living-doc-generator-pdf documentation)
@@ -426,7 +426,7 @@ Override title and version to match your release cycle:
 ```bash
 living-doc normalize-issues \
   --input doc-issues.json \
-  --output pdf_ready.json \
+  --output generator-ready.json \
   --document-title "Sprint $(date +%Y-%m) User Stories" \
   --document-version "$(git describe --tags)"
 ```

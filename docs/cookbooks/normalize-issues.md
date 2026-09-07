@@ -2,7 +2,7 @@
 
 **Service:** `normalize-issues`  
 **Command:** `living-doc normalize-issues`  
-**Purpose:** Convert collector output (`doc-issues.json`) into PDF-ready canonical JSON (`pdf_ready.json`)
+**Purpose:** Convert collector output (`doc-issues.json`) into the canonical `generator-ready.json` dataset
 
 ---
 
@@ -20,7 +20,7 @@
 
 ## What It Does (Overview)
 
-The `normalize-issues` service transforms machine-readable artifacts produced by upstream collectors (e.g., `AbsaOSS/living-doc-collector-gh`) into a canonical, PDF-ready JSON format compliant with [living-doc-generator-pdf](https://github.com/AbsaOSS/living-doc-generator-pdf).
+The `normalize-issues` service transforms machine-readable artifacts produced by upstream collectors (e.g., `AbsaOSS/living-doc-collector-gh`) into the canonical `generator-ready.json` dataset consumed by living-doc generators such as [living-doc-generator-pdf](https://github.com/AbsaOSS/living-doc-generator-pdf).
 
 **Pipeline Overview:**
 1. Load and parse input JSON (`doc-issues.json`)
@@ -28,7 +28,7 @@ The `normalize-issues` service transforms machine-readable artifacts produced by
 3. Check version compatibility (warn if outside confirmed range)
 4. Parse input into internal representation (`AdapterResult`)
 5. Normalize markdown sections using heading synonyms
-6. Build `pdf_ready.json` structure with canonical fields
+6. Build `generator-ready.json` structure with canonical fields
 7. Augment audit envelope with builder trace step
 8. Validate output against JSON Schema
 9. Write output file
@@ -45,11 +45,14 @@ The `normalize-issues` service transforms machine-readable artifacts produced by
 ```bash
 living-doc normalize-issues \
   --input doc-issues.json \
-  --output pdf_ready.json \
+  --output generator-ready.json \
   --source auto \
   --document-title "Sprint 42 Report" \
   --document-version "1.0.0"
 ```
+
+> The canonical output is `generator-ready.json`. The legacy name `pdf_ready.json` still
+> works as a deprecated alias and prints a notice when used.
 
 See [Contracts & Interfaces](../contracts.md#cli-interface) for the full argument reference.
 
@@ -77,7 +80,7 @@ Use `--source collector-gh` to explicitly select the collector-gh adapter withou
 ```bash
 living-doc normalize-issues \
   --input doc-issues.json \
-  --output pdf_ready.json \
+  --output generator-ready.json \
   --source collector-gh
 ```
 
@@ -315,7 +318,7 @@ Normalization failed: Unable to parse markdown in issue #42 body. Check for malf
 
 **Example:**
 ```
-File I/O error: Cannot write to 'outputs/pdf_ready.json'. Ensure output directory exists and is writable.
+File I/O error: Cannot write to 'outputs/generator-ready.json'. Ensure output directory exists and is writable.
 ```
 
 **Solutions:**
@@ -425,7 +428,7 @@ Enable verbose logging to see detailed processing steps:
 ```bash
 living-doc normalize-issues \
   --input doc-issues.json \
-  --output pdf_ready.json \
+  --output generator-ready.json \
   --verbose
 ```
 
@@ -449,7 +452,7 @@ jq '.issues | length' doc-issues.json
 After processing, inspect the audit trace for warnings:
 
 ```bash
-jq .meta.audit.trace pdf_ready.json
+jq .meta.audit.trace generator-ready.json
 ```
 
 ### 4. Version Pinning

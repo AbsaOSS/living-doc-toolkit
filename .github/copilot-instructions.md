@@ -36,9 +36,9 @@ Module map — six packages under `packages/` and `apps/`, each with its own `py
 | Path | Package (`pip` name) | Responsibility |
 |---|---|---|
 | `packages/core` | `living-doc-core` | Shared utilities — `json_utils.py`, `markdown_utils.py`, `logging_config.py`, `errors.py`. No dependencies. |
-| `packages/datasets_pdf` | `living-doc-datasets-pdf` | Versioned PDF contract — `pdf_ready/v1/models.py` + `audit/v1/models.py` (Pydantic, source of truth), `schema.py` / `serializer.py`, `schemas/*.schema.json` exports. |
+| `packages/datasets_generator_ready` | `living-doc-datasets-generator-ready` | Versioned generator-ready contract — `generator_ready/v1/models.py` + `audit/v1/models.py` (Pydantic, source of truth), `schema.py` / `serializer.py`, `schemas/*.schema.json` exports. |
 | `packages/adapters/collector_gh` | `living-doc-adapter-collector-gh` | Collector-gh adapter — `detector.py` (`can_handle`), `compatibility.py` (confirmed version range), `parser.py` (payload → `AdapterResult`), `models.py` (consumer-side representation of the vendored `schemas/doc-issues-v1.0.0-schema.json`). |
-| `packages/services/normalize_issues` | `living-doc-service-normalize-issues` | `normalize-issues` service — `service.py` (orchestration), `normalizer.py` (markdown → sections, pure), `builder.py` (PDF-ready JSON + audit envelope). |
+| `packages/services/normalize_issues` | `living-doc-service-normalize-issues` | `normalize-issues` service — `service.py` (orchestration), `normalizer.py` (markdown → sections, pure), `builder.py` (generator-ready JSON + audit envelope). |
 | `packages/services/coverage_matrix` | `living-doc-service-coverage-matrix` | `coverage-matrix` service — `service.py` (orchestration + `--fail-under`), `loader.py` (pure I/O), `matcher.py` (pure transform), `summary.py` (pure tallying), `model/coverage_item.py` (output dataclasses), `schema_validation.py`. |
 | `apps/cli` | `living-doc-cli` | CLI entry point — `main.py` (`cli()` click group), `commands/normalize_issues.py`, `commands/coverage_matrix.py`. |
 
@@ -57,14 +57,14 @@ Contract-sensitive outputs (the *Stable* / *Requires review* items in `docs/cont
 
 - Must keep exit codes stable — `normalize-issues`: `0` success, `1` invalid input, `2` adapter detection failed, `3` schema validation failure, `4` normalization error, `5` file I/O error; `coverage-matrix`: `0` success, `1` any error (including coverage below `--fail-under`).
 - Must keep error-message prefixes stable — `Invalid input:`, `Adapter error:`, `Schema validation failed:`, `Normalization failed:`, `File I/O error:` — tests assert exact prefixes.
-- Must keep `schema_version` values stable — `pdf_ready` `"1.0"`, `coverage-matrix` `"coverage-matrix-v1.0.0"`, audit envelope `"1.0"`.
-- Must keep the `pdf_ready.json` / `coverage-matrix.json` structure and the `AdapterResult` model signature in step with the Pydantic models / dataclasses that are their source of truth; a breaking change requires a major version bump of the affected package.
+- Must keep `schema_version` values stable — `generator-ready` `"generator-ready-v1.0.0"` (legacy `"1.0"` still accepted on read, deprecated), `coverage-matrix` `"coverage-matrix-v1.0.0"`, audit envelope `"1.0"`.
+- Must keep the `generator-ready.json` / `coverage-matrix.json` structure and the `AdapterResult` model signature in step with the Pydantic models / dataclasses that are their source of truth; a breaking change requires a major version bump of the affected package.
 - Must keep CLI argument names and defaults stable.
 
 QA commands — the per-package `Makefile` targets (`.github/workflows/test.yml` runs the same targets):
 
 - Full gate, every package: `make qa` (runs `format-check` → `lint` → `types` → `test`, failing on the first).
-- Per package: `make qa-<alias>` where `<alias>` is one of `core`, `datasets-pdf`, `collector-gh`, `normalize`, `coverage`, `cli`.
+- Per package: `make qa-<alias>` where `<alias>` is one of `core`, `datasets-generator-ready`, `collector-gh`, `normalize`, `coverage`, `cli`.
 - Individual gate per package: `make lint-<alias>`, `make format-<alias>`, `make format-check-<alias>`, `make types-<alias>`, `make test-<alias>`, `make coverage-<alias>`.
 - `lint-<alias>` runs ruff (`E` / `F` / `I` / `B`, `tests` / `verifications` excluded per each package's `[tool.ruff]`) then Pylint; `format-<alias>` runs `ruff check --fix` then Black.
 - Must not use repo-root `pylint $(git ls-files '*.py')` / `pytest tests/` as the QA command — CI gates changes per package from inside each package directory.

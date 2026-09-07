@@ -67,7 +67,7 @@ def test_build_pdf_ready_basic():
 
     pdf_ready = build_pdf_ready(adapter_result, options)
 
-    assert pdf_ready.schema_version == "1.0"
+    assert pdf_ready.schema_version == "generator-ready-v1.0.0"
     assert pdf_ready.meta.document_title == "Test Document"
     assert pdf_ready.meta.document_version == "1.0.0"
     assert len(pdf_ready.content.user_stories) == 1

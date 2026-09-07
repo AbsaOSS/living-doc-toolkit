@@ -145,7 +145,7 @@ criterion against code at PR time.
 
 ## 6. Pending specifications
 
-*None.* All six packages — `core`, `datasets_pdf`, `adapters/collector_gh`,
+*None.* All six packages — `core`, `datasets_generator_ready`, `adapters/collector_gh`,
 `services/normalize_issues`, `services/coverage_matrix`, `apps/cli` — are implemented; their
 behaviour lives in the live docs listed in [§0](#0-document-lifecycle). Add the next
 prospective spec section below this line.

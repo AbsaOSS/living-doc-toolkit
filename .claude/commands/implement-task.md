@@ -27,7 +27,7 @@ Task-list source (optional override): `$2`
   implementation matches repo patterns (`.github/copilot-instructions.md`,
   `.github/copilot-review-rules.md`).
 - For a monorepo change, identify which of the six packages the task touches — `core`,
-  `datasets_pdf`, `adapters/collector_gh`, `services/normalize_issues`,
+  `datasets_generator_ready`, `adapters/collector_gh`, `services/normalize_issues`,
   `services/coverage_matrix`, `apps/cli` — and respect the dependency rules.
 - If the task is ambiguous after reading, stop and ask — do not guess.
 
@@ -40,7 +40,7 @@ Task-list source (optional override): `$2`
 - Add or update tests for every new or changed code path (success + failure). Use the
   `test-author` agent for the test surface.
 - Do not change externally-visible contracts (CLI argument names/defaults, exit codes,
-  error-message prefixes, `schema_version` values, `pdf_ready.json` / `coverage-matrix.json`
+  error-message prefixes, `schema_version` values, `generator-ready.json` / `coverage-matrix.json`
   structure, `AdapterResult` signature) unless the task explicitly calls for it.
 - If a spec section is being implemented, apply `.claude/rules/docs-lifecycle.md` in this
   same change: move that section's content out of `SPEC.md` into the live docs.
@@ -48,7 +48,7 @@ Task-list source (optional override): `$2`
 ## 4. Run the `make qa` loop until green
 
 - Run `make qa` for a full-repo change, or `make qa-<alias>` for the package you touched
-  (`<alias>` ∈ `core`, `datasets-pdf`, `collector-gh`, `normalize`, `coverage`, `cli`) —
+  (`<alias>` ∈ `core`, `datasets-generator-ready`, `collector-gh`, `normalize`, `coverage`, `cli`) —
   the same targets CI runs.
 - Fix every failure and re-run. Repeat until QA exits clean per package:
   Pylint ≥ 9.5, Black clean, mypy clean, `pytest --cov-fail-under=80` passing.

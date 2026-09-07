@@ -102,7 +102,7 @@ Repo specifics
   - Prefer `docs/architecture.md` and `docs/contracts.md` for system shape and external contracts, each package's `README.md` / `docs/cookbooks/<service>.md` for service behavior, and `DEVELOPER.md` for local-dev workflow.
 - Contract-sensitive outputs
   - CLI argument names and defaults; the exit-code taxonomies (`normalize-issues` `0`–`5`, `coverage-matrix` `0`/`1`) and error-message prefixes (`Invalid input:`, `Adapter error:`, `Schema validation failed:`, `Normalization failed:`, `File I/O error:`).
-  - `schema_version` values (`pdf_ready` `"1.0"`, `coverage-matrix` `"coverage-matrix-v1.0.0"`, audit `"1.0"`); the `pdf_ready.json` / `coverage-matrix.json` structure; the `AdapterResult` signature; the audit-envelope `trace[]` shape.
+  - `schema_version` values (`generator-ready` `"generator-ready-v1.0.0"` with legacy `"1.0"` still accepted on read, `coverage-matrix` `"coverage-matrix-v1.0.0"`, audit `"1.0"`); the `generator-ready.json` / `coverage-matrix.json` structure; the `AdapterResult` signature; the audit-envelope `trace[]` shape.
 - High-risk areas
   - Adapter version-compatibility logic and payload → `AdapterResult` mapping in `packages/adapters/collector_gh`.
   - Markdown section normalization in `normalize_issues`, coverage maths in `coverage_matrix` (deprecated-AC exclusion from `coverage_pct`), and JSON Schema validation of the output contract.

@@ -99,7 +99,7 @@ Repo specifics
   - Criterion "`requires-python` is `>=3.10` in every package" → open each of the six `pyproject.toml` files plus the root and read the literal `requires-python` / `[tool.black] target-version` / `[tool.mypy] python_version` values; a green build on one interpreter is not the check.
 - Contract-sensitive outputs
   - CLI argument names and defaults; exit codes (`normalize-issues` `0`–`5`, `coverage-matrix` `0`/`1`); error-message prefixes.
-  - `schema_version` values; `pdf_ready.json` / `coverage-matrix.json` structure; `AdapterResult` signature; audit-envelope shape.
+  - `schema_version` values; `generator-ready.json` / `coverage-matrix.json` structure; `AdapterResult` signature; audit-envelope shape.
 - High-risk areas
   - Adapter detection and version-compatibility (`packages/adapters/collector_gh/detector.py`, `compatibility.py`, `parser.py`).
   - Markdown normalization (`normalize_issues/normalizer.py`), coverage maths (`coverage_matrix/matcher.py`, `summary.py`), JSON Schema validation.

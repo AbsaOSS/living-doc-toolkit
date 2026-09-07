@@ -6,7 +6,7 @@ Quick reference for all external-facing contracts. Changes to items below requir
 
 - [CLI Interface](#cli-interface)
 - [Input Contract: `doc-issues.json`](#input-contract-doc-issuesjson)
-- [Output Contract: `pdf_ready.json`](#output-contract-pdf_readyjson)
+- [Output Contract: `generator-ready.json`](#output-contract-generator-readyjson)
 - [Output Contract: `coverage-matrix.json`](#output-contract-coverage-matrixjson)
 - [Audit Envelope (v1.0)](#audit-envelope-v10)
 - [JSON Schemas](#json-schemas)
@@ -22,7 +22,7 @@ Quick reference for all external-facing contracts. Changes to items below requir
 | Argument | Type | Required | Default | Description |
 |----------|------|----------|---------|-------------|
 | `--input` | path | Yes | — | Path to input JSON (e.g., `doc-issues.json`) |
-| `--output` | path | Yes | — | Path for output JSON (e.g., `pdf_ready.json`) |
+| `--output` | path | Yes | — | Path for output JSON (e.g., `generator-ready.json`; `pdf_ready.json` still accepted, deprecated) |
 | `--source` | enum | No | `auto` | Adapter selection: `auto`, `collector-gh` |
 | `--document-title` | string | No | from input | Override `meta.document_title` |
 | `--document-version` | string | No | from input | Override `meta.document_version` |
@@ -98,17 +98,19 @@ Warning format in audit:
 
 ---
 
-## Output Contract: `pdf_ready.json`
+## Output Contract: `generator-ready.json`
 
 Target: [living-doc-generator-pdf](https://github.com/AbsaOSS/living-doc-generator-pdf).
 
-**Schema version:** `"1.0"` (field `schema_version`)
+**Schema version:** `"generator-ready-v1.0.0"` (field `schema_version`; the superseded `"1.0"` is still accepted on read, deprecated)
+
+The legacy output name `pdf_ready.json` is still accepted as a deprecated alias for one or two minor versions.
 
 ### Structure
 
 ```
-pdf_ready.json
-├── schema_version: "1.0"
+generator-ready.json
+├── schema_version: "generator-ready-v1.0.0"
 ├── meta
 │   ├── document_title, document_version, generated_at
 │   ├── source_set[]
@@ -238,14 +240,14 @@ Each pipeline stage appends a trace entry:
 ## JSON Schemas
 
 Machine-readable schemas are at:
-- `packages/datasets_pdf/schemas/pdf_ready_v1.schema.json`
-- `packages/datasets_pdf/schemas/audit_envelope_v1.schema.json`
+- `packages/datasets_generator_ready/schemas/generator-ready-v1.0.0-schema.json`
+- `packages/datasets_generator_ready/schemas/audit_envelope_v1.schema.json`
 - `packages/services/coverage_matrix/src/living_doc_service_coverage_matrix/schema/doc-source-v1.0.0-schema.json` (validates the `doc-source.json` input)
 - `packages/services/coverage_matrix/src/living_doc_service_coverage_matrix/schema/coverage-matrix-v1.0.0-schema.json`
 
-Pydantic models (source of truth for PDF contracts):
-- `packages/datasets_pdf/src/living_doc_datasets_pdf/pdf_ready/v1/models.py`
-- `packages/datasets_pdf/src/living_doc_datasets_pdf/audit/v1/models.py`
+Pydantic models (source of truth for the generator-ready contracts):
+- `packages/datasets_generator_ready/src/living_doc_datasets_generator_ready/generator_ready/v1/models.py`
+- `packages/datasets_generator_ready/src/living_doc_datasets_generator_ready/audit/v1/models.py`
 
 Dataclasses (source of truth for coverage-matrix contract):
 - `packages/services/coverage_matrix/src/living_doc_service_coverage_matrix/model/coverage_item.py`
@@ -256,7 +258,7 @@ Dataclasses (source of truth for coverage-matrix contract):
 
 ### Stable (breaking changes require major version bump)
 
-- Schema field names, types, and meanings (`pdf_ready` v1.0, `coverage-matrix` v1.0.0)
+- Schema field names, types, and meanings (`generator-ready` v1.0.0, `coverage-matrix` v1.0.0)
 - `AdapterResult` model signature
 - CLI argument names and defaults
 - Exit codes and error message prefixes
@@ -270,7 +272,7 @@ Dataclasses (source of truth for coverage-matrix contract):
 
 ### Requires review before changing
 
-- Schema modifications (`datasets_pdf`)
+- Schema modifications (`datasets_generator_ready`)
 - Adapter interface changes
 - Error message text
 - Performance budgets
