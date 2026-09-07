@@ -16,7 +16,7 @@ from living_doc_adapter_collector_gh.models import (
     CompatibilityWarning,
 )
 
-from living_doc_service_normalize_issues.builder import build_pdf_ready
+from living_doc_service_normalize_issues.builder import build_generator_ready
 
 
 def _make_metadata(
@@ -42,8 +42,8 @@ def _make_metadata(
     )
 
 
-def test_build_pdf_ready_basic():
-    """Test basic PDF-ready building from adapter result."""
+def test_build_generator_ready_basic():
+    """Test basic generator-ready building from adapter result."""
     item = AdapterItem(
         id="github:owner/repo#123",
         title="Test Issue",
@@ -65,14 +65,14 @@ def test_build_pdf_ready_basic():
 
     options = {"document_title": "Test Document", "document_version": "1.0.0"}
 
-    pdf_ready = build_pdf_ready(adapter_result, options)
+    generator_ready = build_generator_ready(adapter_result, options)
 
-    assert pdf_ready.schema_version == "generator-ready-v1.0.0"
-    assert pdf_ready.meta.document_title == "Test Document"
-    assert pdf_ready.meta.document_version == "1.0.0"
-    assert len(pdf_ready.content.user_stories) == 1
+    assert generator_ready.schema_version == "generator-ready-v1.0.0"
+    assert generator_ready.meta.document_title == "Test Document"
+    assert generator_ready.meta.document_version == "1.0.0"
+    assert len(generator_ready.content.user_stories) == 1
 
-    story = pdf_ready.content.user_stories[0]
+    story = generator_ready.content.user_stories[0]
     assert story.id == "github:owner/repo#123"
     assert story.title == "Test Issue"
     assert story.state == "open"
@@ -83,7 +83,7 @@ def test_build_pdf_ready_basic():
     assert story.sections.description == "This is a test issue."
 
 
-def test_build_pdf_ready_normalized_sections():
+def test_build_generator_ready_normalized_sections():
     """Test that structured sections are mapped correctly."""
     item = AdapterItem(
         id="github:owner/repo#456",
@@ -105,8 +105,8 @@ def test_build_pdf_ready_normalized_sections():
     adapter_result = AdapterResult(items=[item], metadata=metadata, warnings=[])
     options = {}
 
-    pdf_ready = build_pdf_ready(adapter_result, options)
-    story = pdf_ready.content.user_stories[0]
+    generator_ready = build_generator_ready(adapter_result, options)
+    story = generator_ready.content.user_stories[0]
 
     assert story.sections.description == "This is the overview."
     assert story.sections.business_value == ["High value feature."]
@@ -115,7 +115,7 @@ def test_build_pdf_ready_normalized_sections():
     assert any("Criterion 2" in ac.description for ac in story.sections.acceptance_criteria)
 
 
-def test_build_pdf_ready_meta_fields():
+def test_build_generator_ready_meta_fields():
     """Test that meta fields are populated correctly."""
     item = AdapterItem(
         id="github:owner/repo#1",
@@ -132,20 +132,20 @@ def test_build_pdf_ready_meta_fields():
     adapter_result = AdapterResult(items=[item], metadata=metadata, warnings=[])
     options = {"document_title": "My Doc", "document_version": "2.0.0"}
 
-    pdf_ready = build_pdf_ready(adapter_result, options)
+    generator_ready = build_generator_ready(adapter_result, options)
 
-    assert pdf_ready.meta.document_title == "My Doc"
-    assert pdf_ready.meta.document_version == "2.0.0"
-    assert pdf_ready.meta.generated_at is not None
-    assert "T" in pdf_ready.meta.generated_at  # ISO 8601 format
-    assert pdf_ready.meta.source_set == ["github:owner/repo1", "github:owner/repo2"]
+    assert generator_ready.meta.document_title == "My Doc"
+    assert generator_ready.meta.document_version == "2.0.0"
+    assert generator_ready.meta.generated_at is not None
+    assert "T" in generator_ready.meta.generated_at  # ISO 8601 format
+    assert generator_ready.meta.source_set == ["github:owner/repo1", "github:owner/repo2"]
 
-    assert pdf_ready.meta.selection_summary.total_items == 1
-    assert pdf_ready.meta.selection_summary.included_items == 1
-    assert pdf_ready.meta.selection_summary.excluded_items == 0
+    assert generator_ready.meta.selection_summary.total_items == 1
+    assert generator_ready.meta.selection_summary.included_items == 1
+    assert generator_ready.meta.selection_summary.excluded_items == 0
 
 
-def test_build_pdf_ready_fallback_document_title():
+def test_build_generator_ready_fallback_document_title():
     """Test fallback document title when not provided."""
     item = AdapterItem(
         id="github:owner/repo#1",
@@ -162,12 +162,12 @@ def test_build_pdf_ready_fallback_document_title():
     adapter_result = AdapterResult(items=[item], metadata=metadata, warnings=[])
     options = {}  # No document_title provided
 
-    pdf_ready = build_pdf_ready(adapter_result, options)
+    generator_ready = build_generator_ready(adapter_result, options)
 
-    assert "owner/myrepo" in pdf_ready.meta.document_title
+    assert "owner/myrepo" in generator_ready.meta.document_title
 
 
-def test_build_pdf_ready_audit_envelope():
+def test_build_generator_ready_audit_envelope():
     """Test that audit envelope is built correctly."""
     item = AdapterItem(
         id="github:owner/repo#1",
@@ -192,8 +192,8 @@ def test_build_pdf_ready_audit_envelope():
     adapter_result = AdapterResult(items=[item], metadata=metadata, warnings=[])
     options = {}
 
-    pdf_ready = build_pdf_ready(adapter_result, options)
-    audit = pdf_ready.meta.audit
+    generator_ready = build_generator_ready(adapter_result, options)
+    audit = generator_ready.meta.audit
 
     assert audit is not None
     assert audit.schema_version == "1.0"
@@ -218,7 +218,7 @@ def test_build_pdf_ready_audit_envelope():
     assert audit.extensions["collector-gh"]["original_metadata"] == {"some": "data"}
 
 
-def test_build_pdf_ready_audit_trace_normalization_step():
+def test_build_generator_ready_audit_trace_normalization_step():
     """Test that normalization trace step is added."""
     item = AdapterItem(
         id="github:owner/repo#1",
@@ -235,8 +235,8 @@ def test_build_pdf_ready_audit_trace_normalization_step():
     adapter_result = AdapterResult(items=[item], metadata=metadata, warnings=[])
     options = {}
 
-    pdf_ready = build_pdf_ready(adapter_result, options)
-    audit = pdf_ready.meta.audit
+    generator_ready = build_generator_ready(adapter_result, options)
+    audit = generator_ready.meta.audit
 
     assert len(audit.trace) == 1
     trace_step = audit.trace[0]
@@ -247,7 +247,7 @@ def test_build_pdf_ready_audit_trace_normalization_step():
     assert trace_step.finished_at is not None
 
 
-def test_build_pdf_ready_warnings_in_audit():
+def test_build_generator_ready_warnings_in_audit():
     """Test that adapter warnings are included in audit trace."""
     item = AdapterItem(
         id="github:owner/repo#1",
@@ -266,8 +266,8 @@ def test_build_pdf_ready_warnings_in_audit():
     adapter_result = AdapterResult(items=[item], metadata=metadata, warnings=[warning])
     options = {}
 
-    pdf_ready = build_pdf_ready(adapter_result, options)
-    audit = pdf_ready.meta.audit
+    generator_ready = build_generator_ready(adapter_result, options)
+    audit = generator_ready.meta.audit
 
     trace_step = audit.trace[0]
     assert len(trace_step.warnings) == 1
@@ -276,7 +276,7 @@ def test_build_pdf_ready_warnings_in_audit():
     assert trace_step.warnings[0].context == "v0.9.0"
 
 
-def test_build_pdf_ready_run_context():
+def test_build_generator_ready_run_context():
     """Test that run context is populated when run data is available."""
     item = AdapterItem(
         id="github:owner/repo#1",
@@ -297,17 +297,17 @@ def test_build_pdf_ready_run_context():
     adapter_result = AdapterResult(items=[item], metadata=metadata, warnings=[])
     options = {}
 
-    pdf_ready = build_pdf_ready(adapter_result, options)
+    generator_ready = build_generator_ready(adapter_result, options)
 
-    assert pdf_ready.meta.run_context is not None
-    assert pdf_ready.meta.run_context.ci_run_id == "789"
-    assert pdf_ready.meta.run_context.triggered_by == "testuser"
-    assert pdf_ready.meta.run_context.branch == "feature-branch"
-    assert pdf_ready.meta.run_context.commit_sha == "def456"
+    assert generator_ready.meta.run_context is not None
+    assert generator_ready.meta.run_context.ci_run_id == "789"
+    assert generator_ready.meta.run_context.triggered_by == "testuser"
+    assert generator_ready.meta.run_context.branch == "feature-branch"
+    assert generator_ready.meta.run_context.commit_sha == "def456"
 
 
-def test_build_pdf_ready_multiple_items():
-    """Test building PDF-ready with multiple items."""
+def test_build_generator_ready_multiple_items():
+    """Test building generator-ready output with multiple items."""
     items = [
         AdapterItem(
             id=f"github:owner/repo#{i}",
@@ -326,13 +326,13 @@ def test_build_pdf_ready_multiple_items():
     adapter_result = AdapterResult(items=items, metadata=metadata, warnings=[])
     options = {}
 
-    pdf_ready = build_pdf_ready(adapter_result, options)
+    generator_ready = build_generator_ready(adapter_result, options)
 
-    assert len(pdf_ready.content.user_stories) == 5
-    assert pdf_ready.meta.selection_summary.total_items == 5
-    assert pdf_ready.meta.selection_summary.included_items == 5
+    assert len(generator_ready.content.user_stories) == 5
+    assert generator_ready.meta.selection_summary.total_items == 5
+    assert generator_ready.meta.selection_summary.included_items == 5
 
-    for i, story in enumerate(pdf_ready.content.user_stories, start=1):
+    for i, story in enumerate(generator_ready.content.user_stories, start=1):
         assert story.id == f"github:owner/repo#{i}"
         assert story.title == f"Issue {i}"
         assert story.sections.description == f"Issue {i} content."

@@ -445,7 +445,7 @@ living-doc normalize-issues \
 [DEBUG] Mapped heading "Acceptance Criteria" -> "acceptance_criteria"
 [INFO] Normalizing sections for issue #2: Dashboard redesign
 ...
-[INFO] Building PDF-ready JSON structure
+[INFO] Building generator-ready output...
 [INFO] Augmenting audit envelope with normalization trace
 [INFO] Validating output against schema
 [INFO] Writing output file: generator-ready.json
@@ -524,13 +524,13 @@ jq '.meta.audit.trace[].warnings' generator-ready.json
 
 # 5. Validate with Python
 python3 << EOF
-from living_doc_datasets_generator_ready.generator_ready.v1.models import PdfReadyV1
+from living_doc_datasets_generator_ready.generator_ready.v1.models import GeneratorReadyV1
 import json
 
 with open('generator-ready.json') as f:
     data = json.load(f)
 
-model = PdfReadyV1.model_validate(data)
+model = GeneratorReadyV1.model_validate(data)
 print(f"✅ Valid! {len(model.content.user_stories)} user stories")
 EOF
 ```

@@ -19,7 +19,7 @@ Generator-ready v1 JSON Schema export.
 from pathlib import Path
 
 from living_doc_datasets_generator_ready._schema_io import write_schema_file
-from living_doc_datasets_generator_ready.generator_ready.v1.models import PdfReadyV1
+from living_doc_datasets_generator_ready.generator_ready.v1.models import GeneratorReadyV1
 
 
 def export_json_schema(output_path: str | Path | None = None) -> dict:
@@ -32,7 +32,7 @@ def export_json_schema(output_path: str | Path | None = None) -> dict:
     Returns:
         JSON schema as dictionary.
     """
-    schema = PdfReadyV1.model_json_schema()
+    schema = GeneratorReadyV1.model_json_schema()
 
     if output_path:
         write_schema_file(schema, Path(output_path))

@@ -18,15 +18,15 @@ Generator-ready v1 serialization helpers.
 
 import json
 
-from living_doc_datasets_generator_ready.generator_ready.v1.models import PdfReadyV1
+from living_doc_datasets_generator_ready.generator_ready.v1.models import GeneratorReadyV1
 
 
-def to_json(model: PdfReadyV1, indent: int = 2, sort_keys: bool = True) -> str:
+def to_json(model: GeneratorReadyV1, indent: int = 2, sort_keys: bool = True) -> str:
     """
-    Serialize PdfReadyV1 to JSON string with deterministic output.
+    Serialize GeneratorReadyV1 to JSON string with deterministic output.
 
     Args:
-        model: PdfReadyV1 instance to serialize.
+        model: GeneratorReadyV1 instance to serialize.
         indent: Indentation level (default: 2).
         sort_keys: Whether to sort keys (default: True).
 
@@ -36,15 +36,15 @@ def to_json(model: PdfReadyV1, indent: int = 2, sort_keys: bool = True) -> str:
     return json.dumps(model.model_dump(mode="json"), indent=indent, sort_keys=sort_keys)
 
 
-def from_json(json_str: str) -> PdfReadyV1:
+def from_json(json_str: str) -> GeneratorReadyV1:
     """
-    Parse JSON string into PdfReadyV1.
+    Parse JSON string into GeneratorReadyV1.
 
     Args:
         json_str: JSON string to parse.
 
     Returns:
-        PdfReadyV1 instance.
+        GeneratorReadyV1 instance.
     """
     data = json.loads(json_str)
-    return PdfReadyV1.model_validate(data)
+    return GeneratorReadyV1.model_validate(data)

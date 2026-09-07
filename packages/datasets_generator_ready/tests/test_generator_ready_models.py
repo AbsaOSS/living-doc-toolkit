@@ -26,7 +26,7 @@ from living_doc_datasets_generator_ready.generator_ready.v1.models import (
     AcceptanceCriterion,
     Content,
     Meta,
-    PdfReadyV1,
+    GeneratorReadyV1,
     RunContext,
     Sections,
     SelectionSummary,
@@ -120,20 +120,20 @@ def test_valid_generator_ready_from_spec():
         },
     }
 
-    pdf_ready = PdfReadyV1.model_validate(data)
+    generator_ready = GeneratorReadyV1.model_validate(data)
 
-    assert pdf_ready.schema_version == "generator-ready-v1.0.0"
-    assert pdf_ready.meta.document_title == "Product Requirements - Release 2.1"
-    assert pdf_ready.meta.document_version == "2.1.0"
-    assert pdf_ready.meta.source_set == ["github:AbsaOSS/project"]
-    assert pdf_ready.meta.selection_summary.total_items == 15
-    assert pdf_ready.meta.selection_summary.included_items == 12
-    assert pdf_ready.meta.selection_summary.excluded_items == 3
-    assert pdf_ready.meta.audit is not None
-    assert pdf_ready.meta.audit.schema_version == "1.0"
-    assert len(pdf_ready.content.user_stories) == 1
-    assert pdf_ready.content.user_stories[0].id == "github:AbsaOSS/project#42"
-    assert pdf_ready.content.user_stories[0].title == "User login with SSO"
+    assert generator_ready.schema_version == "generator-ready-v1.0.0"
+    assert generator_ready.meta.document_title == "Product Requirements - Release 2.1"
+    assert generator_ready.meta.document_version == "2.1.0"
+    assert generator_ready.meta.source_set == ["github:AbsaOSS/project"]
+    assert generator_ready.meta.selection_summary.total_items == 15
+    assert generator_ready.meta.selection_summary.included_items == 12
+    assert generator_ready.meta.selection_summary.excluded_items == 3
+    assert generator_ready.meta.audit is not None
+    assert generator_ready.meta.audit.schema_version == "1.0"
+    assert len(generator_ready.content.user_stories) == 1
+    assert generator_ready.content.user_stories[0].id == "github:AbsaOSS/project#42"
+    assert generator_ready.content.user_stories[0].title == "User login with SSO"
 
 
 def _minimal_data(schema_version: str) -> dict:
@@ -154,7 +154,7 @@ def _minimal_data(schema_version: str) -> dict:
 def test_invalid_schema_version():
     """Test that an unrecognized schema_version is rejected."""
     with pytest.raises(ValidationError) as exc_info:
-        PdfReadyV1.model_validate(_minimal_data("2.0"))
+        GeneratorReadyV1.model_validate(_minimal_data("2.0"))
 
     assert "schema_version must be 'generator-ready-v1.0.0'" in str(exc_info.value)
 
@@ -165,7 +165,7 @@ def test_canonical_schema_version_accepted_without_warning():
 
     with _warnings.catch_warnings():
         _warnings.simplefilter("error")
-        model = PdfReadyV1.model_validate(_minimal_data("generator-ready-v1.0.0"))
+        model = GeneratorReadyV1.model_validate(_minimal_data("generator-ready-v1.0.0"))
 
     assert model.schema_version == "generator-ready-v1.0.0"
 
@@ -173,7 +173,7 @@ def test_canonical_schema_version_accepted_without_warning():
 def test_deprecated_schema_version_1_0_accepted_with_warning():
     """The legacy '1.0' value is still accepted, with a DeprecationWarning."""
     with pytest.warns(DeprecationWarning, match="deprecated"):
-        model = PdfReadyV1.model_validate(_minimal_data("1.0"))
+        model = GeneratorReadyV1.model_validate(_minimal_data("1.0"))
 
     assert model.schema_version == "1.0"
 
@@ -193,7 +193,7 @@ def test_invalid_document_title_too_long():
     }
 
     with pytest.raises(ValidationError) as exc_info:
-        PdfReadyV1.model_validate(data)
+        GeneratorReadyV1.model_validate(data)
 
     assert "document_title must be 1-200 chars" in str(exc_info.value)
 
@@ -213,7 +213,7 @@ def test_invalid_document_title_empty():
     }
 
     with pytest.raises(ValidationError) as exc_info:
-        PdfReadyV1.model_validate(data)
+        GeneratorReadyV1.model_validate(data)
 
     assert "document_title must be 1-200 chars" in str(exc_info.value)
 
@@ -233,7 +233,7 @@ def test_invalid_document_version_too_long():
     }
 
     with pytest.raises(ValidationError) as exc_info:
-        PdfReadyV1.model_validate(data)
+        GeneratorReadyV1.model_validate(data)
 
     assert "document_version must be 1-50 chars" in str(exc_info.value)
 
@@ -253,7 +253,7 @@ def test_invalid_source_set_empty():
     }
 
     with pytest.raises(ValidationError) as exc_info:
-        PdfReadyV1.model_validate(data)
+        GeneratorReadyV1.model_validate(data)
 
     assert "source_set must be non-empty" in str(exc_info.value)
 
@@ -285,7 +285,7 @@ def test_invalid_title_too_long():
     }
 
     with pytest.raises(ValidationError) as exc_info:
-        PdfReadyV1.model_validate(data)
+        GeneratorReadyV1.model_validate(data)
 
     assert "title must be 1-500 chars" in str(exc_info.value)
 
@@ -295,7 +295,7 @@ def test_missing_required_fields():
     data = {"schema_version": "generator-ready-v1.0.0"}
 
     with pytest.raises(ValidationError):
-        PdfReadyV1.model_validate(data)
+        GeneratorReadyV1.model_validate(data)
 
 
 def test_extra_fields_forbidden():
@@ -314,7 +314,7 @@ def test_extra_fields_forbidden():
     }
 
     with pytest.raises(ValidationError) as exc_info:
-        PdfReadyV1.model_validate(data)
+        GeneratorReadyV1.model_validate(data)
 
     assert "Extra inputs are not permitted" in str(exc_info.value)
 
@@ -349,8 +349,8 @@ def test_run_context_optional():
         "content": {"user_stories": []},
     }
 
-    pdf_ready = PdfReadyV1.model_validate(data)
-    assert pdf_ready.meta.run_context is None
+    generator_ready = GeneratorReadyV1.model_validate(data)
+    assert generator_ready.meta.run_context is None
 
 
 def test_run_context_with_data():
@@ -400,16 +400,16 @@ def test_serialization_round_trip():
         "content": {"user_stories": []},
     }
 
-    pdf_ready1 = PdfReadyV1.model_validate(data)
-    json_str = to_json(pdf_ready1)
-    pdf_ready2 = from_json(json_str)
+    generator_ready1 = GeneratorReadyV1.model_validate(data)
+    json_str = to_json(generator_ready1)
+    generator_ready2 = from_json(json_str)
 
-    assert pdf_ready1.model_dump() == pdf_ready2.model_dump()
+    assert generator_ready1.model_dump() == generator_ready2.model_dump()
 
 
 def test_deterministic_serialization():
     """Test that serialization produces deterministic output."""
-    pdf_ready = PdfReadyV1(
+    generator_ready = GeneratorReadyV1(
         schema_version="generator-ready-v1.0.0",
         meta=Meta(
             document_title="Test",
@@ -423,8 +423,8 @@ def test_deterministic_serialization():
         content=Content(user_stories=[]),
     )
 
-    json1 = to_json(pdf_ready)
-    json2 = to_json(pdf_ready)
+    json1 = to_json(generator_ready)
+    json2 = to_json(generator_ready)
 
     assert json1 == json2
 

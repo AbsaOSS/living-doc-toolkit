@@ -154,7 +154,7 @@ class Meta(BaseModel):
         return v
 
 
-class PdfReadyV1(BaseModel):
+class GeneratorReadyV1(BaseModel):
     """Generator-ready v1.0.0 root model."""
 
     schema_version: str = Field(

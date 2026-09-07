@@ -52,8 +52,5 @@ jobs:
           pip install -e packages/services/coverage_matrix[dev]
           pip install -e "apps/cli[dev]"
 
-      - name: Run golden verification
-        run: python verifications/verify_golden.py
-
-      - name: Run compatibility verification
-        run: python verifications/verify_compatibility.py
+      - name: Run integration verification
+        run: make integration

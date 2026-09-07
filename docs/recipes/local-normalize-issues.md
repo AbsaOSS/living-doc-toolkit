@@ -281,10 +281,10 @@ jq '.content.user_stories[0]' generator-ready.json
 
 ### Method 2: Schema Validation (Python)
 
-Validate the output against the `PdfReadyV1` model:
+Validate the output against the `GeneratorReadyV1` model:
 
 ```python
-from living_doc_datasets_generator_ready.generator_ready.v1.models import PdfReadyV1
+from living_doc_datasets_generator_ready.generator_ready.v1.models import GeneratorReadyV1
 import json
 
 # Load the output
@@ -293,7 +293,7 @@ with open('generator-ready.json', 'r') as f:
 
 # Validate against schema
 try:
-    model = PdfReadyV1.model_validate(data)
+    model = GeneratorReadyV1.model_validate(data)
     print("✅ Output is valid!")
     print(f"Document: {model.meta.document_title} v{model.meta.document_version}")
     print(f"User stories: {len(model.content.user_stories)}")

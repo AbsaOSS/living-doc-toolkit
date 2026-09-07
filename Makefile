@@ -43,7 +43,7 @@ QA_TARGETS      := $(addprefix qa-,$(ALIASES))
 GATE_TARGETS    := $(foreach g,$(GATES),$(addprefix $(g)-,$(ALIASES)))
 DEPREC_TARGETS  := $(DEPRECATED) $(foreach g,$(DEPRECATED),$(addprefix $(g)-,$(ALIASES)))
 
-.PHONY: help install qa $(GATES) $(QA_TARGETS) $(GATE_TARGETS) $(DEPREC_TARGETS)
+.PHONY: help install qa integration $(GATES) $(QA_TARGETS) $(GATE_TARGETS) $(DEPREC_TARGETS)
 
 # ============================================================================
 # Help / install
@@ -54,6 +54,7 @@ help: ## Show this help message
 	@echo ""
 	@echo "$(YELLOW)Setup:$(NC)"
 	@echo "  make install                 Install all packages with [dev] dependencies"
+	@echo "  make integration             Golden-file + compatibility verification"
 	@echo ""
 	@echo "$(YELLOW)Every package:$(NC)"
 	@echo "  make qa                      format-check -> lint -> types -> test, all packages"
@@ -74,6 +75,13 @@ install: ## Install all packages with [dev] dependencies (dependency order)
 	$(PYTHON) -m pip install -e packages/services/coverage_matrix[dev]
 	$(PYTHON) -m pip install -e "apps/cli[dev]"
 	@echo "$(GREEN)✓ All packages installed$(NC)"
+
+integration: ## Golden-file + cross-version compatibility verification (same as integration.yml)
+	@echo "$(YELLOW)→ Golden-file verification$(NC)"
+	$(PYTHON) verifications/verify_golden.py
+	@echo "$(YELLOW)→ Compatibility verification$(NC)"
+	$(PYTHON) verifications/verify_compatibility.py
+	@echo "$(GREEN)✓ Integration verification passed$(NC)"
 
 # ============================================================================
 # Canonical aggregate targets — one gate across every package

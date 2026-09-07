@@ -1,9 +1,9 @@
 # Copyright 2026 ABSA Group Limited. Apache License, Version 2.0.
 
 """
-PDF-ready JSON builder for normalized issues.
+Generator-ready JSON builder for normalized issues.
 
-This module builds PdfReadyV1 objects from AdapterResult data with normalized sections.
+This module builds GeneratorReadyV1 objects from AdapterResult data with normalized sections.
 """
 
 from datetime import datetime, timezone
@@ -20,8 +20,8 @@ from living_doc_datasets_generator_ready.audit.v1.models import (  # type: ignor
 from living_doc_datasets_generator_ready.generator_ready.v1.models import (  # type: ignore[import-untyped]
     AcceptanceCriterion,
     Content,
+    GeneratorReadyV1,
     Meta,
-    PdfReadyV1,
     RunContext,
     Sections,
     SelectionSummary,
@@ -30,11 +30,11 @@ from living_doc_datasets_generator_ready.generator_ready.v1.models import (  # t
 )
 
 
-def build_pdf_ready(adapter_result: AdapterResult, options: dict) -> PdfReadyV1:  # pylint: disable=too-many-locals
+def build_generator_ready(adapter_result: AdapterResult, options: dict) -> GeneratorReadyV1:
     """
-    Build PDF-ready JSON from adapter result.
+    Build generator-ready JSON from adapter result.
 
-    This function transforms AdapterResult into PdfReadyV1 format from the structured
+    This function transforms AdapterResult into GeneratorReadyV1 format from the structured
     item fields, populating metadata, and building the audit trail.
 
     Args:
@@ -42,8 +42,9 @@ def build_pdf_ready(adapter_result: AdapterResult, options: dict) -> PdfReadyV1:
         options: Configuration options (document_title, document_version, etc.)
 
     Returns:
-        PdfReadyV1 object ready for serialization
+        GeneratorReadyV1 object ready for serialization
     """
+    # pylint: disable=too-many-locals
     # Build output user stories from the adapter's parsed items
     user_stories = []
     for item in adapter_result.items:
@@ -146,10 +147,10 @@ def build_pdf_ready(adapter_result: AdapterResult, options: dict) -> PdfReadyV1:
         audit=audit,
     )
 
-    # Build PdfReadyV1
-    pdf_ready = PdfReadyV1(schema_version="generator-ready-v1.0.0", meta=meta, content=content)
+    # Build GeneratorReadyV1
+    generator_ready = GeneratorReadyV1(schema_version="generator-ready-v1.0.0", meta=meta, content=content)
 
-    return pdf_ready
+    return generator_ready
 
 
 def _build_audit_envelope(adapter_result: AdapterResult, _options: dict) -> AuditEnvelopeV1:

@@ -243,7 +243,7 @@ graph TB
     end
     
     subgraph "Dataset Package (packages/datasets_generator_ready)"
-        GeneratorReadyModels[generator_ready/v1/models.py<br/>PdfReadyV1]
+        GeneratorReadyModels[generator_ready/v1/models.py<br/>GeneratorReadyV1]
         AuditModels[audit/v1/models.py<br/>AuditEnvelopeV1]
     end
     

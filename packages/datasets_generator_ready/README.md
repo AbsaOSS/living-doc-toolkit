@@ -21,11 +21,11 @@ pip install -e packages/datasets_generator_ready
 ### Using Generator-Ready Models
 
 ```python
-from living_doc_datasets_generator_ready.generator_ready.v1.models import PdfReadyV1, Meta, Content
+from living_doc_datasets_generator_ready.generator_ready.v1.models import GeneratorReadyV1, Meta, Content
 from living_doc_datasets_generator_ready.generator_ready.v1.serializer import to_json, from_json
 
 # Create a model instance
-generator_ready = PdfReadyV1(
+generator_ready = GeneratorReadyV1(
     schema_version="generator-ready-v1.0.0",
     meta=Meta(...),
     content=Content(user_stories=[])
