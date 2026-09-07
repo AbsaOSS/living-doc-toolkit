@@ -70,7 +70,8 @@ you want to pin to.
 Copy it here **byte-for-byte** — do not reformat or re-key it:
 
 ```bash
-cp <collector-gh>/doc_issues/schema/doc-issues-v1.0.0-schema.json \
+# COLLECTOR_GH points at your local collector-gh checkout
+cp "$COLLECTOR_GH/doc_issues/schema/doc-issues-v1.0.0-schema.json" \
    packages/adapters/collector_gh/schemas/doc-issues-v1.0.0-schema.json
 ```
 
