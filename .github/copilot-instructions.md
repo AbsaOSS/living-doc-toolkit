@@ -37,7 +37,7 @@ Module map — six packages under `packages/` and `apps/`, each with its own `py
 |---|---|---|
 | `packages/core` | `living-doc-core` | Shared utilities — `json_utils.py`, `markdown_utils.py`, `logging_config.py`, `errors.py`. No dependencies. |
 | `packages/datasets_pdf` | `living-doc-datasets-pdf` | Versioned PDF contract — `pdf_ready/v1/models.py` + `audit/v1/models.py` (Pydantic, source of truth), `schema.py` / `serializer.py`, `schemas/*.schema.json` exports. |
-| `packages/adapters/collector_gh` | `living-doc-adapter-collector-gh` | Collector-gh adapter — `detector.py` (`can_handle`), `compatibility.py` (confirmed version range), `parser.py` (payload → `AdapterResult`), `models.py`, `schema_export.py`. |
+| `packages/adapters/collector_gh` | `living-doc-adapter-collector-gh` | Collector-gh adapter — `detector.py` (`can_handle`), `compatibility.py` (confirmed version range), `parser.py` (payload → `AdapterResult`), `models.py` (consumer-side representation of the vendored `schemas/doc-issues-v1.0.0-schema.json`). |
 | `packages/services/normalize_issues` | `living-doc-service-normalize-issues` | `normalize-issues` service — `service.py` (orchestration), `normalizer.py` (markdown → sections, pure), `builder.py` (PDF-ready JSON + audit envelope). |
 | `packages/services/coverage_matrix` | `living-doc-service-coverage-matrix` | `coverage-matrix` service — `service.py` (orchestration + `--fail-under`), `loader.py` (pure I/O), `matcher.py` (pure transform), `summary.py` (pure tallying), `model/coverage_item.py` (output dataclasses), `schema_validation.py`. |
 | `apps/cli` | `living-doc-cli` | CLI entry point — `main.py` (`cli()` click group), `commands/normalize_issues.py`, `commands/coverage_matrix.py`. |

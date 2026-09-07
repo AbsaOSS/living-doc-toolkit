@@ -29,7 +29,7 @@ CONFIRMED_MIN = "0.1.1"
 CONFIRMED_MAX = "2.0.0"  # Exclusive upper bound
 
 # Schema version (independent of adapter package version)
-# See schema_export.py for details
+# Matches the vendored schemas/doc-issues-v1.0.0-schema.json; see SCHEMA_SYNC.md
 SCHEMA_VERSION = "1.0.0"
 
 

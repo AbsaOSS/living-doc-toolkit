@@ -33,9 +33,6 @@ from living_doc_adapter_collector_gh.models import (
 # Export parser
 from living_doc_adapter_collector_gh.parser import parse
 
-# Export schema export function
-from living_doc_adapter_collector_gh.schema_export import export_schema
-
 __all__ = [
     # Version
     "__version__",
@@ -51,5 +48,4 @@ __all__ = [
     "extract_version",
     "check_compatibility",
     "parse",
-    "export_schema",
 ]

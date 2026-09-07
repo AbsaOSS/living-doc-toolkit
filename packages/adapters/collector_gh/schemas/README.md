@@ -11,9 +11,9 @@ schema.
 ## Ownership
 
 `living-doc-collector-gh` **owns** this contract. It generates
-`doc-issues-v1.0.0-schema.json` from its own Pydantic models
-(`doc_issues/models.py` → `doc_issues/schema_export.py`) and is the schema **and** data
-producer. This repository is the schema **and** data consumer: it vendors the file below
+`doc-issues-v1.0.0-schema.json` from its own Pydantic models (`doc_issues/models.py`) and is
+the schema **and** data producer. This repository is the schema **and** data consumer: it
+vendors the file below
 verbatim and keeps `src/living_doc_adapter_collector_gh/models.py` in step with it via the
 golden-fixture tests.
 
@@ -24,8 +24,8 @@ This is a manual sync until the pin-and-vendor automation lands (roadmap Phase 5
 1. Take `doc_issues/schema/doc-issues-v1.0.0-schema.json` from `living-doc-collector-gh` at
    the pinned commit / tag.
 2. Copy it here byte-for-byte (do not reformat or re-key it).
-3. Re-run the adapter golden tests and `verifications/verify_golden.py` /
-   `verifications/verify_compatibility.py`.
+3. Bring `../src/living_doc_adapter_collector_gh/models.py` back into step with it and
+   re-run the adapter golden tests (`make qa-collector-gh`).
 
 See `../SCHEMA_SYNC.md` for the full consumer-side synchronization workflow.
 
