@@ -26,7 +26,20 @@ import json
 import sys
 from pathlib import Path
 
+try:
+    from living_doc_adapter_collector_gh.compatibility import check_compatibility
+    from living_doc_service_normalize_issues.service import run_service
+except ImportError:  # packages not installed in this environment
+    check_compatibility = None  # type: ignore[assignment]
+    run_service = None  # type: ignore[assignment]
+
 _FIXTURES_DIR = Path(__file__).parent.parent / "tests" / "fixtures" / "collector_gh"
+
+_INSTALL_HINT = (
+    "  Packages may not be installed. Run:\n"
+    "  pip install -e packages/core -e packages/datasets_pdf\n"
+    "  pip install -e packages/adapters/collector_gh -e packages/services/normalize_issues"
+)
 
 
 def discover_version_fixtures() -> list[str]:
@@ -55,8 +68,6 @@ def expected_warning_for(version_dir: str) -> bool:
     Returns:
         True if a ``VERSION_MISMATCH`` warning is expected for that fixture.
     """
-    from living_doc_adapter_collector_gh.compatibility import check_compatibility
-
     payload = json.loads((_FIXTURES_DIR / version_dir / "input" / "doc-issues.json").read_text(encoding="utf-8"))
     producer_version = payload["metadata"]["producer"]["version"]
     return any(w.code == "VERSION_MISMATCH" for w in check_compatibility(producer_version))
@@ -88,18 +99,15 @@ def test_version_fixture(version: str, expected_warnings: bool) -> bool:
     print(f"Input: {input_file}")
     print(f"Output: {output_file}")
 
-    # Try to import and run the service
-    try:
-        from living_doc_service_normalize_issues.service import run_service
+    # Run the service
+    if run_service is None:
+        print("✗ Cannot import living_doc_service_normalize_issues")
+        print(_INSTALL_HINT)
+        return False
 
+    try:
         options = {}
         run_service(str(input_file), str(output_file), options)
-    except ImportError:
-        print("✗ Cannot import living_doc_service_normalize_issues")
-        print("  Packages may not be installed. Run:")
-        print("  pip install -e packages/core -e packages/datasets_pdf")
-        print("  pip install -e packages/adapters/collector_gh -e packages/services/normalize_issues")
-        return False
     except Exception as e:  # pylint: disable=broad-except
         print(f"✗ Normalization failed: {e}")
         return False
@@ -155,14 +163,12 @@ def main() -> int:
         print(f"\n✗ No fixtures found under {_FIXTURES_DIR}")
         return 1
 
-    try:
-        expectations = {v: expected_warning_for(v) for v in version_dirs}
-    except ImportError:
+    if check_compatibility is None:
         print("✗ Cannot import living_doc_adapter_collector_gh")
-        print("  Packages may not be installed. Run:")
-        print("  pip install -e packages/core -e packages/datasets_pdf")
-        print("  pip install -e packages/adapters/collector_gh -e packages/services/normalize_issues")
+        print(_INSTALL_HINT)
         return 1
+
+    expectations = {v: expected_warning_for(v) for v in version_dirs}
 
     results = []
     for version in version_dirs:
