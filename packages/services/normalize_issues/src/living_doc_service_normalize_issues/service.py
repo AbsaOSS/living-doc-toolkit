@@ -4,7 +4,7 @@
 Service orchestration for normalize_issues.
 
 This module provides the main service entry point for normalizing collector-gh output
-into PDF-ready JSON format.
+into the canonical generator-ready JSON dataset.
 """
 
 from living_doc_adapter_collector_gh.detector import can_handle  # type: ignore[import-untyped]
@@ -17,7 +17,7 @@ from living_doc_core.errors import (  # type: ignore[import-untyped]
 from living_doc_core.json_utils import read_json, write_json  # type: ignore[import-untyped]
 from living_doc_core.logging_config import setup_logging  # type: ignore[import-untyped]
 
-from living_doc_service_normalize_issues.builder import build_pdf_ready
+from living_doc_service_normalize_issues.builder import build_generator_ready
 
 
 def run_service(input_path: str, output_path: str, options: dict) -> None:
@@ -28,14 +28,14 @@ def run_service(input_path: str, output_path: str, options: dict) -> None:
     1. Load input JSON
     2. Detect adapter (collector-gh)
     3. Parse into AdapterResult
-    4. Build PdfReadyV1 with normalized sections
+    4. Build GeneratorReadyV1 with normalized sections
     5. Validate output (via Pydantic)
     6. Write output JSON
     7. Log summary
 
     Args:
         input_path: Path to input JSON file (collector-gh output)
-        output_path: Path to output JSON file (pdf_ready.json)
+        output_path: Path to output JSON file (generator-ready.json)
         options: Configuration options (document_title, document_version, source, etc.)
 
     Raises:
@@ -82,27 +82,27 @@ def run_service(input_path: str, output_path: str, options: dict) -> None:
             for warning in adapter_result.warnings:
                 logger.warning("  - [%s] %s", warning.code, warning.message)
 
-        # Step 4: Build PdfReadyV1
-        logger.info("Building PDF-ready output...")
+        # Step 4: Build GeneratorReadyV1
+        logger.info("Building generator-ready output...")
         try:
-            pdf_ready = build_pdf_ready(adapter_result, options)
+            generator_ready = build_generator_ready(adapter_result, options)
         except Exception as e:
-            raise NormalizationError(f"Failed to build PDF-ready output: {e}") from e
+            raise NormalizationError(f"Failed to build generator-ready output: {e}") from e
 
         # Step 5: Validate output (Pydantic model already validates)
         logger.info("Output validated successfully")
 
         # Step 6: Write output JSON
         logger.info("Writing output JSON...")
-        output_data = pdf_ready.model_dump(mode="json")
+        output_data = generator_ready.model_dump(mode="json")
         write_json(output_path, output_data, indent=2, sort_keys=True)
 
         # Step 7: Log summary
         logger.info("Normalization completed successfully")
-        logger.info("  - User stories: %d", len(pdf_ready.content.user_stories))  # pylint: disable=no-member
-        logger.info("  - Document title: %s", pdf_ready.meta.document_title)  # pylint: disable=no-member
-        logger.info("  - Document version: %s", pdf_ready.meta.document_version)  # pylint: disable=no-member
-        logger.info("  - Generated at: %s", pdf_ready.meta.generated_at)  # pylint: disable=no-member
+        logger.info("  - User stories: %d", len(generator_ready.content.user_stories))  # pylint: disable=no-member
+        logger.info("  - Document title: %s", generator_ready.meta.document_title)  # pylint: disable=no-member
+        logger.info("  - Document version: %s", generator_ready.meta.document_version)  # pylint: disable=no-member
+        logger.info("  - Generated at: %s", generator_ready.meta.generated_at)  # pylint: disable=no-member
 
     except (InvalidInputError, AdapterError, NormalizationError) as e:
         logger.error("Normalization failed: %s", e.message)

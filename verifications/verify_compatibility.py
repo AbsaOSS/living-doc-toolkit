@@ -37,7 +37,7 @@ _FIXTURES_DIR = Path(__file__).parent.parent / "tests" / "fixtures" / "collector
 
 _INSTALL_HINT = (
     "  Packages may not be installed. Run:\n"
-    "  pip install -e packages/core -e packages/datasets_pdf\n"
+    "  pip install -e packages/core -e packages/datasets_generator_ready\n"
     "  pip install -e packages/adapters/collector_gh -e packages/services/normalize_issues"
 )
 

@@ -18,7 +18,7 @@ Audit Envelope v1 serialization helpers.
 
 import json
 
-from living_doc_datasets_pdf.audit.v1.models import AuditEnvelopeV1
+from living_doc_datasets_generator_ready.audit.v1.models import AuditEnvelopeV1
 
 
 def to_json(model: AuditEnvelopeV1, indent: int = 2, sort_keys: bool = True) -> str:

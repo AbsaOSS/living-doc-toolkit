@@ -3,7 +3,7 @@
 """
 Living Documentation Toolkit - Normalize Issues Service.
 
-This service transforms collector-gh output into PDF-ready canonical JSON.
+This service transforms collector-gh output into the canonical generator-ready JSON dataset.
 """
 
 __version__ = "1.0.0"

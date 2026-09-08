@@ -44,7 +44,7 @@ def test_golden_files(tmp_path):
     assert actual == expected, "Output does not match expected golden file"
 
     # Verify structure
-    assert actual["schema_version"] == "1.0"
+    assert actual["schema_version"] == "generator-ready-v1.0.0"
     assert len(actual["content"]["user_stories"]) == 5
     assert actual["meta"]["document_title"] == "Living Documentation - AbsaOSS/living-doc-toolkit"
     assert actual["meta"]["document_version"] == "1.0.0"

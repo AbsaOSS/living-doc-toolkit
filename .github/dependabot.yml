@@ -43,7 +43,7 @@ updates:
           - "*"
 
   - package-ecosystem: "pip"
-    directory: "/packages/datasets_pdf"
+    directory: "/packages/datasets_generator_ready"
     target-branch: "master"
     schedule:
       interval: "weekly"
@@ -59,7 +59,7 @@ updates:
     allow:
       - dependency-type: "direct"
     groups:
-      pip-datasets-pdf:
+      pip-datasets-generator-ready:
         patterns:
           - "*"
 

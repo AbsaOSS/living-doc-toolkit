@@ -12,10 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-Living Documentation Datasets PDF package.
-
-This package provides versioned Pydantic models and JSON schemas for pdf_ready and audit contracts.
-"""
-
-__version__ = "1.0.0"
+"""Generator-ready contract models."""

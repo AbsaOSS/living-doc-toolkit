@@ -13,18 +13,18 @@
 # limitations under the License.
 
 """
-Audit Envelope v1 JSON Schema export.
+Generator-ready v1 JSON Schema export.
 """
 
 from pathlib import Path
 
-from living_doc_datasets_pdf._schema_io import write_schema_file
-from living_doc_datasets_pdf.audit.v1.models import AuditEnvelopeV1
+from living_doc_datasets_generator_ready._schema_io import write_schema_file
+from living_doc_datasets_generator_ready.generator_ready.v1.models import GeneratorReadyV1
 
 
 def export_json_schema(output_path: str | Path | None = None) -> dict:
     """
-    Export JSON schema for AuditEnvelopeV1.
+    Export JSON schema for the generator-ready v1.0.0 contract.
 
     Args:
         output_path: Optional path to write schema file. If None, schema is only returned.
@@ -32,7 +32,7 @@ def export_json_schema(output_path: str | Path | None = None) -> dict:
     Returns:
         JSON schema as dictionary.
     """
-    schema = AuditEnvelopeV1.model_json_schema()
+    schema = GeneratorReadyV1.model_json_schema()
 
     if output_path:
         write_schema_file(schema, Path(output_path))

@@ -81,15 +81,15 @@ jobs:
         run: |
           living-doc normalize-issues \
             --input doc-issues.json \
-            --output pdf_ready.json \
+            --output generator-ready.json \
             --document-title "Product Requirements" \
             --document-version "${{ github.ref_name }}"
       
-      - name: Upload PDF-ready JSON
+      - name: Upload generator-ready JSON
         uses: actions/upload-artifact@v4
         with:
-          name: pdf-ready-json
-          path: pdf_ready.json
+          name: generator-ready-json
+          path: generator-ready.json
 ```
 
 ### Step 3: Commit and Push
@@ -106,7 +106,7 @@ git push
 2. Click **Actions** tab
 3. Find the "Normalize Issues" workflow
 4. Check that it runs successfully
-5. Download the `pdf-ready-json` artifact to verify output
+5. Download the `generator-ready-json` artifact to verify output
 
 ---
 
@@ -136,7 +136,7 @@ jobs:
         run: |
           living-doc normalize-issues \
             --input doc-issues.json \
-            --output pdf_ready.json \
+            --output generator-ready.json \
             --document-title "${{ inputs.document_title }}" \
             --document-version "${{ inputs.document_version }}"
 ```
@@ -154,7 +154,7 @@ Use Git tags or branch names for versioning:
   run: |
     living-doc normalize-issues \
       --input doc-issues.json \
-      --output pdf_ready.json \
+      --output generator-ready.json \
       --document-version "${{ steps.version.outputs.version }}"
 ```
 
@@ -184,7 +184,7 @@ The full living documentation pipeline consists of three stages:
 │  COLLECTOR  │──────>│   BUILDER   │──────>│  GENERATOR  │
 │  (GitHub)   │       │  (Toolkit)  │       │    (PDF)    │
 └─────────────┘       └─────────────┘       └─────────────┘
- doc-issues.json      pdf_ready.json      living-doc.pdf
+ doc-issues.json      generator-ready.json      living-doc.pdf
 ```
 
 ### Stage 1: Collector (Collect Issues from GitHub)
@@ -241,15 +241,15 @@ jobs:
         run: |
           living-doc normalize-issues \
             --input doc-issues.json \
-            --output pdf_ready.json \
+            --output generator-ready.json \
             --document-title "Product Requirements - Sprint ${{ github.run_number }}" \
             --document-version "${{ github.ref_name }}"
       
-      - name: Upload PDF-ready JSON
+      - name: Upload generator-ready JSON
         uses: actions/upload-artifact@v4
         with:
-          name: pdf-ready-json
-          path: pdf_ready.json
+          name: generator-ready-json
+          path: generator-ready.json
 ```
 
 ### Stage 3: Generator (Generate PDF)
@@ -262,15 +262,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - name: Download PDF-ready JSON
+      - name: Download generator-ready JSON
         uses: actions/download-artifact@v4
         with:
-          name: pdf-ready-json
+          name: generator-ready-json
       
       - name: Generate PDF
         uses: AbsaOSS/living-doc-generator-pdf@v1
         with:
-          input-file: pdf_ready.json
+          input-file: generator-ready.json
           output-file: living-documentation.pdf
       
       - name: Upload PDF
@@ -329,7 +329,7 @@ jobs:
         run: |
           living-doc normalize-issues \
             --input doc-issues-${{ matrix.repo }}.json \
-            --output pdf_ready-${{ matrix.repo }}.json
+            --output generator-ready-${{ matrix.repo }}.json
 ```
 
 ### Pattern 3: Scheduled Pipeline
@@ -358,7 +358,7 @@ Add error handling to continue on non-critical failures:
   run: |
     living-doc normalize-issues \
       --input doc-issues.json \
-      --output pdf_ready.json
+      --output generator-ready.json
 
 - name: Check normalization result
   if: steps.normalize.outcome == 'failure'
@@ -381,7 +381,7 @@ Add retries for transient failures:
     command: |
       living-doc normalize-issues \
         --input doc-issues.json \
-        --output pdf_ready.json
+        --output generator-ready.json
 ```
 
 ---
@@ -424,8 +424,8 @@ Always upload artifacts for debugging:
 ```yaml
 - uses: actions/upload-artifact@v4
   with:
-    name: pdf-ready-json
-    path: pdf_ready.json
+    name: generator-ready-json
+    path: generator-ready.json
     retention-days: 30
 ```
 
@@ -438,7 +438,7 @@ Use `--verbose` flag in workflows for detailed logs:
   run: |
     living-doc normalize-issues \
       --input doc-issues.json \
-      --output pdf_ready.json \
+      --output generator-ready.json \
       --verbose
 ```
 
@@ -484,7 +484,7 @@ Use `--verbose` flag in workflows for detailed logs:
   run: |
     living-doc normalize-issues \
       --input doc-issues.json \
-      --output pdf_ready.json
+      --output generator-ready.json
 ```
 
 ---

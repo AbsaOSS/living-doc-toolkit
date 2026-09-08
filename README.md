@@ -51,10 +51,10 @@ pip install -r requirements.txt
 ### Example CLI Usage
 
 ```bash
-# Normalize issues from collector output to PDF-ready format
+# Normalize issues from collector output to the canonical generator-ready dataset
 living-doc normalize-issues \
   --input doc-issues.json \
-  --output pdf_ready.json \
+  --output generator-ready.json \
   --source auto \
   --document-title "Sprint 42 Report" \
   --document-version "1.0.0"
@@ -66,6 +66,9 @@ living-doc coverage-matrix \
   --output coverage-matrix.json \
   --fail-under 80
 ```
+
+> The canonical output is `generator-ready.json`. The legacy name `pdf_ready.json` is still
+> accepted as a deprecated alias (`normalize-issues` prints a notice when it is used).
 
 ## Documentation
 
@@ -86,7 +89,7 @@ Each service below has a **Cookbook** (explains *how* it works — detection log
 ## Services
 
 ### `normalize-issues`
-Converts collector output (`doc-issues.json`) into PDF-ready canonical JSON (`pdf_ready.json`) compliant with the PDF generator specification.
+Converts collector output (`doc-issues.json`) into the canonical `generator-ready.json` dataset consumed by living-doc generators.
 
 - [Cookbook](docs/cookbooks/normalize-issues.md) — How detection, compatibility, and normalization work
 - [Recipe: Local usage](docs/recipes/local-normalize-issues.md) — Run the CLI on your machine

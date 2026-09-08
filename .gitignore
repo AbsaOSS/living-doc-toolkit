@@ -210,6 +210,7 @@ __marimo__/
 outputs/
 .DS_Store
 doc-issues.json
+generator-ready.json
 pdf_ready.json
 ui-tests.json
 doc-source.json

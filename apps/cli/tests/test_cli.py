@@ -79,6 +79,23 @@ def test_normalize_issues_success(mock_run_service, runner):
     assert options["verbose"] is False
     assert options["source"] == "auto"
 
+    # Canonical output name does not trigger the deprecation notice
+    assert "deprecated output name" not in result.output
+
+
+@patch("living_doc_cli.commands.normalize_issues.run_service")
+def test_normalize_issues_deprecated_output_name_warns(mock_run_service, runner):
+    """Test that using pdf_ready.json as --output still works but emits a deprecation notice."""
+    mock_run_service.return_value = None
+
+    result = runner.invoke(cli, ["normalize-issues", "--input", "input.json", "--output", "out/pdf_ready.json"])
+
+    assert result.exit_code == 0
+    assert "Successfully normalized" in result.output
+    assert "'pdf_ready.json' is a deprecated output name" in result.output
+    assert "generator-ready.json" in result.output
+    mock_run_service.assert_called_once()
+
 
 @patch("living_doc_cli.commands.normalize_issues.run_service")
 def test_normalize_issues_with_all_options(mock_run_service, runner):

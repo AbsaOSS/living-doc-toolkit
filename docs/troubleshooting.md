@@ -78,7 +78,7 @@ Invalid input: File 'doc-issues.json' not found. Ensure --input points to a vali
    ```bash
    living-doc normalize-issues \
      --input "$(pwd)/doc-issues.json" \
-     --output pdf_ready.json
+     --output generator-ready.json
    ```
 
 3. **Check file permissions:**
@@ -189,7 +189,7 @@ Adapter error: No compatible adapter found for input. Check metadata.generator.n
    ```bash
    living-doc normalize-issues \
      --input doc-issues.json \
-     --output pdf_ready.json \
+     --output generator-ready.json \
      --source collector-gh
    ```
 
@@ -280,7 +280,7 @@ Normalization failed: Unable to parse markdown in issue #42 body. Check for malf
    ```bash
    living-doc normalize-issues \
      --input doc-issues.json \
-     --output pdf_ready.json \
+     --output generator-ready.json \
      --verbose
    ```
 
@@ -322,7 +322,7 @@ Normalization failed: Section mapping failed for issue #42. Unknown heading form
 
 **Message:**
 ```
-File I/O error: Cannot write to 'outputs/pdf_ready.json'. Ensure output directory exists and is writable.
+File I/O error: Cannot write to 'outputs/generator-ready.json'. Ensure output directory exists and is writable.
 ```
 
 **Causes:**
@@ -355,7 +355,7 @@ File I/O error: Cannot write to 'outputs/pdf_ready.json'. Ensure output director
    ```bash
    living-doc normalize-issues \
      --input doc-issues.json \
-     --output "$(pwd)/pdf_ready.json"
+     --output "$(pwd)/generator-ready.json"
    ```
 
 5. **Test write permissions:**
@@ -384,12 +384,12 @@ File I/O error: Cannot write to 'outputs/pdf_ready.json'. Ensure output director
 
 1. **Check the output is valid:**
    ```bash
-   jq .meta.audit.trace pdf_ready.json
+   jq .meta.audit.trace generator-ready.json
    ```
 
 2. **Review warnings in audit trail:**
    ```bash
-   jq '.meta.audit.trace[].warnings' pdf_ready.json
+   jq '.meta.audit.trace[].warnings' generator-ready.json
    ```
    
    Expected warning structure:
@@ -426,7 +426,7 @@ Use the `--verbose` flag to see detailed processing steps:
 ```bash
 living-doc normalize-issues \
   --input doc-issues.json \
-  --output pdf_ready.json \
+  --output generator-ready.json \
   --verbose
 ```
 
@@ -445,10 +445,10 @@ living-doc normalize-issues \
 [DEBUG] Mapped heading "Acceptance Criteria" -> "acceptance_criteria"
 [INFO] Normalizing sections for issue #2: Dashboard redesign
 ...
-[INFO] Building PDF-ready JSON structure
+[INFO] Building generator-ready output...
 [INFO] Augmenting audit envelope with normalization trace
 [INFO] Validating output against schema
-[INFO] Writing output file: pdf_ready.json
+[INFO] Writing output file: generator-ready.json
 [INFO] Successfully processed 42 user stories
 [INFO] Total processing time: 3.2 seconds
 ```
@@ -469,7 +469,7 @@ living-doc normalize-issues \
 **A:** Inspect the audit trace in the output:
 
 ```bash
-jq '.meta.audit.producer' pdf_ready.json
+jq '.meta.audit.producer' generator-ready.json
 ```
 
 Expected output:
@@ -511,26 +511,26 @@ Future versions may support multi-source input.
 
 ```bash
 # 1. Check schema version
-jq .schema_version pdf_ready.json
+jq .schema_version generator-ready.json
 
 # 2. Count user stories
-jq '.content.user_stories | length' pdf_ready.json
+jq '.content.user_stories | length' generator-ready.json
 
 # 3. View first user story
-jq '.content.user_stories[0]' pdf_ready.json
+jq '.content.user_stories[0]' generator-ready.json
 
 # 4. Check for warnings
-jq '.meta.audit.trace[].warnings' pdf_ready.json
+jq '.meta.audit.trace[].warnings' generator-ready.json
 
 # 5. Validate with Python
 python3 << EOF
-from living_doc_datasets_pdf.pdf_ready.v1.models import PdfReadyV1
+from living_doc_datasets_generator_ready.generator_ready.v1.models import GeneratorReadyV1
 import json
 
-with open('pdf_ready.json') as f:
+with open('generator-ready.json') as f:
     data = json.load(f)
 
-model = PdfReadyV1.model_validate(data)
+model = GeneratorReadyV1.model_validate(data)
 print(f"✅ Valid! {len(model.content.user_stories)} user stories")
 EOF
 ```
@@ -568,7 +568,7 @@ Or reinstall from source:
 ```bash
 cd living-doc-toolkit
 git pull
-pip install -e packages/core packages/datasets_pdf packages/adapters/collector_gh packages/services/normalize_issues apps/cli
+pip install -e packages/core packages/datasets_generator_ready packages/adapters/collector_gh packages/services/normalize_issues apps/cli
 ```
 
 ---
@@ -580,7 +580,7 @@ pip install -e packages/core packages/datasets_pdf packages/adapters/collector_g
 ```bash
 living-doc normalize-issues \
   --input doc-issues.json \
-  --output pdf_ready.json \
+  --output generator-ready.json \
   --verbose 2>&1 | tee normalize.log
 ```
 
@@ -644,7 +644,7 @@ Usage:
 docker build -t living-doc-toolkit .
 docker run -v $(pwd):/data living-doc-toolkit \
   --input /data/doc-issues.json \
-  --output /data/pdf_ready.json
+  --output /data/generator-ready.json
 ```
 
 ---

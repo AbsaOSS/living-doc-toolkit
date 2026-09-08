@@ -14,7 +14,7 @@ authors = [
 requires-python = ">=3.10"
 dependencies = [
     "living-doc-core",
-    "living-doc-datasets-pdf",
+    "living-doc-datasets-generator-ready",
     "living-doc-adapter-collector-gh"
 ]
 

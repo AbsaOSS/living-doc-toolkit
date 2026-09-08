@@ -13,14 +13,22 @@
 # limitations under the License.
 
 """
-PDF Ready v1.0 Pydantic Models.
+Generator-ready v1.0.0 Pydantic Models.
 
 Based on SPEC.md section 3.3.
 """
 
+import warnings
+
 from pydantic import BaseModel, Field, field_validator
 
-from living_doc_datasets_pdf.audit.v1.models import AuditEnvelopeV1
+from living_doc_datasets_generator_ready.audit.v1.models import AuditEnvelopeV1
+
+# Canonical value for the ``schema_version`` field of ``generator-ready.json``.
+SCHEMA_VERSION = "generator-ready-v1.0.0"
+
+# Superseded value, still accepted on read during the alias window.
+DEPRECATED_SCHEMA_VERSION = "1.0"
 
 
 class Timestamps(BaseModel):
@@ -146,10 +154,14 @@ class Meta(BaseModel):
         return v
 
 
-class PdfReadyV1(BaseModel):
-    """PDF Ready v1.0 root model."""
+class GeneratorReadyV1(BaseModel):
+    """Generator-ready v1.0.0 root model."""
 
-    schema_version: str = Field(..., description="Schema version (must be '1.0')")
+    schema_version: str = Field(
+        ...,
+        description="Schema version (canonical 'generator-ready-v1.0.0'; '1.0' accepted, deprecated)",
+        json_schema_extra={"enum": [SCHEMA_VERSION, DEPRECATED_SCHEMA_VERSION]},
+    )
     meta: Meta = Field(..., description="Metadata")
     content: Content = Field(..., description="Content")
 
@@ -157,8 +169,15 @@ class PdfReadyV1(BaseModel):
 
     @field_validator("schema_version")
     @classmethod
-    def schema_version_must_be_1_0(cls, v: str) -> str:
-        """Validate that schema_version is '1.0'."""
-        if v != "1.0":
-            raise ValueError("schema_version must be '1.0'")
-        return v
+    def schema_version_must_be_supported(cls, v: str) -> str:
+        """Accept the canonical schema_version and the deprecated '1.0' alias."""
+        if v == SCHEMA_VERSION:
+            return v
+        if v == DEPRECATED_SCHEMA_VERSION:
+            warnings.warn(
+                f"schema_version '{DEPRECATED_SCHEMA_VERSION}' is deprecated; emit '{SCHEMA_VERSION}'",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            return v
+        raise ValueError(f"schema_version must be '{SCHEMA_VERSION}'")

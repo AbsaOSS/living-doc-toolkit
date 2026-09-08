@@ -1,5 +1,60 @@
 {
   "$defs": {
+    "AcceptanceCriterion": {
+      "additionalProperties": false,
+      "description": "A single acceptance criterion entry.",
+      "properties": {
+        "description": {
+          "description": "Criterion text",
+          "title": "Description",
+          "type": "string"
+        },
+        "id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Criterion identifier (e.g. 'GH-28-01')",
+          "title": "Id"
+        },
+        "state": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "State (e.g. 'Active')",
+          "title": "State"
+        },
+        "version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Version when introduced (e.g. 'v1.5.0')",
+          "title": "Version"
+        }
+      },
+      "required": [
+        "description"
+      ],
+      "title": "AcceptanceCriterion",
+      "type": "object"
+    },
     "AuditEnvelopeV1": {
       "additionalProperties": false,
       "description": "Audit Envelope v1.0.",
@@ -49,6 +104,41 @@
       "title": "AuditEnvelopeV1",
       "type": "object"
     },
+    "AuditWarning": {
+      "additionalProperties": false,
+      "description": "Warning in trace step.",
+      "properties": {
+        "code": {
+          "description": "Warning code (e.g., 'VERSION_MISMATCH')",
+          "title": "Code",
+          "type": "string"
+        },
+        "context": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional context (e.g., field path)",
+          "title": "Context"
+        },
+        "message": {
+          "description": "Human-readable message",
+          "title": "Message",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "title": "AuditWarning",
+      "type": "object"
+    },
     "Content": {
       "additionalProperties": false,
       "description": "Content section.",
@@ -96,7 +186,6 @@
         },
         "generated_at": {
           "description": "ISO 8601 UTC timestamp",
-          "format": "date-time",
           "title": "Generated At",
           "type": "string"
         },
@@ -323,27 +412,33 @@
         "acceptance_criteria": {
           "anyOf": [
             {
-              "type": "string"
+              "items": {
+                "$ref": "#/$defs/AcceptanceCriterion"
+              },
+              "type": "array"
             },
             {
               "type": "null"
             }
           ],
           "default": null,
-          "description": "Acceptance criteria (Markdown, optional)",
+          "description": "Acceptance criteria",
           "title": "Acceptance Criteria"
         },
         "business_value": {
           "anyOf": [
             {
-              "type": "string"
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
             },
             {
               "type": "null"
             }
           ],
           "default": null,
-          "description": "Business value (Markdown, optional)",
+          "description": "Business value items",
           "title": "Business Value"
         },
         "connections": {
@@ -388,14 +483,17 @@
         "preconditions": {
           "anyOf": [
             {
-              "type": "string"
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
             },
             {
               "type": "null"
             }
           ],
           "default": null,
-          "description": "Preconditions (Markdown, optional)",
+          "description": "Precondition items",
           "title": "Preconditions"
         },
         "user_guide": {
@@ -569,7 +667,7 @@
         "warnings": {
           "description": "List of warnings",
           "items": {
-            "$ref": "#/$defs/Warning"
+            "$ref": "#/$defs/AuditWarning"
           },
           "title": "Warnings",
           "type": "array"
@@ -635,45 +733,10 @@
       ],
       "title": "UserStory",
       "type": "object"
-    },
-    "Warning": {
-      "additionalProperties": false,
-      "description": "Warning in trace step.",
-      "properties": {
-        "code": {
-          "description": "Warning code (e.g., 'VERSION_MISMATCH')",
-          "title": "Code",
-          "type": "string"
-        },
-        "context": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Optional context (e.g., field path)",
-          "title": "Context"
-        },
-        "message": {
-          "description": "Human-readable message",
-          "title": "Message",
-          "type": "string"
-        }
-      },
-      "required": [
-        "code",
-        "message"
-      ],
-      "title": "Warning",
-      "type": "object"
     }
   },
   "additionalProperties": false,
-  "description": "PDF Ready v1.0 root model.",
+  "description": "Generator-ready v1.0.0 root model.",
   "properties": {
     "content": {
       "$ref": "#/$defs/Content",
@@ -684,7 +747,11 @@
       "description": "Metadata"
     },
     "schema_version": {
-      "description": "Schema version (must be '1.0')",
+      "description": "Schema version (canonical 'generator-ready-v1.0.0'; '1.0' accepted, deprecated)",
+      "enum": [
+        "generator-ready-v1.0.0",
+        "1.0"
+      ],
       "title": "Schema Version",
       "type": "string"
     }
@@ -694,6 +761,6 @@
     "meta",
     "content"
   ],
-  "title": "PdfReadyV1",
+  "title": "GeneratorReadyV1",
   "type": "object"
 }

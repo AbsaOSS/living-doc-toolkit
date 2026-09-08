@@ -39,7 +39,7 @@ repo's own risk areas and review expectations; it is not shared with other repos
 
 ## Mode — Double-check review
 
-- Must treat the change as higher risk — schema or contract changes (`datasets_pdf` models, `coverage-matrix` dataclasses, `AdapterResult`, the audit envelope), CLI argument or exit-code changes, adapter interface changes, wide refactors, and anything touching the golden fixtures.
+- Must treat the change as higher risk — schema or contract changes (`datasets_generator_ready` models, `coverage-matrix` dataclasses, `AdapterResult`, the audit envelope), CLI argument or exit-code changes, adapter interface changes, wide refactors, and anything touching the golden fixtures.
 
 **Additional focus**
 
@@ -69,8 +69,8 @@ repo's own risk areas and review expectations; it is not shared with other repos
 
 ## Repo specifics
 
-- Must treat these as high-risk areas — the adapter version-compatibility logic (`packages/adapters/collector_gh/detector.py`, `compatibility.py`), the payload → `AdapterResult` mapping in `parser.py`, markdown section normalization in `normalize_issues/normalizer.py`, the coverage maths in `coverage_matrix/matcher.py` / `summary.py`, JSON Schema validation in `schema_validation.py` / `datasets_pdf`, and the exit-code mapping in each service's `service.py`.
-- Must treat these as contract-sensitive — CLI argument names and defaults, the exit-code taxonomies (`normalize-issues` `0`–`5`, `coverage-matrix` `0`/`1`), the error-message prefixes, `schema_version` values (`pdf_ready` `"1.0"`, `coverage-matrix` `"coverage-matrix-v1.0.0"`, audit `"1.0"`), the `pdf_ready.json` / `coverage-matrix.json` structure, and the `AdapterResult` signature. Tests and golden fixtures assert exact content.
+- Must treat these as high-risk areas — the adapter version-compatibility logic (`packages/adapters/collector_gh/detector.py`, `compatibility.py`), the payload → `AdapterResult` mapping in `parser.py`, markdown section normalization in `normalize_issues/normalizer.py`, the coverage maths in `coverage_matrix/matcher.py` / `summary.py`, JSON Schema validation in `schema_validation.py` / `datasets_generator_ready`, and the exit-code mapping in each service's `service.py`.
+- Must treat these as contract-sensitive — CLI argument names and defaults, the exit-code taxonomies (`normalize-issues` `0`–`5`, `coverage-matrix` `0`/`1`), the error-message prefixes, `schema_version` values (`generator-ready` `"generator-ready-v1.0.0"` with legacy `"1.0"` still accepted on read, `coverage-matrix` `"coverage-matrix-v1.0.0"`, audit `"1.0"`), the `generator-ready.json` / `coverage-matrix.json` structure, and the `AdapterResult` signature. Tests and golden fixtures assert exact content.
 - Must expect the whole collect → normalize → generate pipeline to stay AI-free and offline — flag any LLM call or network request introduced into the runtime path.
 - Must expect unit tests in each package's `tests/` mirroring its `src/`, with golden fixtures under `tests/fixtures/golden/v*` and collector-gh compatibility fixtures under `tests/fixtures/collector_gh/v*` (discovered, never hard-coded).
 - Must expect QA to run through the per-package `Makefile` targets — `make qa` / `make qa-<alias>` cover `format-check`, `lint`, `types`, and `test`, and `.github/workflows/test.yml` calls the same targets.

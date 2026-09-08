@@ -37,7 +37,7 @@ The Living Documentation Toolkit is a **generic builder** that transforms machin
 graph LR
     A[Collector Action] -->|doc-issues.json| B[Adapter]
     B -->|AdapterResult| C[Service]
-    C -->|pdf_ready.json| D[Dataset]
+    C -->|generator-ready.json| D[Dataset]
     D -->|Validated JSON| E[Generator Action]
     
     style A fill:#e1f5ff,stroke:#0288d1
@@ -59,10 +59,10 @@ graph LR
    - Outputs: `AdapterResult`
 
 3. **Services** (`packages/services/*`)
-   - `normalize_issues`: Normalizes markdown sections into PDF-ready JSON
+   - `normalize_issues`: Normalizes markdown sections into generator-ready JSON
    - `coverage_matrix`: Cross-references User Stories with UI tests into an AC-level coverage matrix
 
-4. **Dataset** (`packages/datasets_pdf`)
+4. **Dataset** (`packages/datasets_generator_ready`)
    - Validates output against schema
    - Ensures compliance with generator contract
 
@@ -94,7 +94,7 @@ flowchart TD
     LogWarn --> Parse
     
     Parse --> Normalize[Normalize Markdown Sections]
-    Normalize --> Build[Build PDF-Ready JSON]
+    Normalize --> Build[Build Generator-Ready JSON]
     Build --> Augment[Augment Audit Envelope]
     Augment --> Validate[Validate Output Schema]
     
@@ -133,7 +133,7 @@ graph TD
     Root --> Tests[tests/]
     
     Packages --> Core[core/]
-    Packages --> Datasets[datasets_pdf/]
+    Packages --> Datasets[datasets_generator_ready/]
     Packages --> Adapters[adapters/]
     Packages --> Services[services/]
     
@@ -152,8 +152,8 @@ graph TD
     CoreSrc --> LoggingConfig[logging_config.py]
     CoreSrc --> Errors[errors.py]
     
-    Datasets --> DatasetsSrc[src/living_doc_datasets_pdf/]
-    DatasetsSrc --> PdfReady[pdf_ready/v1/models.py]
+    Datasets --> DatasetsSrc[src/living_doc_datasets_generator_ready/]
+    DatasetsSrc --> GeneratorReady[generator_ready/v1/models.py]
     DatasetsSrc --> Audit[audit/v1/models.py]
     
     CollectorGH --> AdapterSrc[src/living_doc_adapter_collector_gh/]
@@ -193,7 +193,7 @@ graph TD
     CLI[apps/cli] --> NormalizeService[packages/services/normalize_issues]
     CLI --> CoverageService[packages/services/coverage_matrix]
     NormalizeService --> Core[packages/core]
-    NormalizeService --> Datasets[packages/datasets_pdf]
+    NormalizeService --> Datasets[packages/datasets_generator_ready]
     NormalizeService --> CollectorGH[packages/adapters/collector_gh]
     CoverageService --> Core
 
@@ -242,8 +242,8 @@ graph TB
         AdapterModels[models.py<br/>AdapterResult]
     end
     
-    subgraph "Dataset Package (packages/datasets_pdf)"
-        PdfReadyModels[pdf_ready/v1/models.py<br/>PdfReadyV1]
+    subgraph "Dataset Package (packages/datasets_generator_ready)"
+        GeneratorReadyModels[generator_ready/v1/models.py<br/>GeneratorReadyV1]
         AuditModels[audit/v1/models.py<br/>AuditEnvelopeV1]
     end
     
@@ -253,7 +253,7 @@ graph TB
     ServiceEntry --> Parser
     
     Normalizer --> MarkdownUtils
-    Builder --> PdfReadyModels
+    Builder --> GeneratorReadyModels
     Builder --> AuditModels
     
     ServiceEntry --> JsonUtils
@@ -271,7 +271,7 @@ graph TB
 
 - **service.py**: Main orchestration logic, pipeline coordination
 - **normalizer.py**: Markdown parsing and section mapping
-- **builder.py**: PDF-ready JSON structure construction
+- **builder.py**: generator-ready JSON structure construction
 - **Core utilities**: Reusable helpers (JSON I/O, logging, markdown parsing)
 - **Adapter**: Input detection and parsing
 - **Dataset models**: Schema validation and type safety
@@ -366,7 +366,7 @@ sequenceDiagram
     Parser->>Service: Return AdapterResult
     
     Service->>Service: Normalize sections
-    Service->>Service: Build PDF-ready JSON
+    Service->>Service: Build generator-ready JSON
     Service->>Service: Validate output
     Service->>CLI: Success
 ```
@@ -400,7 +400,7 @@ flowchart LR
         ServiceWarnings[Add warnings if any]
     end
     
-    subgraph Output["Output (pdf_ready.json)"]
+    subgraph Output["Output (generator-ready.json)"]
         OutputAudit[Complete audit envelope:<br/>producer + run + source<br/>+ trace + extensions]
     end
     

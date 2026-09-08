@@ -13,18 +13,18 @@
 # limitations under the License.
 
 """
-PDF Ready v1 JSON Schema export.
+Audit Envelope v1 JSON Schema export.
 """
 
 from pathlib import Path
 
-from living_doc_datasets_pdf._schema_io import write_schema_file
-from living_doc_datasets_pdf.pdf_ready.v1.models import PdfReadyV1
+from living_doc_datasets_generator_ready._schema_io import write_schema_file
+from living_doc_datasets_generator_ready.audit.v1.models import AuditEnvelopeV1
 
 
 def export_json_schema(output_path: str | Path | None = None) -> dict:
     """
-    Export JSON schema for PdfReadyV1.
+    Export JSON schema for AuditEnvelopeV1.
 
     Args:
         output_path: Optional path to write schema file. If None, schema is only returned.
@@ -32,7 +32,7 @@ def export_json_schema(output_path: str | Path | None = None) -> dict:
     Returns:
         JSON schema as dictionary.
     """
-    schema = PdfReadyV1.model_json_schema()
+    schema = AuditEnvelopeV1.model_json_schema()
 
     if output_path:
         write_schema_file(schema, Path(output_path))

@@ -18,17 +18,20 @@ living-doc --help
 living-doc --version
 
 # Normalize issues
-living-doc normalize-issues --input doc-issues.json --output pdf_ready.json
+living-doc normalize-issues --input doc-issues.json --output generator-ready.json
 
 # With options
 living-doc normalize-issues \
   --input doc-issues.json \
-  --output pdf_ready.json \
+  --output generator-ready.json \
   --source collector-gh \
   --document-title "My Document" \
   --document-version "1.0.0" \
   --verbose
 ```
+
+The canonical output name is `generator-ready.json`. `pdf_ready.json` is still accepted as a
+deprecated alias and prints a notice when used.
 
 ## Exit Codes
 

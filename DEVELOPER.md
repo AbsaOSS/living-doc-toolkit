@@ -39,7 +39,7 @@ package together with the `[dev]` extras needed for tooling:
 
 ```shell
 pip install -e packages/core[dev]
-pip install -e packages/datasets_pdf[dev]
+pip install -e packages/datasets_generator_ready[dev]
 pip install -e packages/adapters/collector_gh[dev]
 pip install -e packages/services/normalize_issues[dev]
 pip install -e packages/services/coverage_matrix[dev]
@@ -54,7 +54,7 @@ pip install -e "apps/cli[dev]"
 | Path | Package | Description |
 |---|---|---|
 | `packages/core` | `living-doc-core` | Shared utilities (logging, JSON, markdown, errors) |
-| `packages/datasets_pdf` | `living-doc-datasets-pdf` | Pydantic models and JSON schemas for PDF contracts |
+| `packages/datasets_generator_ready` | `living-doc-datasets-generator-ready` | Pydantic models and JSON schemas for the generator-ready and audit contracts |
 | `packages/adapters/collector_gh` | `living-doc-adapter-collector-gh` | Detector and parser for collector-gh output |
 | `packages/services/normalize_issues` | `living-doc-service-normalize-issues` | Issue normalization service |
 | `packages/services/coverage_matrix` | `living-doc-service-coverage-matrix` | AC-level test coverage matrix generator |
@@ -108,11 +108,11 @@ Seven targets. Each has an **aggregate** form (every package) and a **per-packag
 
 ### Run QA for a specific package
 
-Package aliases: `core`, `datasets-pdf`, `collector-gh`, `normalize`, `coverage`, `cli`.
+Package aliases: `core`, `datasets-generator-ready`, `collector-gh`, `normalize`, `coverage`, `cli`.
 
 ```shell
 make qa-core                  # all gates for packages/core
-make qa-datasets-pdf          # packages/datasets_pdf
+make qa-datasets-generator-ready   # packages/datasets_generator_ready
 make qa-collector-gh          # packages/adapters/collector_gh
 make qa-normalize             # packages/services/normalize_issues
 make qa-coverage              # packages/services/coverage_matrix
@@ -274,7 +274,7 @@ command is available:
 ```shell
 living-doc normalize-issues \
   --input doc-issues.json \
-  --output pdf_ready.json \
+  --output generator-ready.json \
   --source auto \
   --document-title "Sprint 42 Report" \
   --document-version "1.0.0"

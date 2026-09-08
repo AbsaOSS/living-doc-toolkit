@@ -84,7 +84,7 @@ def run_golden_test(version: str) -> bool:
     except ImportError:
         print("✗ Cannot import living_doc_service_normalize_issues")
         print("  Packages may not be installed. Run:")
-        print("  pip install -e packages/core -e packages/datasets_pdf")
+        print("  pip install -e packages/core -e packages/datasets_generator_ready")
         print("  pip install -e packages/adapters/collector_gh -e packages/services/normalize_issues")
         return False
     except Exception as e:  # pylint: disable=broad-except

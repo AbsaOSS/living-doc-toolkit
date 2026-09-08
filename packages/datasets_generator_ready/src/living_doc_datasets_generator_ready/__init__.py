@@ -12,4 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""PDF Ready v1 models."""
+"""
+Living Documentation generator-ready datasets package.
+
+This package provides versioned Pydantic models and JSON schemas for the
+generator-ready and audit contracts.
+"""
+
+__version__ = "1.0.0"

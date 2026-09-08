@@ -19,7 +19,7 @@ Unit tests for Audit Envelope v1 models.
 import pytest
 from pydantic import ValidationError
 
-from living_doc_datasets_pdf.audit.v1.models import (
+from living_doc_datasets_generator_ready.audit.v1.models import (
     AuditEnvelopeV1,
     AuditWarning,
     Producer,
@@ -27,7 +27,7 @@ from living_doc_datasets_pdf.audit.v1.models import (
     Source,
     TraceStep,
 )
-from living_doc_datasets_pdf.audit.v1.serializer import from_json, to_json
+from living_doc_datasets_generator_ready.audit.v1.serializer import from_json, to_json
 
 
 def test_valid_audit_envelope():

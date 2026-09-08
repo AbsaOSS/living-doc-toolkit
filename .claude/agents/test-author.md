@@ -35,8 +35,8 @@ guessing.
 | Version-compatibility warning | set `metadata.producer.version` outside the confirmed range; assert a `VERSION_MISMATCH` entry in `audit.trace[].warnings[]`, not a raise | `packages/adapters/collector_gh/tests/` |
 | collector-gh schema compatibility across versions | golden JSON fixtures, one directory per version, parametrized over the discovered set | `tests/fixtures/collector_gh/v0.1.0/`, `v1.0.0/`, `v1.2.0/`, `v2.0.0/`; `verifications/verify_compatibility.py` |
 | Golden output regression | compare the built output against `tests/fixtures/golden/v<X.Y.Z>/expected_output.json` | `packages/services/coverage_matrix/tests/integration/test_golden_files.py`; `verifications/verify_golden.py` |
-| Pydantic model / dataclass round-trip (`PdfReadyV1`, `AuditEnvelopeV1`, `CoverageItem`) | build the object, serialize, assert on keys/structure and `schema_version`; no I/O | `packages/datasets_pdf/tests/` |
-| Exported JSON Schema drift | regenerate via the package's `schema_export` / `schema.py` and diff against `schemas/*.schema.json` | `packages/datasets_pdf/tests/test_schema_export.py`, `packages/adapters/collector_gh` |
+| Pydantic model / dataclass round-trip (`GeneratorReadyV1`, `AuditEnvelopeV1`, `CoverageItem`) | build the object, serialize, assert on keys/structure and `schema_version`; no I/O | `packages/datasets_generator_ready/tests/` |
+| Exported JSON Schema drift | regenerate via the package's `schema_export` / `schema.py` and diff against `schemas/*.schema.json` | `packages/datasets_generator_ready/tests/test_schema_export.py`, `packages/adapters/collector_gh` |
 | CLI invocation + exit code + output prefix | `click.testing.CliRunner().invoke(cli, [...])`, assert `result.exit_code` and `result.output` | `apps/cli/tests/test_cli.py`, `apps/cli/tests/integration/test_cli_invocation.py` |
 | Clock (`datetime.now(timezone.utc)`) | `mocker.patch("<module>.datetime")`, set `.now.return_value` | `packages/services/*/tests/` |
 | Logging assertions | `mocker.patch("<module>.logger")`, assert on `.warning` / `.error` | `packages/services/*/tests/` |
