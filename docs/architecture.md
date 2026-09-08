@@ -225,8 +225,8 @@ graph TD
 graph TB
     subgraph "Service Package (packages/services/normalize_issues)"
         ServiceEntry[service.py<br/>Main Orchestration]
-        Normalizer[normalizer.py<br/>Markdown Processing]
-        Builder[builder.py<br/>JSON Construction]
+        Builder[builder.py<br/>Normalize + Enrich + Restructure:<br/>Canonical JSON Construction]
+        Normalizer[normalizer.py<br/>Heading-synonym mapping<br/>NOT wired into the pipeline]
     end
     
     subgraph "Core Package (packages/core)"
@@ -247,12 +247,11 @@ graph TB
         AuditModels[audit/v1/models.py<br/>AuditEnvelopeV1]
     end
     
-    ServiceEntry --> Normalizer
     ServiceEntry --> Builder
     ServiceEntry --> Detector
     ServiceEntry --> Parser
     
-    Normalizer --> MarkdownUtils
+    Normalizer -.->|unused| MarkdownUtils
     Builder --> GeneratorReadyModels
     Builder --> AuditModels
     
@@ -263,18 +262,41 @@ graph TB
     Parser --> AdapterModels
     
     style ServiceEntry fill:#ffe0b2,stroke:#e64a19,stroke-width:3px
-    style Normalizer fill:#e3f2fd,stroke:#1976d2
+    style Normalizer fill:#eeeeee,stroke:#9e9e9e,stroke-dasharray:4 3
     style Builder fill:#f3e5f5,stroke:#7b1fa2
 ```
 
 **Component Responsibilities:**
 
-- **service.py**: Main orchestration logic, pipeline coordination
-- **normalizer.py**: Markdown parsing and section mapping
-- **builder.py**: generator-ready JSON structure construction
+- **service.py**: Main orchestration logic, pipeline coordination — loads input, runs the
+  adapter, calls `builder.py`, validates and writes output
+- **builder.py**: canonical (`generator-ready`) JSON structure construction — the
+  **normalize**, **enrich**, and **restructure** stages
+- **normalizer.py**: markdown heading-synonym mapping (`HEADING_SYNONYMS`). Currently **not
+  called by the pipeline** — `service.py` and `builder.py` do not import it, and it is
+  exercised only by its unit tests. Kept for the case where an adapter starts emitting raw
+  issue-body markdown instead of pre-split section fields.
 - **Core utilities**: Reusable helpers (JSON I/O, logging, markdown parsing)
-- **Adapter**: Input detection and parsing
+- **Adapter**: Input detection and parsing — the **adapt** stage
 - **Dataset models**: Schema validation and type safety
+
+**The four transform stages:**
+
+`normalize-issues` is named for its dominant stage, but end-to-end the command runs four —
+**adapt → normalize → enrich → restructure**. Only the second is normalization in the strict
+sense (one canonical shape, nothing added); the command as a whole is a transformation
+pipeline, and a bug filed against "normalization" often lives in the restructure stage.
+
+| Stage | Owner module | What it does |
+|-------|--------------|--------------|
+| **adapt** | `collector_gh` adapter — `detector.py`, `parser.py` | Detect the producer (`metadata.producer.name`) and parse raw `doc-issues.json` into a typed `AdapterResult` (`items[]`, `metadata`, `warnings`). No new information. |
+| **normalize** | `builder.py` | Copy the adapter's already-split section fields (`item.description`, `item.business_value`, `item.preconditions`, `item.acceptance_criteria`) into a canonical `Sections` object, one key per section. Same content, one shape — nothing added or inferred. Heading-synonym resolution happens upstream in the producer; `normalizer.py` would do it in-repo but is not wired in (see Component Responsibilities). |
+| **enrich** | `builder.py` | Derive data the source does not carry — `meta.selection_summary`, and the `audit` envelope with its `trace[]` step and carried-forward adapter warnings. |
+| **restructure** | `builder.py` | Reshape the top level — collector-side `AdapterResult` / `items[]` → canonical `meta` / `content.user_stories[].sections{…}`. |
+
+The CLI command stays `normalize-issues`: it names the dominant, user-facing intent ("make
+this consistent and usable downstream"), so do **not** rename it to match the stage list.
+The collector-side record array is `items[]`; the canonical-side array stays `user_stories[]`.
 
 ---
 
