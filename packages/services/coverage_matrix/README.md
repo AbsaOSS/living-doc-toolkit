@@ -17,11 +17,18 @@ envelope exposing an `items` array, or a `doc-source` envelope exposing
 `user_stories`, `functionalities`, and `features` arrays. The tests input must be an
 envelope with an `items` array.
 
+The `doc-source.json` input is validated against a vendored, pinned copy of
+[`doc-source-v1.0.0-schema.json`](src/living_doc_service_coverage_matrix/schema/doc-source-v1.0.0-schema.json).
+`living-doc-collector-gh` owns and generates that schema; this service is a vendoring
+consumer only — see [`schema/README.md`](src/living_doc_service_coverage_matrix/schema/README.md)
+for the ownership split and re-sync procedure.
+
 ## Output
 
 `coverage-matrix.json`, conforming to
 [`coverage-matrix-v1.0.0-schema.json`](src/living_doc_service_coverage_matrix/schema/coverage-matrix-v1.0.0-schema.json).
 It groups results into `user_stories`, `functionalities`, and `features`.
+This service **owns** that output schema — it is not vendored from anywhere else.
 
 ## CLI
 
@@ -57,4 +64,4 @@ living-doc coverage-matrix \
 - `summary.py` — pure: `compute_summary()`, `compute_us_summary()`
 - `service.py` — orchestration: `run_service()`
 - `model/coverage_item.py` — output dataclasses
-- `schema/` — shipped JSON Schema
+- `schema/` — shipped JSON Schema (`doc-source-v1.0.0` vendored from `collector-gh`, `coverage-matrix-v1.0.0` owned here — see `schema/README.md`)
