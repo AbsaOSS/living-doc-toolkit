@@ -100,7 +100,10 @@ Warning format in audit:
 
 ## Output Contract: `generator-ready.json`
 
-Target: [living-doc-generator-pdf](https://github.com/AbsaOSS/living-doc-generator-pdf).
+Target: any generator that consumes the canonical dataset — today
+[`living-doc-generator-pdf`](https://github.com/AbsaOSS/living-doc-generator-pdf) and
+[`living-doc-generator-markdown`](https://github.com/AbsaOSS/living-doc-generator-markdown).
+The schema has no format-specific field; `generator-pdf` is one consumer, not the owner.
 
 **Schema version:** `"generator-ready-v1.0.0"` (field `schema_version`; the superseded `"1.0"` is still accepted on read, deprecated)
 

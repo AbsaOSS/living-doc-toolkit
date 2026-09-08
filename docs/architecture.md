@@ -225,8 +225,8 @@ graph TD
 graph TB
     subgraph "Service Package (packages/services/normalize_issues)"
         ServiceEntry[service.py<br/>Main Orchestration]
-        Normalizer[normalizer.py<br/>Markdown Processing]
-        Builder[builder.py<br/>JSON Construction]
+        Normalizer[normalizer.py<br/>Normalize: Section Mapping]
+        Builder[builder.py<br/>Enrich + Restructure:<br/>Canonical JSON Construction]
     end
     
     subgraph "Core Package (packages/core)"
@@ -270,11 +270,29 @@ graph TB
 **Component Responsibilities:**
 
 - **service.py**: Main orchestration logic, pipeline coordination
-- **normalizer.py**: Markdown parsing and section mapping
-- **builder.py**: generator-ready JSON structure construction
+- **normalizer.py**: Markdown parsing and section mapping — the **normalize** stage
+- **builder.py**: canonical (`generator-ready`) JSON structure construction — the **enrich** and **restructure** stages
 - **Core utilities**: Reusable helpers (JSON I/O, logging, markdown parsing)
-- **Adapter**: Input detection and parsing
+- **Adapter**: Input detection and parsing — the **adapt** stage
 - **Dataset models**: Schema validation and type safety
+
+**The four transform stages:**
+
+`normalize-issues` is named for its dominant stage, but end to end the command runs four —
+**adapt → normalize → enrich → restructure**. Only the second is normalization in the strict
+sense (one canonical shape, nothing added); the command as a whole is a transformation
+pipeline, and a bug filed against "normalization" often lives in the restructure stage.
+
+| Stage | Owner module | What it does |
+|-------|--------------|--------------|
+| **adapt** | `collector_gh` adapter — `detector.py`, `parser.py` | Detect the producer (`metadata.producer.name`) and parse raw `doc-issues.json` into a typed `AdapterResult` (`items[]`, `metadata`, `warnings`). No new information. |
+| **normalize** | `normalizer.py` | Map issue-body `##` heading synonyms to canonical section keys via `HEADING_SYNONYMS` (`Description` / `Overview` / `Summary` → `description`, and so on). Same content, one shape — nothing added or inferred. |
+| **enrich** | `builder.py` | Derive data the source does not carry — `meta.selection_summary`, and the `audit` envelope with its `trace[]` step and carried-forward adapter warnings. |
+| **restructure** | `builder.py` | Reshape the top level — collector-side `AdapterResult` / `items[]` → canonical `meta` / `content.user_stories[].sections{…}`. |
+
+The CLI command stays `normalize-issues`: it names the dominant, user-facing intent ("make
+this consistent and usable downstream"), so do **not** rename it to match the stage list.
+The collector-side record array is `items[]`; the canonical-side array stays `user_stories[]`.
 
 ---
 
