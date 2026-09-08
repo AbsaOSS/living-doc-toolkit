@@ -160,6 +160,7 @@ class GeneratorReadyV1(BaseModel):
     schema_version: str = Field(
         ...,
         description="Schema version (canonical 'generator-ready-v1.0.0'; '1.0' accepted, deprecated)",
+        json_schema_extra={"enum": [SCHEMA_VERSION, DEPRECATED_SCHEMA_VERSION]},
     )
     meta: Meta = Field(..., description="Metadata")
     content: Content = Field(..., description="Content")

@@ -21,14 +21,25 @@ pip install -e packages/datasets_generator_ready
 ### Using Generator-Ready Models
 
 ```python
-from living_doc_datasets_generator_ready.generator_ready.v1.models import GeneratorReadyV1, Meta, Content
+from living_doc_datasets_generator_ready.generator_ready.v1.models import (
+    Content,
+    GeneratorReadyV1,
+    Meta,
+    SelectionSummary,
+)
 from living_doc_datasets_generator_ready.generator_ready.v1.serializer import to_json, from_json
 
 # Create a model instance
 generator_ready = GeneratorReadyV1(
     schema_version="generator-ready-v1.0.0",
-    meta=Meta(...),
-    content=Content(user_stories=[])
+    meta=Meta(
+        document_title="Product Requirements",
+        document_version="1.0.0",
+        generated_at="2026-01-23T12:00:00Z",
+        source_set=["github:AbsaOSS/project"],
+        selection_summary=SelectionSummary(total_items=0, included_items=0, excluded_items=0),
+    ),
+    content=Content(user_stories=[]),
 )
 
 # Serialize to JSON

@@ -748,6 +748,10 @@
     },
     "schema_version": {
       "description": "Schema version (canonical 'generator-ready-v1.0.0'; '1.0' accepted, deprecated)",
+      "enum": [
+        "generator-ready-v1.0.0",
+        "1.0"
+      ],
       "title": "Schema Version",
       "type": "string"
     }

@@ -19,6 +19,9 @@ Unit tests for JSON schema export functions.
 import json
 from pathlib import Path
 
+import jsonschema
+import pytest
+
 from living_doc_datasets_generator_ready.audit.v1.schema import export_json_schema as export_audit_schema
 from living_doc_datasets_generator_ready.generator_ready.v1.schema import (
     export_json_schema as export_generator_ready_schema,
@@ -87,3 +90,37 @@ def test_committed_generator_ready_schema_is_in_sync():
         committed = json.load(f)
 
     assert committed == export_generator_ready_schema()
+
+
+def test_generator_ready_schema_constrains_schema_version():
+    """The exported schema must enumerate the only accepted schema_version values."""
+    schema = export_generator_ready_schema()
+
+    assert schema["properties"]["schema_version"]["enum"] == ["generator-ready-v1.0.0", "1.0"]
+
+
+def _valid_generator_ready_document(schema_version: str) -> dict:
+    return {
+        "schema_version": schema_version,
+        "meta": {
+            "document_title": "Test",
+            "document_version": "1.0",
+            "generated_at": "2026-01-23T12:00:00Z",
+            "source_set": ["test"],
+            "selection_summary": {"total_items": 0, "included_items": 0, "excluded_items": 0},
+        },
+        "content": {"user_stories": []},
+    }
+
+
+@pytest.mark.parametrize("schema_version", ["generator-ready-v1.0.0", "1.0"])
+def test_schema_accepts_supported_schema_versions(schema_version):
+    """JSON Schema validation passes for the canonical and deprecated values."""
+    jsonschema.validate(_valid_generator_ready_document(schema_version), export_generator_ready_schema())
+
+
+@pytest.mark.parametrize("schema_version", ["2.0", "generator-ready-v2.0.0", ""])
+def test_schema_rejects_unsupported_schema_versions(schema_version):
+    """JSON Schema validation fails for any value the models would reject."""
+    with pytest.raises(jsonschema.ValidationError):
+        jsonschema.validate(_valid_generator_ready_document(schema_version), export_generator_ready_schema())

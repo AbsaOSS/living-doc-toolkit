@@ -17,6 +17,7 @@ Unit tests for generator-ready v1 models.
 """
 
 import json
+import warnings
 
 import pytest
 from pydantic import ValidationError
@@ -161,10 +162,8 @@ def test_invalid_schema_version():
 
 def test_canonical_schema_version_accepted_without_warning():
     """The canonical 'generator-ready-v1.0.0' value is accepted silently."""
-    import warnings as _warnings
-
-    with _warnings.catch_warnings():
-        _warnings.simplefilter("error")
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
         model = GeneratorReadyV1.model_validate(_minimal_data("generator-ready-v1.0.0"))
 
     assert model.schema_version == "generator-ready-v1.0.0"
