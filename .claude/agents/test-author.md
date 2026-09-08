@@ -18,7 +18,6 @@ guessing.
   file I/O to `tmp_path` and fixtures, never the ambient filesystem.
 - Must mock `datetime.now` where a test compares against a golden file, so `generated_at`
   is deterministic.
-- Must cover the success path and the failure/edge paths for the changed logic.
 - Must assert on behavior — return values, raised errors, error-message prefixes, exit
   codes, serialized JSON keys and `schema_version`.
 - Prefer adding to each package's `tests/conftest.py` over duplicating setup.
@@ -33,10 +32,10 @@ guessing.
 | Pure transforms (`normalizer`, `matcher`, `summary`, `loader`, adapter `parser`) | call with parsed dict/list input, assert on the returned structure — no mocks | `packages/services/coverage_matrix/tests/test_matcher.py`, `test_summary.py`, `test_loader.py` |
 | Adapter selection | shape the payload so `detector.can_handle()` matches, or pass `--source collector-gh`; assert the chosen adapter | `packages/adapters/collector_gh/tests/` |
 | Version-compatibility warning | set `metadata.producer.version` outside the confirmed range; assert a `VERSION_MISMATCH` entry in `audit.trace[].warnings[]`, not a raise | `packages/adapters/collector_gh/tests/` |
-| collector-gh schema compatibility across versions | golden JSON fixtures, one directory per version, parametrized over the discovered set | `tests/fixtures/collector_gh/v0.1.0/`, `v1.0.0/`, `v1.2.0/`, `v2.0.0/`; `verifications/verify_compatibility.py` |
+| collector-gh schema compatibility across versions | golden JSON fixtures, one directory per version, parametrized over the discovered set | Repo-root: `tests/fixtures/collector_gh/v0.1.0/`, `v1.0.0/`, `v1.2.0/`, `v2.0.0/`; Adapter: `packages/adapters/collector_gh/tests/fixtures/collector_v0.1.1/`, `collector_v1.0.0/`, `collector_v1.2.0/`; `verifications/verify_compatibility.py` |
 | Golden output regression | compare the built output against `tests/fixtures/golden/v<X.Y.Z>/expected_output.json` | `packages/services/coverage_matrix/tests/integration/test_golden_files.py`; `verifications/verify_golden.py` |
 | Pydantic model / dataclass round-trip (`GeneratorReadyV1`, `AuditEnvelopeV1`, `CoverageItem`) | build the object, serialize, assert on keys/structure and `schema_version`; no I/O | `packages/datasets_generator_ready/tests/` |
-| Exported JSON Schema drift | regenerate via the package's `schema_export` / `schema.py` and diff against `schemas/*.schema.json` | `packages/datasets_generator_ready/tests/test_schema_export.py`, `packages/adapters/collector_gh` |
+| Exported JSON Schema drift | regenerate the dataset's `schema_export` / `schema.py` and diff against `schemas/*.schema.json` — adapter schema is a vendored copy, not regenerated here | `packages/datasets_generator_ready/tests/test_schema_export.py` |
 | CLI invocation + exit code + output prefix | `click.testing.CliRunner().invoke(cli, [...])`, assert `result.exit_code` and `result.output` | `apps/cli/tests/test_cli.py`, `apps/cli/tests/integration/test_cli_invocation.py` |
 | Clock (`datetime.now(timezone.utc)`) | `mocker.patch("<module>.datetime")`, set `.now.return_value` | `packages/services/*/tests/` |
 | Logging assertions | `mocker.patch("<module>.logger")`, assert on `.warning` / `.error` | `packages/services/*/tests/` |
