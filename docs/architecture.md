@@ -59,7 +59,7 @@ graph LR
    - Outputs: `AdapterResult`
 
 3. **Services** (`packages/services/*`)
-   - `normalize_issues`: Normalizes markdown sections into PDF-ready JSON
+   - `normalize_issues`: Normalizes markdown sections into generator-ready JSON
    - `coverage_matrix`: Cross-references User Stories with UI tests into an AC-level coverage matrix
 
 4. **Dataset** (`packages/datasets_generator_ready`)
@@ -94,7 +94,7 @@ flowchart TD
     LogWarn --> Parse
     
     Parse --> Normalize[Normalize Markdown Sections]
-    Normalize --> Build[Build PDF-Ready JSON]
+    Normalize --> Build[Build Generator-Ready JSON]
     Build --> Augment[Augment Audit Envelope]
     Augment --> Validate[Validate Output Schema]
     
@@ -271,7 +271,7 @@ graph TB
 
 - **service.py**: Main orchestration logic, pipeline coordination
 - **normalizer.py**: Markdown parsing and section mapping
-- **builder.py**: PDF-ready JSON structure construction
+- **builder.py**: generator-ready JSON structure construction
 - **Core utilities**: Reusable helpers (JSON I/O, logging, markdown parsing)
 - **Adapter**: Input detection and parsing
 - **Dataset models**: Schema validation and type safety
@@ -366,7 +366,7 @@ sequenceDiagram
     Parser->>Service: Return AdapterResult
     
     Service->>Service: Normalize sections
-    Service->>Service: Build PDF-ready JSON
+    Service->>Service: Build generator-ready JSON
     Service->>Service: Validate output
     Service->>CLI: Success
 ```
