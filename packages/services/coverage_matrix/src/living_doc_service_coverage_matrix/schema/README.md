@@ -38,6 +38,9 @@ procedure mirrors `packages/adapters/collector_gh/SCHEMA_SYNC.md`:
 2. Copy it here byte-for-byte (do not reformat or re-key it).
 3. Bring `../schema_validation.py` back into step with it and re-run this service's golden
    tests (`make qa-coverage`).
+4. Commit the sync, recording the exact `living-doc-collector-gh` commit SHA or tag the
+   copy came from in the commit message (e.g. `chore: re-sync vendored doc-source schema
+   to collector-gh <pin>`) — mirrors `packages/adapters/collector_gh/SCHEMA_SYNC.md`.
 
 ## Usage
 

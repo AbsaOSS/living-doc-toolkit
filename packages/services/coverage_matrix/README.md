@@ -17,8 +17,10 @@ envelope exposing an `items` array, or a `doc-source` envelope exposing
 `user_stories`, `functionalities`, and `features` arrays. The tests input must be an
 envelope with an `items` array.
 
-The `doc-source.json` input is validated against a vendored, pinned copy of
-[`doc-source-v1.0.0-schema.json`](src/living_doc_service_coverage_matrix/schema/doc-source-v1.0.0-schema.json).
+Only a full `doc-source` envelope (one carrying `metadata` and `warnings`) is validated
+against a vendored, pinned copy of
+[`doc-source-v1.0.0-schema.json`](src/living_doc_service_coverage_matrix/schema/doc-source-v1.0.0-schema.json);
+a bare JSON array or a legacy `items` envelope is accepted without schema validation.
 `living-doc-collector-gh` owns and generates that schema; this service is a vendoring
 consumer only — see [`schema/README.md`](src/living_doc_service_coverage_matrix/schema/README.md)
 for the ownership split and re-sync procedure.
