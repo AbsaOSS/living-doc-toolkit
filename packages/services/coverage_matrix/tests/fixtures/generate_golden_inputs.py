@@ -181,6 +181,14 @@ def main() -> None:
                 raise SystemExit("ui-tests collection failed")
             ui_tests = json.loads((Path(tmp) / "ui-tests" / "ui-tests.json").read_text(encoding="utf-8"))
 
+    # Re-check HEAD and cleanliness now that mining is done: if the collector checkout
+    # moved mid-run, the mined JSON no longer matches the SHA we are about to record.
+    if _collector_sha(collector_root) != collector_sha:
+        raise SystemExit(
+            "The collector-gh checkout changed while mining; recorded provenance would be "
+            "wrong. Re-run against a stable checkout."
+        )
+
     doc_source["metadata"] = _pin_metadata(doc_source["metadata"])
     for story in doc_source.get("user_stories", []):
         story["url"] = _clean_url(story.get("url"))
