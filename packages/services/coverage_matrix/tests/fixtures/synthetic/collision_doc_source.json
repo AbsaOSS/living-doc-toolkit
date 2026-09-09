@@ -1,0 +1,73 @@
+{
+  "user_stories": [
+    {
+      "id": "absa-group/aul-ui/US-1",
+      "repository_name": "aul-ui",
+      "title": "User Login (absa-group)",
+      "state": "active",
+      "tags": [],
+      "url": null,
+      "timestamps": null,
+      "description": "As a user, I want to log in.",
+      "business_value": [],
+      "preconditions": [],
+      "not_in_scope": [],
+      "deprecated_at": null,
+      "deprecation_reason": null,
+      "acceptance_criteria": [
+        {
+          "id": "US-1-01",
+          "state": "Active",
+          "version": "v1.0.0",
+          "description": "User can log in with valid credentials.",
+          "aspect": [],
+          "preconditions": [],
+          "not_in_scope": [],
+          "removal_planned": null,
+          "descoped_at": null,
+          "descoped_reason": null,
+          "future_release": null
+        }
+      ]
+    },
+    {
+      "id": "other-org/other-repo/US-1",
+      "repository_name": "other-repo",
+      "title": "Different story, same short id (other-org)",
+      "state": "active",
+      "tags": [],
+      "url": null,
+      "timestamps": null,
+      "description": "A colliding US-1 from a second source.",
+      "business_value": [],
+      "preconditions": [],
+      "not_in_scope": [],
+      "deprecated_at": null,
+      "deprecation_reason": null,
+      "acceptance_criteria": [
+        {
+          "id": "US-1-02",
+          "state": "Active",
+          "version": "v1.0.0",
+          "description": "Only defined on the other-org US-1.",
+          "aspect": [],
+          "preconditions": [],
+          "not_in_scope": [],
+          "removal_planned": null,
+          "descoped_at": null,
+          "descoped_reason": null,
+          "future_release": null
+        }
+      ]
+    }
+  ],
+  "functionalities": [],
+  "features": [],
+  "metadata": {
+    "producer": { "name": "hand-authored-synthetic-fixture", "version": "0", "build": null },
+    "run": { "run_id": null, "run_attempt": null, "actor": null, "workflow": null, "ref": null, "sha": null },
+    "source": { "systems": ["GitHub"], "repositories": ["absa-group/aul-ui", "other-org/other-repo"], "organization": null, "enterprise": null },
+    "original_metadata": { "generated_at": "2026-01-01T00:00:00+00:00", "schema_version": "1.0.0", "inputs": {} }
+  },
+  "warnings": []
+}

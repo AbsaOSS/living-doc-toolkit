@@ -67,3 +67,14 @@ living-doc coverage-matrix \
 - `service.py` — orchestration: `run_service()`
 - `model/coverage_item.py` — output dataclasses
 - `schema/` — shipped JSON Schema (`doc-source-v1.0.0` vendored from `collector-gh`, `coverage-matrix-v1.0.0` owned here — see `schema/README.md`)
+
+## Testing
+
+The golden integration fixtures (`tests/fixtures/golden/`) are **real
+`living-doc-collector-gh` output** — the `.feature` corpus in `tests/fixtures/corpus/` is
+mined by the collector's `doc-source` and `ui-tests` modes, so a schema/parser change in
+`collector-gh` that alters the mined output surfaces here as a failing golden test.
+Hand-authored fixtures under `tests/fixtures/synthetic/` cover shapes the corpus does not
+produce (empty inputs, a cross-source AC-id collision). See
+[`tests/fixtures/README.md`](tests/fixtures/README.md) for the two-step golden-refresh
+procedure.
