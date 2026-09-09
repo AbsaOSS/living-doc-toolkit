@@ -54,8 +54,10 @@ living-doc coverage-matrix \
 - A scenario links to a User Story when `scenario.us_id` equals the US short id
   (the numeric suffix of `us.id`, e.g. `org/repo/US-27` -> `US-27`).
 - When two User Stories share a short id across sources, the scenario's
-  `source.org` / `source.repo` picks the matching one; if that is still ambiguous the
-  first in document order wins so the output stays deterministic.
+  `source.org` / `source.repo` picks the matching one. A scenario whose `source` matches
+  none of the colliding User Stories is left unresolved (it becomes an unlinked test); a
+  scenario with no usable `source` falls back to the first in document order so the
+  output stays deterministic.
 - A scenario covers an AC when the `ac_id` appears in `scenario.ac_ids` and matches a
   known `acceptance_criteria[].id` on the resolved User Story.
 - `coverage_pct` counts only Active ACs, so deprecated ACs never inflate it.
@@ -78,6 +80,6 @@ The golden integration fixtures (`tests/fixtures/golden/`) are **real
 mined by the collector's `doc-source` and `ui-tests` modes, so a schema/parser change in
 `collector-gh` that alters the mined output surfaces here as a failing golden test.
 Hand-authored fixtures under `tests/fixtures/synthetic/` cover shapes the corpus does not
-produce (empty inputs, a cross-source AC-id collision). See
+produce (empty inputs, a cross-source User Story id collision). See
 [`tests/fixtures/README.md`](tests/fixtures/README.md) for the two-step golden-refresh
 procedure.

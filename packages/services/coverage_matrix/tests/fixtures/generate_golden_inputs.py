@@ -24,7 +24,9 @@ After running it, regenerate the expected output with
 
 The exact ``collector-gh`` commit each run was mined from is read from the checkout's
 git HEAD and written to ``tests/fixtures/golden/collector_provenance.json`` (committed),
-so the recorded provenance can never silently drift from what was actually used.
+so the recorded provenance can never silently drift from what was actually used. The
+checkout must be clean — the script refuses to mine from a worktree with uncommitted
+changes, since the recorded SHA would not then describe the code that ran.
 """
 
 from __future__ import annotations
@@ -73,7 +75,26 @@ def _collector_sha(collector_root: Path) -> str:
         raise SystemExit(f"Could not read the collector-gh commit at {collector_root}: {exc}") from exc
     if not sha:
         raise SystemExit(f"Empty git HEAD for the collector-gh checkout at {collector_root}")
+    _require_clean_checkout(collector_root)
     return sha
+
+
+def _require_clean_checkout(collector_root: Path) -> None:
+    """Refuse to mine from a dirty collector checkout so the recorded SHA stays reproducible."""
+    try:
+        dirty = subprocess.run(
+            ["git", "-C", str(collector_root), "status", "--porcelain"],
+            capture_output=True,
+            text=True,
+            check=True,
+        ).stdout.strip()
+    except (OSError, subprocess.CalledProcessError) as exc:  # pragma: no cover - dev tool
+        raise SystemExit(f"Could not check the collector-gh checkout state at {collector_root}: {exc}") from exc
+    if dirty:
+        raise SystemExit(
+            f"The collector-gh checkout at {collector_root} has uncommitted changes. Commit or "
+            "stash them so the recorded provenance commit matches the code that was actually run."
+        )
 
 
 def _write_provenance(collector_root: Path, sha: str) -> None:

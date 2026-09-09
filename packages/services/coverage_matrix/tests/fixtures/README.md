@@ -31,4 +31,5 @@ make qa-coverage
 
 `generate_golden_inputs.py` reads the collector checkout's git HEAD and writes it to
 `golden/collector_provenance.json`, so the recorded commit always matches what was
-actually mined — review that file's diff when refreshing.
+actually mined — review that file's diff when refreshing. The collector checkout must be
+clean; the script refuses to run against a worktree with uncommitted changes.

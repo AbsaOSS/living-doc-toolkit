@@ -66,9 +66,10 @@ def _resolve_entity(index: dict[str, list[dict]], short_id: str | None, source: 
     Resolve a scenario's ``us_id`` / ``func_id`` to a doc entity.
 
     With a single entity for the short id, return it. When several entities share the
-    short id across sources, disambiguate on the scenario ``source`` org/repo; if that
-    still does not single one out, fall back to the first in document order so the
-    result stays deterministic.
+    short id across sources, disambiguate on the scenario ``source`` org/repo. A scenario
+    that carries an ``org``/``repo`` matching none of the candidates is left unresolved
+    (``None``) rather than guessed at; only a scenario with no usable source falls back to
+    the first candidate in document order so the result stays deterministic.
     """
     if not short_id:
         return None
@@ -80,6 +81,7 @@ def _resolve_entity(index: dict[str, list[dict]], short_id: str | None, source: 
         for entity in matches:
             if _entity_source_prefix(entity) == prefix:
                 return entity
+        return None
     return matches[0]
 
 

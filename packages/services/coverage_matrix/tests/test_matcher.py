@@ -182,7 +182,7 @@ def test_cross_source_short_id_collision_disambiguates_on_source():
     assert matrix.stale_ac_refs == []
 
 
-def test_cross_source_collision_without_source_match_is_deterministic():
+def test_cross_source_collision_with_unmatched_source_is_unresolved():
     doc = _doc(
         [
             {"id": "org-a/repo-a/US-1", "title": "A", "state": "active", "acceptance_criteria": [_ac("US-1-01")]},
@@ -193,7 +193,26 @@ def test_cross_source_collision_without_source_match_is_deterministic():
 
     matrix = build_coverage_matrix(doc, tests, GENERATED_AT)
 
-    # Falls back to the first US in document order.
+    # A scenario whose source matches neither colliding US is not guessed at: it stays
+    # unlinked and no AC is credited.
+    by_full = {us.full_id: us for us in matrix.user_stories}
+    assert by_full["org-a/repo-a/US-1"].acceptance_criteria[0].coverage.status == "not_covered"
+    assert by_full["org-b/repo-b/US-1"].acceptance_criteria[0].coverage.status == "not_covered"
+    assert [t.us_id for t in matrix.unlinked_tests] == ["US-1"]
+
+
+def test_cross_source_collision_without_source_falls_back_to_document_order():
+    doc = _doc(
+        [
+            {"id": "org-a/repo-a/US-1", "title": "A", "state": "active", "acceptance_criteria": [_ac("US-1-01")]},
+            {"id": "org-b/repo-b/US-1", "title": "B", "state": "active", "acceptance_criteria": [_ac("US-1-02")]},
+        ]
+    )
+    tests = [_scenario("s1", "US-1", ["US-1-01"], source={"file": "f.feature"})]
+
+    matrix = build_coverage_matrix(doc, tests, GENERATED_AT)
+
+    # No usable org/repo on the scenario -> first US in document order wins, deterministically.
     by_full = {us.full_id: us for us in matrix.user_stories}
     assert by_full["org-a/repo-a/US-1"].acceptance_criteria[0].coverage.status == "covered"
     assert by_full["org-b/repo-b/US-1"].acceptance_criteria[0].coverage.status == "not_covered"
