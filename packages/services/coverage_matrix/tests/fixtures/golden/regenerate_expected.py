@@ -20,9 +20,11 @@ import json
 import tempfile
 from pathlib import Path
 
+from living_doc_core.logging_config import setup_logging
 from living_doc_service_coverage_matrix.service import run_service
 
 GOLDEN_DIR = Path(__file__).resolve().parent
+LOGGER = setup_logging()
 
 
 def main() -> None:
@@ -40,7 +42,7 @@ def main() -> None:
     (GOLDEN_DIR / "expected_coverage_matrix.json").write_text(
         json.dumps(matrix, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
-    print(f"Wrote {GOLDEN_DIR / 'expected_coverage_matrix.json'}")
+    LOGGER.info("Wrote %s", GOLDEN_DIR / "expected_coverage_matrix.json")
 
 
 if __name__ == "__main__":

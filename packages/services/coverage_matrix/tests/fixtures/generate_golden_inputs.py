@@ -17,6 +17,9 @@ Usage::
 
     # collector-gh checked out next to this repo (../living-doc-collector-gh), or:
     export LIVING_DOC_COLLECTOR_GH=/path/to/living-doc-collector-gh
+    # the collector's own dependencies must be importable in this interpreter -- install
+    # its requirements (pip install -r $LIVING_DOC_COLLECTOR_GH/requirements.txt) or run
+    # from its prepared virtualenv; a bare checkout is not enough.
     python packages/services/coverage_matrix/tests/fixtures/generate_golden_inputs.py
 
 After running it, regenerate the expected output with
@@ -37,7 +40,10 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path
+from types import SimpleNamespace
 from unittest import mock
+
+from living_doc_core.logging_config import setup_logging
 
 FIXTURES_DIR = Path(__file__).resolve().parent
 CORPUS_DIR = FIXTURES_DIR / "corpus"
@@ -46,6 +52,26 @@ GOLDEN_DIR = FIXTURES_DIR / "golden"
 ORG = "absa-group"
 REPO = "aul-ui"
 PINNED_GENERATED_AT = "2026-01-01T00:00:00+00:00"
+
+LOGGER = setup_logging()
+
+
+def _load_collector(collector_root: Path) -> SimpleNamespace:
+    """
+    Import the collector's doc-source / ui-tests collector classes.
+
+    The import is deliberately deferred and lives behind this one loader rather than at
+    module scope: the collector packages only become importable once ``collector_root``
+    (discovered at runtime by :func:`_find_collector_gh`) is on ``sys.path``. Keeping the
+    single ``import-outside-toplevel`` here documents that constraint instead of scattering
+    suppressions through :func:`main`.
+    """
+    sys.path.insert(0, str(collector_root))
+    # pylint: disable=import-outside-toplevel
+    from doc_source.collector import GHDocSourceCollector
+    from ui_tests.collector import GHUITestsCollector
+
+    return SimpleNamespace(doc_source=GHDocSourceCollector, ui_tests=GHUITestsCollector)
 
 
 def _find_collector_gh() -> Path:
@@ -137,11 +163,8 @@ def _clean_url(url: str | None) -> str | None:
 def main() -> None:
     collector_root = _find_collector_gh()
     collector_sha = _collector_sha(collector_root)
-    print(f"Mining corpus with living-doc-collector-gh @ {collector_sha}")
-    sys.path.insert(0, str(collector_root))
-
-    from doc_source.collector import GHDocSourceCollector  # pylint: disable=import-outside-toplevel
-    from ui_tests.collector import GHUITestsCollector  # pylint: disable=import-outside-toplevel
+    LOGGER.info("Mining corpus with living-doc-collector-gh @ %s", collector_sha)
+    collectors = _load_collector(collector_root)
 
     us_dir = str(CORPUS_DIR / "us")
     doc_repos = [{"organization-name": ORG, "repository-name": REPO, "us-paths": [us_dir]}]
@@ -149,11 +172,13 @@ def main() -> None:
 
     with tempfile.TemporaryDirectory() as tmp:
         with mock.patch("doc_source.collector.ActionInputs.get_doc_source_repositories", return_value=doc_repos):
-            assert GHDocSourceCollector(tmp).collect(), "doc-source collection failed"
+            if not collectors.doc_source(tmp).collect():
+                raise SystemExit("doc-source collection failed")
             doc_source = json.loads((Path(tmp) / "doc-source" / "doc-source.json").read_text(encoding="utf-8"))
 
         with mock.patch("ui_tests.collector.ActionInputs.get_ui_tests_repositories", return_value=ui_repos):
-            assert GHUITestsCollector(tmp).collect(), "ui-tests collection failed"
+            if not collectors.ui_tests(tmp).collect():
+                raise SystemExit("ui-tests collection failed")
             ui_tests = json.loads((Path(tmp) / "ui-tests" / "ui-tests.json").read_text(encoding="utf-8"))
 
     doc_source["metadata"] = _pin_metadata(doc_source["metadata"])
@@ -169,9 +194,9 @@ def main() -> None:
         json.dumps(ui_tests, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
     )
     _write_provenance(collector_root, collector_sha)
-    print(f"Wrote {GOLDEN_DIR / 'doc_source.json'}")
-    print(f"Wrote {GOLDEN_DIR / 'ui_tests.json'}")
-    print(f"Wrote {GOLDEN_DIR / 'collector_provenance.json'} ({collector_sha})")
+    LOGGER.info("Wrote %s", GOLDEN_DIR / "doc_source.json")
+    LOGGER.info("Wrote %s", GOLDEN_DIR / "ui_tests.json")
+    LOGGER.info("Wrote %s (%s)", GOLDEN_DIR / "collector_provenance.json", collector_sha)
 
 
 if __name__ == "__main__":

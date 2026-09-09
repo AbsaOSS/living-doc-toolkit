@@ -18,7 +18,10 @@ Two steps, both manual (the pin-and-vendor automation is roadmap Phase 5):
 
 ```bash
 # 1. Re-mine the corpus with collector-gh's doc-source + ui-tests modes.
-#    Needs collector-gh checked out next to this repo, or LIVING_DOC_COLLECTOR_GH set.
+#    Needs collector-gh checked out next to this repo, or LIVING_DOC_COLLECTOR_GH set,
+#    AND the collector's own dependencies importable in the interpreter you run this
+#    with (pip install -r <collector>/requirements.txt, or use its prepared venv) --
+#    importing the collector pulls in packages coverage-matrix does not declare.
 python packages/services/coverage_matrix/tests/fixtures/generate_golden_inputs.py
 
 # 2. Regenerate the expected coverage matrix from the refreshed inputs.
