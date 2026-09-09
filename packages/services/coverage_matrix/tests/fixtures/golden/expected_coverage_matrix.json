@@ -10,7 +10,7 @@
       "scenario_name": "Scenario referencing an AC that no longer exists",
       "source": {
         "file": "user_login.feature",
-        "line": 40,
+        "line": 41,
         "org": "absa-group",
         "repo": "aul-ui"
       },
@@ -126,6 +126,31 @@
         {
           "coverage": {
             "status": "covered",
+            "test_count": 1,
+            "tests": [
+              {
+                "id": "absa-group/aul-ui/user_login.feature/user-logs-in-with-valid-credentials",
+                "scenario_name": "User logs in with valid credentials",
+                "source": {
+                  "file": "user_login.feature",
+                  "line": 24,
+                  "org": "absa-group",
+                  "repo": "aul-ui"
+                },
+                "tags": [
+                  "Regression"
+                ]
+              }
+            ]
+          },
+          "description": "User can log in with valid credentials.",
+          "id": "US-1-01",
+          "state": "Active",
+          "version": "v1.0.0"
+        },
+        {
+          "coverage": {
+            "status": "covered",
             "test_count": 2,
             "tests": [
               {
@@ -146,37 +171,12 @@
                 "scenario_name": "Login button stays disabled until fields are filled",
                 "source": {
                   "file": "user_login.feature",
-                  "line": 30,
+                  "line": 31,
                   "org": "absa-group",
                   "repo": "aul-ui"
                 },
                 "tags": [
                   "Smoke"
-                ]
-              }
-            ]
-          },
-          "description": "User can log in with valid credentials.",
-          "id": "US-1-01",
-          "state": "Active",
-          "version": "v1.0.0"
-        },
-        {
-          "coverage": {
-            "status": "covered",
-            "test_count": 1,
-            "tests": [
-              {
-                "id": "absa-group/aul-ui/user_login.feature/user-logs-in-with-valid-credentials",
-                "scenario_name": "User logs in with valid credentials",
-                "source": {
-                  "file": "user_login.feature",
-                  "line": 24,
-                  "org": "absa-group",
-                  "repo": "aul-ui"
-                },
-                "tags": [
-                  "Regression"
                 ]
               }
             ]
@@ -196,7 +196,7 @@
                 "scenario_name": "Legacy basic-auth login",
                 "source": {
                   "file": "user_login.feature",
-                  "line": 35,
+                  "line": 36,
                   "org": "absa-group",
                   "repo": "aul-ui"
                 },

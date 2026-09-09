@@ -7,6 +7,10 @@ Run this after ``../generate_golden_inputs.py`` refreshes ``doc_source.json`` /
 ``ui_tests.json`` from real collector output. The dynamic ``generated_at`` field is
 pinned to ``PLACEHOLDER`` to match the integration test's normalisation.
 
+Requires the ``living-doc-service-coverage-matrix`` package to be importable (the repo
+uses a ``src`` layout) — run ``make install`` first, or set ``PYTHONPATH`` to the
+package ``src/`` directory.
+
 Usage::
 
     python packages/services/coverage_matrix/tests/fixtures/golden/regenerate_expected.py

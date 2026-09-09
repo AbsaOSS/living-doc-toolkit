@@ -130,11 +130,15 @@
         },
         {
           "keyword": "When",
-          "text": "the user submits valid credentials"
+          "text": "the user fills in both fields with valid credentials"
         },
         {
           "keyword": "Then",
-          "text": "the dashboard is shown"
+          "text": "the login button is enabled"
+        },
+        {
+          "keyword": "And",
+          "text": "submitting the form shows the dashboard"
         }
       ],
       "source": {
@@ -149,11 +153,11 @@
       "us_id": "US-1",
       "func_id": null,
       "ac_ids": [
-        "US-1-01"
+        "US-1-02"
       ],
       "ac_links": [
         {
-          "id": "US-1-01",
+          "id": "US-1-02",
           "aspect": null
         }
       ],
@@ -176,7 +180,7 @@
         "org": "absa-group",
         "repo": "aul-ui",
         "file": "user_login.feature",
-        "line": 30
+        "line": 31
       }
     },
     {
@@ -212,7 +216,7 @@
         "org": "absa-group",
         "repo": "aul-ui",
         "file": "user_login.feature",
-        "line": 35
+        "line": 36
       }
     },
     {
@@ -247,7 +251,7 @@
         "org": "absa-group",
         "repo": "aul-ui",
         "file": "user_login.feature",
-        "line": 40
+        "line": 41
       }
     }
   ],

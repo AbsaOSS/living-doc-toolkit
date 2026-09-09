@@ -48,17 +48,56 @@ def _ac_ids_of(entity: dict) -> set[str]:
     return {ac.get("id") for ac in entity.get("acceptance_criteria") or []}
 
 
+def _index_by_short_id(entities: list[dict]) -> dict[str, list[dict]]:
+    """Group entities by short id; a list per id so cross-source id collisions are kept."""
+    index: dict[str, list[dict]] = defaultdict(list)
+    for entity in entities:
+        index[_short_id(entity["id"])].append(entity)
+    return index
+
+
+def _entity_source_prefix(entity: dict) -> str:
+    """The ``org/repo`` prefix of an entity's full id (everything before the short id)."""
+    return "/".join(entity["id"].split("/")[:-1])
+
+
+def _resolve_entity(index: dict[str, list[dict]], short_id: str | None, source: dict | None) -> dict | None:
+    """
+    Resolve a scenario's ``us_id`` / ``func_id`` to a doc entity.
+
+    With a single entity for the short id, return it. When several entities share the
+    short id across sources, disambiguate on the scenario ``source`` org/repo; if that
+    still does not single one out, fall back to the first in document order so the
+    result stays deterministic.
+    """
+    if not short_id:
+        return None
+    matches = index.get(short_id) or []
+    if len(matches) <= 1:
+        return matches[0] if matches else None
+    if source and source.get("org") and source.get("repo"):
+        prefix = f"{source['org']}/{source['repo']}"
+        for entity in matches:
+            if _entity_source_prefix(entity) == prefix:
+                return entity
+    return matches[0]
+
+
 def _resolve_tests(
     test_items: list[dict],
-    us_by_num: dict[str, dict],
-    func_by_num: dict[str, dict],
+    us_index: dict[str, list[dict]],
+    func_index: dict[str, list[dict]],
 ) -> tuple[
     dict[str, dict[str, list[TestRef]]],
     dict[str, dict[str, list[TestRef]]],
     list[UnlinkedTest],
     list[StaleAcRef],
 ]:
-    """Split scenarios into per-US and per-Functionality coverage maps, unlinked, and stale refs."""
+    """Split scenarios into per-US and per-Functionality coverage maps, unlinked, and stale refs.
+
+    The coverage maps are keyed by **full** id so two doc entities that share a short id
+    (a cross-source collision) do not clobber each other.
+    """
     us_map: dict[str, dict[str, list[TestRef]]] = defaultdict(lambda: defaultdict(list))
     func_map: dict[str, dict[str, list[TestRef]]] = defaultdict(lambda: defaultdict(list))
     unlinked: list[UnlinkedTest] = []
@@ -67,8 +106,9 @@ def _resolve_tests(
     for scenario in test_items:
         us_id = scenario.get("us_id")
         func_id = scenario.get("func_id")
-        us = us_by_num.get(us_id) if us_id else None
-        func = func_by_num.get(func_id) if func_id else None
+        source = scenario.get("source")
+        us = _resolve_entity(us_index, us_id, source)
+        func = _resolve_entity(func_index, func_id, source)
 
         if us is None and func is None:
             unlinked.append(
@@ -85,8 +125,8 @@ def _resolve_tests(
 
         us_ac_ids = _ac_ids_of(us) if us is not None else set()
         func_ac_ids = _ac_ids_of(func) if func is not None else set()
-        us_key = _short_id(us["id"]) if us is not None else None
-        func_key = _short_id(func["id"]) if func is not None else None
+        us_key = us["id"] if us is not None else None
+        func_key = func["id"] if func is not None else None
 
         for ac_id in scenario.get("ac_ids") or []:
             matched = False
@@ -191,13 +231,13 @@ def build_coverage_matrix(doc: dict, test_items: list[dict], generated_at: str) 
     doc_func = doc.get("functionalities") or []
     doc_feat = doc.get("features") or []
 
-    us_by_num = {_short_id(us["id"]): us for us in doc_us}
-    func_by_num = {_short_id(func["id"]): func for func in doc_func}
+    us_index = _index_by_short_id(doc_us)
+    func_index = _index_by_short_id(doc_func)
 
-    us_map, func_map, unlinked, stale = _resolve_tests(test_items, us_by_num, func_by_num)
+    us_map, func_map, unlinked, stale = _resolve_tests(test_items, us_index, func_index)
 
-    user_stories = [_build_user_story(us, us_map.get(_short_id(us["id"]), {})) for us in doc_us]
-    functionalities = [_build_functionality(func, func_map.get(_short_id(func["id"]), {})) for func in doc_func]
+    user_stories = [_build_user_story(us, us_map.get(us["id"], {})) for us in doc_us]
+    functionalities = [_build_functionality(func, func_map.get(func["id"], {})) for func in doc_func]
     features = [_build_feature(feature) for feature in doc_feat]
 
     return CoverageMatrix(

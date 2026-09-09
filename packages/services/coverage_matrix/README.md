@@ -53,6 +53,9 @@ living-doc coverage-matrix \
 
 - A scenario links to a User Story when `scenario.us_id` equals the US short id
   (the numeric suffix of `us.id`, e.g. `org/repo/US-27` -> `US-27`).
+- When two User Stories share a short id across sources, the scenario's
+  `source.org` / `source.repo` picks the matching one; if that is still ambiguous the
+  first in document order wins so the output stays deterministic.
 - A scenario covers an AC when the `ac_id` appears in `scenario.ac_ids` and matches a
   known `acceptance_criteria[].id` on the resolved User Story.
 - `coverage_pct` counts only Active ACs, so deprecated ACs never inflate it.

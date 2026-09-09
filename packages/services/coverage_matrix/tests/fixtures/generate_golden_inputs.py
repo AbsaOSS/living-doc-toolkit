@@ -22,13 +22,16 @@ Usage::
 After running it, regenerate the expected output with
 ``tests/fixtures/golden/regenerate_expected.py`` and re-run ``make qa-coverage``.
 
-Pinned collector-gh commit: b6c935d3541b6580b2ed356b458c1427d9a3659e (2026-09-08).
+The exact ``collector-gh`` commit each run was mined from is read from the checkout's
+git HEAD and written to ``tests/fixtures/golden/collector_provenance.json`` (committed),
+so the recorded provenance can never silently drift from what was actually used.
 """
 
 from __future__ import annotations
 
 import json
 import os
+import subprocess
 import sys
 import tempfile
 from pathlib import Path
@@ -57,6 +60,39 @@ def _find_collector_gh() -> Path:
     )
 
 
+def _collector_sha(collector_root: Path) -> str:
+    """Return the exact HEAD commit of the collector checkout the fixtures were mined from."""
+    try:
+        sha = subprocess.run(
+            ["git", "-C", str(collector_root), "rev-parse", "HEAD"],
+            capture_output=True,
+            text=True,
+            check=True,
+        ).stdout.strip()
+    except (OSError, subprocess.CalledProcessError) as exc:  # pragma: no cover - dev tool
+        raise SystemExit(f"Could not read the collector-gh commit at {collector_root}: {exc}") from exc
+    if not sha:
+        raise SystemExit(f"Empty git HEAD for the collector-gh checkout at {collector_root}")
+    return sha
+
+
+def _write_provenance(collector_root: Path, sha: str) -> None:
+    """Persist the real collector commit next to the golden inputs so it shows in diffs."""
+    (GOLDEN_DIR / "collector_provenance.json").write_text(
+        json.dumps(
+            {
+                "_comment": "Written by generate_golden_inputs.py - the collector-gh commit the "
+                "golden inputs were actually mined from. Do not hand-edit.",
+                "collector_gh_commit": sha,
+                "generated_at_pin": PINNED_GENERATED_AT,
+            },
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+
 def _pin_metadata(metadata: dict) -> dict:
     """Pin the dynamic / environment-derived metadata fields to fixed values."""
     metadata["producer"]["build"] = None
@@ -79,6 +115,8 @@ def _clean_url(url: str | None) -> str | None:
 
 def main() -> None:
     collector_root = _find_collector_gh()
+    collector_sha = _collector_sha(collector_root)
+    print(f"Mining corpus with living-doc-collector-gh @ {collector_sha}")
     sys.path.insert(0, str(collector_root))
 
     from doc_source.collector import GHDocSourceCollector  # pylint: disable=import-outside-toplevel
@@ -109,8 +147,10 @@ def main() -> None:
     (GOLDEN_DIR / "ui_tests.json").write_text(
         json.dumps(ui_tests, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
     )
+    _write_provenance(collector_root, collector_sha)
     print(f"Wrote {GOLDEN_DIR / 'doc_source.json'}")
     print(f"Wrote {GOLDEN_DIR / 'ui_tests.json'}")
+    print(f"Wrote {GOLDEN_DIR / 'collector_provenance.json'} ({collector_sha})")
 
 
 if __name__ == "__main__":

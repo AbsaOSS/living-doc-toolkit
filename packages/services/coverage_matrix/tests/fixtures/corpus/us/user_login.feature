@@ -23,10 +23,11 @@ As a user, I want to log in so that I can access the application.
   @Regression @AC:US-1-01 @AC:US-1-02
   Scenario: User logs in with valid credentials
     Given the user is on the login page
-    When the user submits valid credentials
-    Then the dashboard is shown
+    When the user fills in both fields with valid credentials
+    Then the login button is enabled
+    And submitting the form shows the dashboard
 
-  @Smoke @AC:US-1-01
+  @Smoke @AC:US-1-02
   Scenario: Login button stays disabled until fields are filled
     Given the user is on the login page
     Then the login button is disabled
