@@ -64,6 +64,44 @@ living-doc coverage-matrix \
 - Scenarios with an unresolved `us_id` land in `unlinked_tests`; `ac_ids` that do not
   exist on the resolved US land in `stale_ac_refs`.
 
+## Multi-source coverage matrices — merge before you run
+
+`coverage-matrix` joins a **technical project** (User Stories + ACs, from `doc-source.json`)
+to a **test catalog** (scenarios, from `ui-tests.json`) on AC ID. That join is only valid
+when both sides describe the **same** dataset.
+
+**Rule:** if a coverage matrix must span more than one source (for example a GitHub repo
+*and* an Azure DevOps project, or GitHub issues *and* source-code `.feature` files), merge
+those sources into a single `doc-source.json` / `ui-tests.json` pair **before** running
+`coverage-matrix`. Isolated per-source pipelines may each produce their own technical
+project and test catalog, but a coverage matrix over them is valid only *per source*.
+
+### The false-gap failure mode
+
+Running `coverage-matrix` on one source's `doc-source.json` while the covering scenarios
+live in another source's `ui-tests.json` does not just miss the cross-source coverage — it
+**reports every cross-source AC as uncovered**. The covering scenario is simply absent from
+the input, so the AC lands in the "no scenario" bucket and `coverage_pct` drops. This false
+gap is indistinguishable from a genuine coverage hole in the report itself.
+
+If you open a coverage matrix and see a wall of uncovered ACs, first check whether you ran
+it per-source by mistake: confirm the `doc-source.json` and `ui-tests.json` you passed were
+produced from the *same* merged set of sources, not one source each.
+
+### Prerequisite: globally unique IDs
+
+A clean merge requires that **entity and AC IDs are globally unique across sources** — no
+`US-1` meaning one thing in a GitHub repo and another in an Azure DevOps project. This is an
+authoring-time constraint; `coverage-matrix` cannot reconcile colliding IDs after the fact.
+See the "Acceptance Criterion" section of the
+[Living Doc Glossary](https://github.com/AbsaOSS/living-doc/blob/master/docs/guides/living-doc-glossary.md)
+for the authoring rule, and the "Data Flows, Formats & Schemas" spec §8
+("Multiple sources and multiple generators" → "The coverage-matrix constraint") for the
+full rationale.
+
+Carrying this guidance into `living-doc-generator-pdf`'s `document-type: coverage-matrix`
+README is Phase 3 work, tracked separately — it is not part of this service's docs.
+
 ## Module layout
 
 - `loader.py` — pure I/O: `load_doc_input()`, `load_tests_input()`
