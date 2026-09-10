@@ -766,6 +766,10 @@
         },
         "view": {
           "description": "Applied view: 'inner' (comprehensive) or 'release' (filtered)",
+          "enum": [
+            "inner",
+            "release"
+          ],
           "title": "View",
           "type": "string"
         }

@@ -53,8 +53,8 @@ def test_inner_keeps_planned_entities_and_deprecated_acs(tmp_path):
     }
 
 
-def test_release_drops_planned_entities_and_in_review_acs_keeps_deprecated(tmp_path):
-    """Release view removes planned/in_review entities and planned/in_review ACs, keeps deprecated ACs."""
+def test_release_drops_planned_entities_and_planned_in_review_deprecated_acs(tmp_path):
+    """Release view removes planned/in_review entities and planned/in_review/deprecated ACs (issue #77)."""
     actual = _run("release", tmp_path)
 
     story_ids = [s["id"] for s in actual["content"]["user_stories"]]
@@ -62,11 +62,11 @@ def test_release_drops_planned_entities_and_in_review_acs_keeps_deprecated(tmp_p
 
     shipped = actual["content"]["user_stories"][0]
     ac_states = [ac["state"] for ac in shipped["sections"]["acceptance_criteria"]]
-    assert ac_states == ["Active", "deprecated"]
+    assert ac_states == ["Active"]
 
     assert actual["meta"]["view"] == {
         "view": "release",
         "filtered_user_stories": 2,
-        "filtered_acceptance_criteria": 1,
+        "filtered_acceptance_criteria": 2,
     }
     assert actual["meta"]["selection_summary"] == {"total_items": 3, "included_items": 1, "excluded_items": 2}

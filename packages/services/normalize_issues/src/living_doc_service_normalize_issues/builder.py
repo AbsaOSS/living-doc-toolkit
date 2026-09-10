@@ -33,9 +33,10 @@ from living_doc_datasets_generator_ready.generator_ready.v1.models import (  # t
 # Content view filtering (see docs/contracts.md "Content Views"). The ``release`` view
 # hides work that is not yet public; the ``inner`` view keeps everything.
 DROP_ENTITY_STATES = frozenset({"planned", "in_review"})
-# ``deprecated`` ACs are kept: they describe behaviour that shipped and is still part of the
-# solution. Only not-yet-real ACs (``planned`` / ``in_review``) are release-hidden.
-DROP_AC_STATES = frozenset({"planned", "in_review"})
+# Per issue #77 the release view drops ``deprecated`` ACs too: the release document shows
+# only acceptance criteria that are currently part of the public solution. A ``deprecated``
+# entity is still kept (only ``planned`` / ``in_review`` entities are dropped).
+DROP_AC_STATES = frozenset({"planned", "in_review", "deprecated"})
 
 
 def _normalize_state(state: str | None) -> str:

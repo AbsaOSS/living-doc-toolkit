@@ -19,6 +19,7 @@ Based on SPEC.md section 3.3.
 """
 
 import warnings
+from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -119,19 +120,13 @@ class SelectionSummary(BaseModel):
 class ViewSummary(BaseModel):
     """Records which content view was applied and how much content it filtered out."""
 
-    view: str = Field(..., description="Applied view: 'inner' (comprehensive) or 'release' (filtered)")
+    view: Literal["inner", "release"] = Field(
+        ..., description="Applied view: 'inner' (comprehensive) or 'release' (filtered)"
+    )
     filtered_user_stories: int = Field(0, ge=0, description="User stories dropped by the view (>= 0)")
     filtered_acceptance_criteria: int = Field(0, ge=0, description="Acceptance criteria dropped by the view (>= 0)")
 
     model_config = {"extra": "forbid", "strict": True}
-
-    @field_validator("view")
-    @classmethod
-    def view_must_be_supported(cls, v: str) -> str:
-        """Validate that view is one of the supported values."""
-        if v not in ("inner", "release"):
-            raise ValueError("view must be 'inner' or 'release'")
-        return v
 
 
 class Meta(BaseModel):

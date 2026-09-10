@@ -244,12 +244,11 @@ so `In Review` == `in-review` == `in_review`):
 
 - **Entities** (`content.user_stories[]`) whose `state` is `planned` or `in_review` are
   removed entirely, along with their acceptance criteria.
-- **Acceptance criteria** (`sections.acceptance_criteria[]`) whose `state` is `planned` or
-  `in_review` are dropped from entities that are kept.
-- `deprecated` acceptance criteria are **kept** — they describe behaviour that shipped and
-  is still part of the solution. Likewise a `deprecated` **entity** is not dropped (only
-  `planned` / `in_review` entities are), so its acceptance criteria survive `release`. Only
-  not-yet-real content (`planned` / `in_review`) is release-hidden.
+- **Acceptance criteria** (`sections.acceptance_criteria[]`) whose `state` is `planned`,
+  `in_review`, or `deprecated` are dropped from entities that are kept — the release
+  document shows only acceptance criteria that are currently part of the public solution.
+- A `deprecated` **entity** is **not** dropped (only `planned` / `in_review` entities are);
+  its non-`deprecated` acceptance criteria survive `release`.
 
 **Provenance.** Every output records the applied view at `meta.view`:
 
