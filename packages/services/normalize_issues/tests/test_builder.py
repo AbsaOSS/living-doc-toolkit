@@ -363,15 +363,15 @@ def test_release_view_drops_planned_and_in_review_entities():
     assert generator_ready.meta.selection_summary.excluded_items == 2
 
 
-def test_release_view_drops_planned_in_review_and_deprecated_acs():
-    """Release view drops planned/in_review/deprecated ACs from kept entities (issue #77)."""
+def test_release_view_drops_planned_and_in_review_acs_but_keeps_deprecated():
+    """Release view drops planned/in_review ACs from kept entities; deprecated ACs stay."""
     result = _result([_story("github:owner/repo#1", "open", ["planned", "in_review", "deprecated", "Active"])])
 
     generator_ready = build_generator_ready(result, {"view": "release"})
 
     acs = generator_ready.content.user_stories[0].sections.acceptance_criteria
-    assert [ac.state for ac in acs] == ["Active"]
-    assert generator_ready.meta.view.filtered_acceptance_criteria == 3
+    assert [ac.state for ac in acs] == ["deprecated", "Active"]
+    assert generator_ready.meta.view.filtered_acceptance_criteria == 2
 
 
 def test_build_generator_ready_multiple_items():

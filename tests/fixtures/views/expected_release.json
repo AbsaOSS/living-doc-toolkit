@@ -10,6 +10,12 @@
               "id": "GH-10-01",
               "state": "Active",
               "version": "v1.0.0"
+            },
+            {
+              "description": "Deprecated criterion is release-hidden",
+              "id": "GH-10-02",
+              "state": "deprecated",
+              "version": "v0.9.0"
             }
           ],
           "business_value": null,
@@ -115,7 +121,7 @@
       "github:AbsaOSS/living-doc-toolkit"
     ],
     "view": {
-      "filtered_acceptance_criteria": 2,
+      "filtered_acceptance_criteria": 1,
       "filtered_user_stories": 2,
       "view": "release"
     }
