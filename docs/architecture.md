@@ -35,17 +35,35 @@ The Living Documentation Toolkit is a **generic builder** that transforms machin
 
 ```mermaid
 graph LR
-    A[Collector Action] -->|doc-issues.json| B[Adapter]
-    B -->|AdapterResult| C[Service]
-    C -->|generator-ready.json| D[Dataset]
-    D -->|Validated JSON| E[Generator Action]
-    
-    style A fill:#e1f5ff,stroke:#0288d1
-    style B fill:#fff9c4,stroke:#f57f17
-    style C fill:#f3e5f5,stroke:#7b1fa2
-    style D fill:#e8f5e9,stroke:#388e3c
-    style E fill:#ffe0b2,stroke:#e64a19
+    subgraph Collector["living-doc-collector-gh"]
+        DI[doc-issues.json]
+        DS[doc-source.json]
+        UT[ui-tests.json]
+    end
+
+    DI -->|adapter + normalize| NI[living-doc normalize-issues]
+    NI -->|generator-ready.json| G1[Generator: user-stories]
+
+    DS --> CM[living-doc coverage-matrix]
+    UT --> CM
+    CM -->|coverage-matrix.json| G2[Generator: coverage-matrix]
+
+    UT -->|ui-tests.json — owned schema, generator-ready as-is| G3[Generator: ui-test-catalog]
+
+    style DI fill:#e1f5ff,stroke:#0288d1
+    style DS fill:#e1f5ff,stroke:#0288d1
+    style UT fill:#e1f5ff,stroke:#0288d1
+    style NI fill:#f3e5f5,stroke:#7b1fa2
+    style CM fill:#f3e5f5,stroke:#7b1fa2
+    style G1 fill:#ffe0b2,stroke:#e64a19
+    style G2 fill:#ffe0b2,stroke:#e64a19
+    style G3 fill:#ffe0b2,stroke:#e64a19
 ```
+
+Per-`document-type` generator inputs (artifact + schema) are specified in
+[`contracts.md`](contracts.md#generator-inputs-by-document-type). `ui-tests.json` is consumed
+by a generator directly and deliberately: it is a toolkit-owned, schema-versioned contract
+(the same artifact `coverage-matrix` reads as `--tests-input`), not raw collector scraping.
 
 **Pipeline Stages:**
 

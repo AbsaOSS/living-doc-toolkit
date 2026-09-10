@@ -5,6 +5,7 @@ Quick reference for all external-facing contracts. Changes to items below requir
 ---
 
 - [CLI Interface](#cli-interface)
+- [Generator Inputs by `document-type`](#generator-inputs-by-document-type)
 - [Input Contract: `doc-issues.json`](#input-contract-doc-issuesjson)
 - [Output Contract: `generator-ready.json`](#output-contract-generator-readyjson)
 - [Output Contract: `coverage-matrix.json`](#output-contract-coverage-matrixjson)
@@ -59,6 +60,74 @@ Error format: `{prefix} {detail}. {guidance}`
 |------|-----------|
 | 0 | Success |
 | 1 | Any error (invalid input, I/O failure, coverage below `--fail-under`) |
+
+---
+
+## Generator Inputs by `document-type`
+
+Design rule: **a generator never consumes a collector's output directly — the input it reads
+is always a toolkit-produced (or toolkit-owned) artifact with an owned, versioned schema.**
+The table below is the authoritative statement of which artifact + schema is the generator
+input for each `document-type`.
+
+| `document-type` | Generator input artifact | Schema (`schema_version`) | Producer | Provenance envelope |
+|-----------------|--------------------------|---------------------------|----------|---------------------|
+| `user-stories` | `generator-ready.json` | `generator-ready-v1.0.0` | `living-doc normalize-issues` (this repo) | `meta.audit` — see [Audit Envelope](#audit-envelope-v10) |
+| `ui-test-catalog` | `ui-tests.json` | `ui-tests-v1.0.0` | `living-doc-collector-gh` `ui-tests` mode | none — see rationale below |
+| `coverage-matrix` | `coverage-matrix.json` | `coverage-matrix-v1.0.0` | `living-doc coverage-matrix` (this repo) | none today — see rationale below |
+
+### `user-stories`
+
+`doc-issues.json` (collector output) → `living-doc normalize-issues` → `generator-ready.json`.
+The normalize step does real work — heading-synonym normalization, restructuring, and audit
+enrichment (see [Output Contract: `generator-ready.json`](#output-contract-generator-readyjson)).
+This is the reference shape for the rule.
+
+### `ui-test-catalog` — `ui-tests.json` is generator-ready as-is (no toolkit pass)
+
+**Decision: option (a).** No `normalize-test-catalog` service is added. The generator input
+for `document-type: ui-test-catalog` is `ui-tests.json` exactly as `living-doc-collector-gh`
+emits it, validated against `ui-tests-v1.0.0-schema.json` (owned by `living-doc-collector-gh`,
+per `packages/services/coverage_matrix/.../schema/README.md`).
+
+Rationale:
+
+- `ui-tests.json` is a **flat `items[]` catalog** of test scenarios with a single owned,
+  versioned schema. There is no multi-surface-form input to canonicalize — nothing analogous
+  to the `Description` / `Overview` / `Summary` heading-synonym problem that justifies
+  `normalize-issues`.
+- It is **not raw scraping**: `ui-tests.json` is already a first-class, schema-versioned
+  ecosystem contract that this repo's `coverage-matrix` service consumes directly as
+  `--tests-input`. The "toolkit is in the path" intent — a stable, owned contract between
+  collector and generator — is satisfied by the schema, not by an extra copy step.
+- A `normalize-test-catalog` pass with no normalization rule to apply would only re-wrap
+  identical bytes in a `meta` envelope. That is ceremony, not provenance: it adds a service,
+  a CLI command, a schema, and a test surface for zero transformation.
+
+If a concrete catalog-level normalization need appears later (e.g. tag-grammar canonicalization,
+cross-source ID reconciliation), revisit as option (b): a thin `normalize-test-catalog` service
+producing a `test-catalog-ready.json` with a `meta.audit` envelope consistent with
+`generator-ready.json`.
+
+### `coverage-matrix` — `coverage-matrix.json` is toolkit-produced (rule satisfied)
+
+`doc-source.json` + `ui-tests.json` → `living-doc coverage-matrix` → `coverage-matrix.json`.
+The artifact is produced by this repo's `coverage_matrix` service, so a generator consuming it
+for `document-type: coverage-matrix` never touches a collector output — the rule is satisfied.
+
+**Provenance-envelope decision: not added in v1.0.0.** `coverage-matrix.json` carries
+`schema_version` and `generated_at` but no `meta.audit` envelope. It is not added now because:
+
+- the output is a deterministic join of two already-provenanced inputs; the useful provenance
+  (collector producer/version, run context) lives in those inputs, and no generator consumes
+  it today;
+- adding `meta.audit` is a **purely additive** change (new optional object — *Safe to change*
+  under [Change Control](#change-control)), so it can be introduced without a major bump the
+  moment a consumer needs upstream provenance parity with `generator-ready.json`.
+
+Tracked as a follow-up: add a `meta.audit` envelope to `coverage-matrix.json` (mapping
+`doc-source.json` / `ui-tests.json` producer metadata + a `coverage-matrix` `trace[]` step)
+when a generator requires it.
 
 ---
 
