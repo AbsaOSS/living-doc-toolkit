@@ -35,19 +35,43 @@ The Living Documentation Toolkit is a **generic builder** that transforms machin
 
 ```mermaid
 graph LR
-    A[Collector Action] -->|doc-issues.json| B[Adapter]
-    B -->|AdapterResult| C[Service]
-    C -->|generator-ready.json| D[Dataset]
-    D -->|Validated JSON| E[Generator Action]
-    
-    style A fill:#e1f5ff,stroke:#0288d1
-    style B fill:#fff9c4,stroke:#f57f17
-    style C fill:#f3e5f5,stroke:#7b1fa2
-    style D fill:#e8f5e9,stroke:#388e3c
-    style E fill:#ffe0b2,stroke:#e64a19
+    subgraph Collector["living-doc-collector-gh"]
+        DI[doc-issues.json]
+        DS[doc-source.json]
+        UT[ui-tests.json]
+    end
+
+    DI -->|adapter + normalize| NI[living-doc normalize-issues]
+    NI -->|generator-ready.json| G1[Generator: user-stories]
+
+    DS --> CM[living-doc coverage-matrix]
+    UT --> CM
+    CM -->|coverage-matrix.json| G2[Generator: coverage-matrix]
+
+    UT -->|ui-tests.json — collector-owned schema, generator-ready as-is| G3[Generator: ui-test-catalog]
+
+    style DI fill:#e1f5ff,stroke:#0288d1
+    style DS fill:#e1f5ff,stroke:#0288d1
+    style UT fill:#e1f5ff,stroke:#0288d1
+    style NI fill:#f3e5f5,stroke:#7b1fa2
+    style CM fill:#f3e5f5,stroke:#7b1fa2
+    style G1 fill:#ffe0b2,stroke:#e64a19
+    style G2 fill:#ffe0b2,stroke:#e64a19
+    style G3 fill:#ffe0b2,stroke:#e64a19
 ```
 
-**Pipeline Stages:**
+Per-`document-type` generator inputs (artifact + schema) are specified in
+[`contracts.md`](contracts.md#generator-inputs-by-document-type). `ui-tests.json` is consumed
+by a generator directly and deliberately: it is a first-class, schema-versioned ecosystem
+contract (schema owned by `living-doc-collector-gh`; the same artifact `coverage-matrix`
+reads as `--tests-input`), not raw collector scraping.
+
+**Pipeline Stages** — the stages below trace the `doc-issues.json` → `generator-ready.json`
+flow. The `coverage-matrix` path joins `doc-source.json` + `ui-tests.json` in the
+`coverage_matrix` service (its own loader and schema, not `datasets_generator_ready`);
+`ui-tests.json` reaches the `ui-test-catalog` generator with no toolkit stage in between.
+Both are shown in the diagram above and specified in
+[`contracts.md`](contracts.md#generator-inputs-by-document-type).
 
 1. **Collector Action** (`AbsaOSS/living-doc-collector-gh`)
    - Collects issues from GitHub
@@ -63,12 +87,13 @@ graph LR
    - `coverage_matrix`: Cross-references User Stories with UI tests into an AC-level coverage matrix
 
 4. **Dataset** (`packages/datasets_generator_ready`)
-   - Validates output against schema
-   - Ensures compliance with generator contract
+   - Validates the service output against its owned schema
+   - Ensures compliance with the generator input contract
 
-5. **Generator Action** (`AbsaOSS/living-doc-generator-pdf`)
-   - Generates PDF document
-   - Outputs: `living-documentation.pdf`
+5. **Generator Action** (e.g. `AbsaOSS/living-doc-generator-pdf`)
+   - Consumes the validated `document-type` input artifact
+   - Generates the document (PDF, catalog, coverage report, …)
+   - Outputs: e.g. `living-documentation.pdf`
 
 ---
 
