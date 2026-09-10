@@ -25,6 +25,7 @@ Quick reference for all external-facing contracts. Changes to items below requir
 | `--input` | path | Yes | — | Path to input JSON (e.g., `doc-issues.json`) |
 | `--output` | path | Yes | — | Path for output JSON (e.g., `generator-ready.json`; `pdf_ready.json` still accepted, deprecated) |
 | `--source` | enum | No | `auto` | Adapter selection: `auto`, `collector-gh` |
+| `--view` | enum | No | `inner` | Content view: `inner` (comprehensive) or `release` (public-facing, filtered) — see [Content Views](#content-views) |
 | `--document-title` | string | No | from input | Override `meta.document_title` |
 | `--document-version` | string | No | from input | Override `meta.document_version` |
 | `--verbose` | flag | No | `false` | Enable verbose logging |
@@ -194,6 +195,7 @@ generator-ready.json
 │   ├── document_title, document_version, generated_at
 │   ├── source_set[]
 │   ├── selection_summary { total_items, included_items, excluded_items }
+│   ├── view (optional) { view, filtered_user_stories, filtered_acceptance_criteria }
 │   └── audit (optional) → see Audit Envelope below
 └── content
     └── user_stories[]
@@ -225,6 +227,40 @@ Issue body `##` headings map to canonical section keys (case-insensitive):
 ### Stable ID Format
 
 `github:{owner}/{repo}#{number}` (e.g., `github:AbsaOSS/project#42`)
+
+### Content Views
+
+`normalize-issues` renders one of two views, selected with `--view` (default `inner`).
+The view is a toolkit-level decision, not a per-generator input — the same
+`generator-ready.json` contract is produced either way.
+
+| View | Purpose | Filtering |
+|------|---------|-----------|
+| `inner` (default) | Comprehensive internal documentation | None — every entity and acceptance criterion from the input is kept |
+| `release` | Public-facing documentation | Drop rules below are applied |
+
+**`release` drop rules** (state comparison is case-insensitive; `-` and spaces fold to `_`,
+so `In Review` == `in-review` == `in_review`):
+
+- **Entities** (`content.user_stories[]`) whose `state` is `planned` or `in_review` are
+  removed entirely, along with their acceptance criteria.
+- **Acceptance criteria** (`sections.acceptance_criteria[]`) whose `state` is `planned` or
+  `in_review` are dropped from entities that are kept.
+- `deprecated` acceptance criteria are **kept** — they describe behaviour that shipped and
+  is still part of the solution. Likewise a `deprecated` **entity** is not dropped (only
+  `planned` / `in_review` entities are), so its acceptance criteria survive `release`. Only
+  not-yet-real content (`planned` / `in_review`) is release-hidden.
+
+**Provenance.** Every output records the applied view at `meta.view`:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `view` | string | `inner` or `release` |
+| `filtered_user_stories` | int ≥ 0 | Entities removed by the view (`0` for `inner`) |
+| `filtered_acceptance_criteria` | int ≥ 0 | Acceptance criteria removed from kept entities (`0` for `inner`) |
+
+`meta.selection_summary.excluded_items` also reflects entities removed by the view
+(`total_items` counts the input entities, `included_items` the ones written).
 
 ---
 

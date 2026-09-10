@@ -1,0 +1,130 @@
+{
+  "content": {
+    "user_stories": [
+      {
+        "id": "github:AbsaOSS/living-doc-toolkit#10",
+        "sections": {
+          "acceptance_criteria": [
+            {
+              "description": "Active criterion stays",
+              "id": "GH-10-01",
+              "state": "Active",
+              "version": "v1.0.0"
+            },
+            {
+              "description": "Deprecated criterion is release-hidden",
+              "id": "GH-10-02",
+              "state": "deprecated",
+              "version": "v0.9.0"
+            }
+          ],
+          "business_value": null,
+          "connections": null,
+          "description": "A feature that has shipped.",
+          "last_edited": null,
+          "preconditions": null,
+          "user_guide": null
+        },
+        "state": "open",
+        "tags": [
+          "DocumentedFeature"
+        ],
+        "timestamps": {
+          "created": "2026-02-01T00:00:00Z",
+          "updated": "2026-02-02T00:00:00Z"
+        },
+        "title": "Shipped feature",
+        "url": "https://github.com/AbsaOSS/living-doc-toolkit/issues/10"
+      }
+    ]
+  },
+  "meta": {
+    "audit": {
+      "extensions": {
+        "collector-gh": {
+          "original_metadata": {
+            "producer": {
+              "name": "AbsaOSS/living-doc-collector-gh",
+              "version": "1.0.0"
+            },
+            "run": {
+              "actor": "ci",
+              "ref": "refs/heads/main",
+              "run_attempt": "1",
+              "run_id": "999",
+              "sha": "deadbeef",
+              "workflow": "collect"
+            },
+            "source": {
+              "enterprise": null,
+              "organization": "AbsaOSS",
+              "repositories": [
+                "AbsaOSS/living-doc-toolkit"
+              ],
+              "systems": [
+                "github"
+              ]
+            }
+          }
+        }
+      },
+      "producer": {
+        "build": null,
+        "name": "AbsaOSS/living-doc-collector-gh",
+        "version": "1.0.0"
+      },
+      "run": {
+        "actor": "ci",
+        "ref": "refs/heads/main",
+        "run_attempt": "1",
+        "run_id": "999",
+        "sha": "deadbeef",
+        "workflow": "collect"
+      },
+      "schema_version": "1.0",
+      "source": {
+        "enterprise": null,
+        "organization": "AbsaOSS",
+        "repositories": [
+          "AbsaOSS/living-doc-toolkit"
+        ],
+        "systems": [
+          "github"
+        ]
+      },
+      "trace": [
+        {
+          "finished_at": "DYNAMIC_TIMESTAMP",
+          "started_at": "DYNAMIC_TIMESTAMP",
+          "step": "normalization",
+          "tool": "living-doc-toolkit",
+          "tool_version": "1.0.0",
+          "warnings": []
+        }
+      ]
+    },
+    "document_title": "Living Documentation - views",
+    "document_version": "1.0.0",
+    "generated_at": "DYNAMIC_TIMESTAMP",
+    "run_context": {
+      "branch": "refs/heads/main",
+      "ci_run_id": "999",
+      "commit_sha": "deadbeef",
+      "triggered_by": "ci"
+    },
+    "selection_summary": {
+      "excluded_items": 2,
+      "included_items": 1,
+      "total_items": 3
+    },
+    "source_set": [
+      "github:AbsaOSS/living-doc-toolkit"
+    ],
+    "view": {
+      "filtered_acceptance_criteria": 1,
+      "filtered_user_stories": 2,
+      "view": "release"
+    }
+  },
+  "schema_version": "generator-ready-v1.0.0"
+}

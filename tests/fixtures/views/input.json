@@ -1,0 +1,51 @@
+{
+  "metadata": {
+    "producer": { "name": "AbsaOSS/living-doc-collector-gh", "version": "1.0.0" },
+    "run": { "run_id": "999", "run_attempt": "1", "actor": "ci", "workflow": "collect", "ref": "refs/heads/main", "sha": "deadbeef" },
+    "source": { "systems": ["github"], "repositories": ["AbsaOSS/living-doc-toolkit"], "organization": "AbsaOSS", "enterprise": null }
+  },
+  "items": [
+    {
+      "id": "github:AbsaOSS/living-doc-toolkit#10",
+      "title": "Shipped feature",
+      "state": "open",
+      "tags": ["DocumentedFeature"],
+      "url": "https://github.com/AbsaOSS/living-doc-toolkit/issues/10",
+      "timestamps": { "created": "2026-02-01T00:00:00Z", "updated": "2026-02-02T00:00:00Z" },
+      "description": "A feature that has shipped.",
+      "business_value": null,
+      "preconditions": null,
+      "acceptance_criteria": [
+        { "id": "GH-10-01", "state": "Active", "version": "v1.0.0", "description": "Active criterion stays" },
+        { "id": "GH-10-02", "state": "deprecated", "version": "v0.9.0", "description": "Deprecated criterion is release-hidden" },
+        { "id": "GH-10-03", "state": "in_review", "version": "v1.1.0", "description": "In-review criterion is release-hidden" }
+      ]
+    },
+    {
+      "id": "github:AbsaOSS/living-doc-toolkit#11",
+      "title": "Planned feature",
+      "state": "planned",
+      "tags": ["DocumentedFeature"],
+      "url": "https://github.com/AbsaOSS/living-doc-toolkit/issues/11",
+      "timestamps": { "created": "2026-02-03T00:00:00Z", "updated": "2026-02-03T00:00:00Z" },
+      "description": "A feature that is only planned.",
+      "business_value": null,
+      "preconditions": null,
+      "acceptance_criteria": [
+        { "id": "GH-11-01", "state": "planned", "version": "v2.0.0", "description": "Planned criterion" }
+      ]
+    },
+    {
+      "id": "github:AbsaOSS/living-doc-toolkit#12",
+      "title": "In review feature",
+      "state": "in_review",
+      "tags": ["DocumentedFeature"],
+      "url": "https://github.com/AbsaOSS/living-doc-toolkit/issues/12",
+      "timestamps": { "created": "2026-02-04T00:00:00Z", "updated": "2026-02-04T00:00:00Z" },
+      "description": "A feature under review.",
+      "business_value": null,
+      "preconditions": null,
+      "acceptance_criteria": null
+    }
+  ]
+}

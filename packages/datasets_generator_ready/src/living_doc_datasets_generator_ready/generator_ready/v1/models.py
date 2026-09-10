@@ -19,6 +19,7 @@ Based on SPEC.md section 3.3.
 """
 
 import warnings
+from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -116,6 +117,18 @@ class SelectionSummary(BaseModel):
     model_config = {"extra": "forbid", "strict": True}
 
 
+class ViewSummary(BaseModel):
+    """Records which content view was applied and how much content it filtered out."""
+
+    view: Literal["inner", "release"] = Field(
+        ..., description="Applied view: 'inner' (comprehensive) or 'release' (filtered)"
+    )
+    filtered_user_stories: int = Field(0, ge=0, description="User stories dropped by the view (>= 0)")
+    filtered_acceptance_criteria: int = Field(0, ge=0, description="Acceptance criteria dropped by the view (>= 0)")
+
+    model_config = {"extra": "forbid", "strict": True}
+
+
 class Meta(BaseModel):
     """Metadata section."""
 
@@ -124,6 +137,7 @@ class Meta(BaseModel):
     generated_at: str = Field(..., description="ISO 8601 UTC timestamp")
     source_set: list[str] = Field(..., description="Source set (non-empty)")
     selection_summary: SelectionSummary = Field(..., description="Selection summary")
+    view: ViewSummary | None = Field(None, description="Applied content view and filter counts (optional)")
     run_context: RunContext | None = Field(None, description="Run context (optional)")
     audit: AuditEnvelopeV1 | None = Field(None, description="Audit envelope (optional)")
 

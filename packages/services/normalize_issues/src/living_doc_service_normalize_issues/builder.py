@@ -27,7 +27,20 @@ from living_doc_datasets_generator_ready.generator_ready.v1.models import (  # t
     SelectionSummary,
     Timestamps,
     UserStory,
+    ViewSummary,
 )
+
+# Content view filtering (see docs/contracts.md "Content Views"). The ``release`` view
+# hides work that is not yet public; the ``inner`` view keeps everything.
+DROP_ENTITY_STATES = frozenset({"planned", "in_review"})
+# ``deprecated`` ACs are kept: they describe behaviour that shipped and is still part of the
+# solution. Only not-yet-real ACs (``planned`` / ``in_review``) are release-hidden.
+DROP_AC_STATES = frozenset({"planned", "in_review"})
+
+
+def _normalize_state(state: str | None) -> str:
+    """Fold a free-form state label to its canonical comparison form (e.g. 'In Review' -> 'in_review')."""
+    return (state or "").strip().lower().replace(" ", "_").replace("-", "_")
 
 
 def build_generator_ready(adapter_result: AdapterResult, options: dict) -> GeneratorReadyV1:
@@ -45,11 +58,25 @@ def build_generator_ready(adapter_result: AdapterResult, options: dict) -> Gener
         GeneratorReadyV1 object ready for serialization
     """
     # pylint: disable=too-many-locals
+    view = options.get("view", "inner")
+    release_view = view == "release"
+
     # Build output user stories from the adapter's parsed items
     user_stories = []
+    filtered_user_stories = 0
+    filtered_acceptance_criteria = 0
     for item in adapter_result.items:
+        if release_view and _normalize_state(item.state) in DROP_ENTITY_STATES:
+            filtered_user_stories += 1
+            continue
+
         acceptance_criteria: list[AcceptanceCriterion] | None = None
         if item.acceptance_criteria is not None:
+            source_acs = item.acceptance_criteria
+            if release_view:
+                kept_acs = [ac for ac in source_acs if _normalize_state(ac.state) not in DROP_AC_STATES]
+                filtered_acceptance_criteria += len(source_acs) - len(kept_acs)
+                source_acs = kept_acs
             acceptance_criteria = [
                 AcceptanceCriterion(
                     id=ac.id,
@@ -57,7 +84,7 @@ def build_generator_ready(adapter_result: AdapterResult, options: dict) -> Gener
                     version=ac.version,
                     description=ac.description,
                 )
-                for ac in item.acceptance_criteria
+                for ac in source_acs
             ]
 
         # Build Sections object from structured fields
@@ -91,10 +118,18 @@ def build_generator_ready(adapter_result: AdapterResult, options: dict) -> Gener
 
     # Build SelectionSummary
     total_items = len(adapter_result.items)
+    included_items = len(user_stories)
     selection_summary = SelectionSummary(
         total_items=total_items,
-        included_items=total_items,
-        excluded_items=0,
+        included_items=included_items,
+        excluded_items=total_items - included_items,
+    )
+
+    # Record the applied view and how much content it filtered out
+    view_summary = ViewSummary(
+        view=view,
+        filtered_user_stories=filtered_user_stories,
+        filtered_acceptance_criteria=filtered_acceptance_criteria,
     )
 
     # Build source_set from adapter metadata
@@ -143,6 +178,7 @@ def build_generator_ready(adapter_result: AdapterResult, options: dict) -> Gener
         generated_at=generated_at,
         source_set=source_set,
         selection_summary=selection_summary,
+        view=view_summary,
         run_context=run_context,
         audit=audit,
     )

@@ -306,6 +306,74 @@ def test_build_generator_ready_run_context():
     assert generator_ready.meta.run_context.commit_sha == "def456"
 
 
+def _story(item_id, state, ac_states=()):
+    """Build an AdapterItem with the given entity state and acceptance-criterion states."""
+    return AdapterItem(
+        id=item_id,
+        title=f"Story {item_id}",
+        state=state,
+        tags=[],
+        url=f"https://github.com/owner/repo/issues/{item_id.rsplit('#', 1)[-1]}",
+        timestamps=AdapterItemTimestamps(created="2026-01-01T00:00:00Z", updated="2026-01-01T00:00:00Z"),
+        description="body",
+        acceptance_criteria=[
+            AcceptanceCriterion(id=f"AC-{i}", state=s, version="v1.0.0", description=f"crit {i}")
+            for i, s in enumerate(ac_states)
+        ]
+        or None,
+    )
+
+
+def _result(items):
+    return AdapterResult(items=items, metadata=_make_metadata(), warnings=[])
+
+
+def test_inner_view_keeps_everything():
+    """The default inner view filters nothing and records zero counts."""
+    result = _result([_story("github:owner/repo#1", "planned", ["deprecated", "Active"])])
+
+    generator_ready = build_generator_ready(result, {})
+
+    assert len(generator_ready.content.user_stories) == 1
+    assert len(generator_ready.content.user_stories[0].sections.acceptance_criteria) == 2
+    assert generator_ready.meta.view.view == "inner"
+    assert generator_ready.meta.view.filtered_user_stories == 0
+    assert generator_ready.meta.view.filtered_acceptance_criteria == 0
+    assert generator_ready.meta.selection_summary.excluded_items == 0
+
+
+def test_release_view_drops_planned_and_in_review_entities():
+    """Release view removes entities in planned or in_review states, keeps the rest."""
+    result = _result(
+        [
+            _story("github:owner/repo#1", "planned"),
+            _story("github:owner/repo#2", "In Review"),
+            _story("github:owner/repo#3", "open"),
+        ]
+    )
+
+    generator_ready = build_generator_ready(result, {"view": "release"})
+
+    kept = [s.id for s in generator_ready.content.user_stories]
+    assert kept == ["github:owner/repo#3"]
+    assert generator_ready.meta.view.view == "release"
+    assert generator_ready.meta.view.filtered_user_stories == 2
+    assert generator_ready.meta.selection_summary.total_items == 3
+    assert generator_ready.meta.selection_summary.included_items == 1
+    assert generator_ready.meta.selection_summary.excluded_items == 2
+
+
+def test_release_view_drops_planned_and_in_review_acs_but_keeps_deprecated():
+    """Release view drops planned/in_review ACs from kept entities; deprecated ACs stay."""
+    result = _result([_story("github:owner/repo#1", "open", ["planned", "in_review", "deprecated", "Active"])])
+
+    generator_ready = build_generator_ready(result, {"view": "release"})
+
+    acs = generator_ready.content.user_stories[0].sections.acceptance_criteria
+    assert [ac.state for ac in acs] == ["deprecated", "Active"]
+    assert generator_ready.meta.view.filtered_acceptance_criteria == 2
+
+
 def test_build_generator_ready_multiple_items():
     """Test building generator-ready output with multiple items."""
     items = [
