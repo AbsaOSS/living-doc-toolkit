@@ -1,146 +1,289 @@
 {
-    "items": [
+  "items": [
+    {
+      "id": "absa-group/aul-ui/dashboard.feature/user-sees-accessible-domains-on-the-dashboard",
+      "us_id": "US-2",
+      "func_id": null,
+      "ac_ids": [
+        "US-2-01"
+      ],
+      "ac_links": [
         {
-            "id": "absa-group/aul-ui/user_login.feature/user-logs-in-with-valid-credentials",
-            "us_id": "US-1",
-            "ac_ids": [
-                "US-1-01",
-                "US-1-02"
-            ],
-            "scenario_name": "User logs in with valid credentials",
-            "scenario_type": "Scenario",
-            "tags": [
-                "Regression"
-            ],
-            "steps": [],
-            "source": {
-                "org": "absa-group",
-                "repo": "aul-ui",
-                "file": "user_login.feature"
-            }
-        },
-        {
-            "id": "absa-group/aul-ui/user_login.feature/legacy-basic-auth-login",
-            "us_id": "US-1",
-            "ac_ids": [
-                "US-1-03"
-            ],
-            "scenario_name": "Legacy basic-auth login",
-            "scenario_type": "Scenario",
-            "tags": [
-                "Regression",
-                "skip"
-            ],
-            "steps": [],
-            "source": {
-                "org": "absa-group",
-                "repo": "aul-ui",
-                "file": "user_login.feature"
-            }
-        },
-        {
-            "id": "absa-group/aul-ui/user_login.feature/login-button-disabled",
-            "us_id": "US-1",
-            "ac_ids": [
-                "US-1-01"
-            ],
-            "scenario_name": "Login button stays disabled until fields are filled",
-            "scenario_type": "Scenario",
-            "tags": [
-                "Smoke"
-            ],
-            "steps": [],
-            "source": {
-                "org": "absa-group",
-                "repo": "aul-ui",
-                "file": "user_login.feature"
-            }
-        },
-        {
-            "id": "absa-group/aul-ui/user_login.feature/references-unknown-ac",
-            "us_id": "US-1",
-            "ac_ids": [
-                "US-1-99"
-            ],
-            "scenario_name": "Scenario referencing an AC that no longer exists",
-            "scenario_type": "Scenario",
-            "tags": [
-                "Regression"
-            ],
-            "steps": [],
-            "source": {
-                "org": "absa-group",
-                "repo": "aul-ui",
-                "file": "user_login.feature"
-            }
-        },
-        {
-            "id": "absa-group/aul-ui/dashboard.feature/user-sees-accessible-domains",
-            "us_id": "US-2",
-            "ac_ids": [
-                "US-2-01"
-            ],
-            "scenario_name": "User sees accessible domains on the dashboard",
-            "scenario_type": "Scenario",
-            "tags": [
-                "Regression"
-            ],
-            "steps": [],
-            "source": {
-                "org": "absa-group",
-                "repo": "aul-ui",
-                "file": "dashboard.feature"
-            }
-        },
-        {
-            "id": "absa-group/aul-ui/orphan.feature/scenario-without-us",
-            "us_id": null,
-            "ac_ids": [],
-            "scenario_name": "Scenario not linked to any user story",
-            "scenario_type": "Scenario",
-            "tags": [],
-            "steps": [],
-            "source": {
-                "org": "absa-group",
-                "repo": "aul-ui",
-                "file": "orphan.feature"
-            }
-        },
-        {
-            "id": "absa-group/aul-ui/unknown.feature/scenario-for-unknown-us",
-            "us_id": "US-99",
-            "ac_ids": [
-                "US-99-01"
-            ],
-            "scenario_name": "Scenario for a user story not in the doc input",
-            "scenario_type": "Scenario",
-            "tags": [
-                "Regression"
-            ],
-            "steps": [],
-            "source": {
-                "org": "absa-group",
-                "repo": "aul-ui",
-                "file": "unknown.feature"
-            }
+          "id": "US-2-01",
+          "aspect": null
         }
-    ],
-    "metadata": {
-        "producer": {
-            "name": "AbsaOSS/living-doc-collector-gh",
-            "version": "0.1.1",
-            "build": null
+      ],
+      "scenario_name": "User sees accessible domains on the dashboard",
+      "scenario_type": "Scenario",
+      "tags": [
+        "Regression"
+      ],
+      "steps": [
+        {
+          "keyword": "Given",
+          "text": "the user has accessible domains"
         },
-        "source": {
-            "systems": [
-                "GitHub"
-            ],
-            "repositories": [
-                "absa-group/aul-ui"
-            ],
-            "organization": "absa-group",
-            "enterprise": null
+        {
+          "keyword": "When",
+          "text": "the user opens the dashboard"
+        },
+        {
+          "keyword": "Then",
+          "text": "the accessible domains are listed"
         }
+      ],
+      "source": {
+        "org": "absa-group",
+        "repo": "aul-ui",
+        "file": "dashboard.feature",
+        "line": 18
+      }
     },
-    "warnings": []
+    {
+      "id": "absa-group/aul-ui/orphan.feature/scenario-not-linked-to-any-user-story",
+      "us_id": null,
+      "func_id": null,
+      "ac_ids": [],
+      "ac_links": [],
+      "scenario_name": "Scenario not linked to any user story",
+      "scenario_type": "Scenario",
+      "tags": [],
+      "steps": [
+        {
+          "keyword": "Given",
+          "text": "an unlabelled test"
+        },
+        {
+          "keyword": "Then",
+          "text": "it produces an unlinked entry"
+        }
+      ],
+      "source": {
+        "org": "absa-group",
+        "repo": "aul-ui",
+        "file": "orphan.feature",
+        "line": 6
+      }
+    },
+    {
+      "id": "absa-group/aul-ui/unknown_us.feature/scenario-for-a-user-story-not-in-the-doc-input",
+      "us_id": "US-99",
+      "func_id": null,
+      "ac_ids": [
+        "US-99-01"
+      ],
+      "ac_links": [
+        {
+          "id": "US-99-01",
+          "aspect": null
+        }
+      ],
+      "scenario_name": "Scenario for a user story not in the doc input",
+      "scenario_type": "Scenario",
+      "tags": [
+        "Regression"
+      ],
+      "steps": [
+        {
+          "keyword": "Given",
+          "text": "a test for an unknown story"
+        },
+        {
+          "keyword": "Then",
+          "text": "it lands in unlinked tests"
+        }
+      ],
+      "source": {
+        "org": "absa-group",
+        "repo": "aul-ui",
+        "file": "unknown_us.feature",
+        "line": 9
+      }
+    },
+    {
+      "id": "absa-group/aul-ui/user_login.feature/user-logs-in-with-valid-credentials",
+      "us_id": "US-1",
+      "func_id": null,
+      "ac_ids": [
+        "US-1-01",
+        "US-1-02"
+      ],
+      "ac_links": [
+        {
+          "id": "US-1-01",
+          "aspect": null
+        },
+        {
+          "id": "US-1-02",
+          "aspect": null
+        }
+      ],
+      "scenario_name": "User logs in with valid credentials",
+      "scenario_type": "Scenario",
+      "tags": [
+        "Regression"
+      ],
+      "steps": [
+        {
+          "keyword": "Given",
+          "text": "the user is on the login page"
+        },
+        {
+          "keyword": "When",
+          "text": "the user fills in both fields with valid credentials"
+        },
+        {
+          "keyword": "Then",
+          "text": "the login button is enabled"
+        },
+        {
+          "keyword": "And",
+          "text": "submitting the form shows the dashboard"
+        }
+      ],
+      "source": {
+        "org": "absa-group",
+        "repo": "aul-ui",
+        "file": "user_login.feature",
+        "line": 24
+      }
+    },
+    {
+      "id": "absa-group/aul-ui/user_login.feature/login-button-stays-disabled-until-fields-are-filled",
+      "us_id": "US-1",
+      "func_id": null,
+      "ac_ids": [
+        "US-1-02"
+      ],
+      "ac_links": [
+        {
+          "id": "US-1-02",
+          "aspect": null
+        }
+      ],
+      "scenario_name": "Login button stays disabled until fields are filled",
+      "scenario_type": "Scenario",
+      "tags": [
+        "Smoke"
+      ],
+      "steps": [
+        {
+          "keyword": "Given",
+          "text": "the user is on the login page"
+        },
+        {
+          "keyword": "Then",
+          "text": "the login button is disabled"
+        }
+      ],
+      "source": {
+        "org": "absa-group",
+        "repo": "aul-ui",
+        "file": "user_login.feature",
+        "line": 31
+      }
+    },
+    {
+      "id": "absa-group/aul-ui/user_login.feature/legacy-basic-auth-login",
+      "us_id": "US-1",
+      "func_id": null,
+      "ac_ids": [
+        "US-1-03"
+      ],
+      "ac_links": [
+        {
+          "id": "US-1-03",
+          "aspect": null
+        }
+      ],
+      "scenario_name": "Legacy basic-auth login",
+      "scenario_type": "Scenario",
+      "tags": [
+        "Regression",
+        "skip"
+      ],
+      "steps": [
+        {
+          "keyword": "Given",
+          "text": "the user sends a basic-auth header"
+        },
+        {
+          "keyword": "Then",
+          "text": "access is rejected"
+        }
+      ],
+      "source": {
+        "org": "absa-group",
+        "repo": "aul-ui",
+        "file": "user_login.feature",
+        "line": 36
+      }
+    },
+    {
+      "id": "absa-group/aul-ui/user_login.feature/scenario-referencing-an-ac-that-no-longer-exists",
+      "us_id": "US-1",
+      "func_id": null,
+      "ac_ids": [
+        "US-1-99"
+      ],
+      "ac_links": [
+        {
+          "id": "US-1-99",
+          "aspect": null
+        }
+      ],
+      "scenario_name": "Scenario referencing an AC that no longer exists",
+      "scenario_type": "Scenario",
+      "tags": [
+        "Regression"
+      ],
+      "steps": [
+        {
+          "keyword": "Given",
+          "text": "a stale test"
+        },
+        {
+          "keyword": "Then",
+          "text": "it still runs"
+        }
+      ],
+      "source": {
+        "org": "absa-group",
+        "repo": "aul-ui",
+        "file": "user_login.feature",
+        "line": 41
+      }
+    }
+  ],
+  "metadata": {
+    "producer": {
+      "name": "AbsaOSS/living-doc-collector-gh",
+      "version": "0.1.1",
+      "build": null
+    },
+    "run": {
+      "run_id": null,
+      "run_attempt": null,
+      "actor": null,
+      "workflow": null,
+      "ref": null,
+      "sha": null
+    },
+    "source": {
+      "systems": [
+        "GitHub"
+      ],
+      "repositories": [
+        "absa-group/aul-ui"
+      ],
+      "organization": "absa-group",
+      "enterprise": null
+    },
+    "original_metadata": {
+      "generated_at": "2026-01-01T00:00:00+00:00",
+      "schema_version": "1.0.0",
+      "inputs": {}
+    }
+  },
+  "warnings": []
 }

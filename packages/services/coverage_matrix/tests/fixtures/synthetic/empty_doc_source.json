@@ -1,0 +1,12 @@
+{
+  "user_stories": [],
+  "functionalities": [],
+  "features": [],
+  "metadata": {
+    "producer": { "name": "hand-authored-synthetic-fixture", "version": "0", "build": null },
+    "run": { "run_id": null, "run_attempt": null, "actor": null, "workflow": null, "ref": null, "sha": null },
+    "source": { "systems": [], "repositories": [], "organization": null, "enterprise": null },
+    "original_metadata": { "generated_at": "2026-01-01T00:00:00+00:00", "schema_version": "1.0.0", "inputs": {} }
+  },
+  "warnings": []
+}
