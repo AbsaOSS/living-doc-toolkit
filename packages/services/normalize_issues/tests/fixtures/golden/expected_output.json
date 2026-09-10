@@ -230,7 +230,12 @@
     },
     "source_set": [
       "github:AbsaOSS/living-doc-toolkit"
-    ]
+    ],
+    "view": {
+      "filtered_acceptance_criteria": 0,
+      "filtered_user_stories": 0,
+      "view": "inner"
+    }
   },
   "schema_version": "generator-ready-v1.0.0"
 }

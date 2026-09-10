@@ -83,7 +83,7 @@ def run_service(input_path: str, output_path: str, options: dict) -> None:
                 logger.warning("  - [%s] %s", warning.code, warning.message)
 
         # Step 4: Build GeneratorReadyV1
-        logger.info("Building generator-ready output...")
+        logger.info("Building generator-ready output (view: %s)...", options.get("view", "inner"))
         try:
             generator_ready = build_generator_ready(adapter_result, options)
         except Exception as e:
@@ -100,6 +100,13 @@ def run_service(input_path: str, output_path: str, options: dict) -> None:
         # Step 7: Log summary
         logger.info("Normalization completed successfully")
         logger.info("  - User stories: %d", len(generator_ready.content.user_stories))  # pylint: disable=no-member
+        if generator_ready.meta.view is not None:  # pylint: disable=no-member
+            logger.info(
+                "  - View: %s (filtered %d user stories, %d acceptance criteria)",
+                generator_ready.meta.view.view,  # pylint: disable=no-member
+                generator_ready.meta.view.filtered_user_stories,  # pylint: disable=no-member
+                generator_ready.meta.view.filtered_acceptance_criteria,  # pylint: disable=no-member
+            )
         logger.info("  - Document title: %s", generator_ready.meta.document_title)  # pylint: disable=no-member
         logger.info("  - Document version: %s", generator_ready.meta.document_version)  # pylint: disable=no-member
         logger.info("  - Generated at: %s", generator_ready.meta.generated_at)  # pylint: disable=no-member

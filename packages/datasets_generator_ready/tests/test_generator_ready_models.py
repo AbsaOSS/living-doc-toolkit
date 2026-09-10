@@ -333,6 +333,34 @@ def test_selection_summary_negative_values():
         SelectionSummary(total_items=-1, included_items=0, excluded_items=0)
 
 
+def test_view_summary_validation():
+    """Test ViewSummary accepts supported views and rejects others."""
+    from living_doc_datasets_generator_ready.generator_ready.v1.models import ViewSummary
+
+    summary = ViewSummary(view="release", filtered_user_stories=2, filtered_acceptance_criteria=5)
+    assert summary.view == "release"
+    assert summary.filtered_user_stories == 2
+    assert summary.filtered_acceptance_criteria == 5
+
+    with pytest.raises(ValidationError):
+        ViewSummary(view="public")
+
+    with pytest.raises(ValidationError):
+        ViewSummary(view="inner", filtered_user_stories=-1)
+
+
+def test_meta_view_optional():
+    """meta.view is optional and defaults to None."""
+    meta = Meta(
+        document_title="Doc",
+        document_version="1.0.0",
+        generated_at="2026-01-01T00:00:00Z",
+        source_set=["github:owner/repo"],
+        selection_summary=SelectionSummary(total_items=0, included_items=0, excluded_items=0),
+    )
+    assert meta.view is None
+
+
 def test_run_context_optional():
     """Test RunContext is optional."""
     data = {

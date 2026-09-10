@@ -48,6 +48,7 @@ def test_normalize_issues_help(runner):
     assert "--input" in result.output
     assert "--output" in result.output
     assert "--source" in result.output
+    assert "--view" in result.output
     assert "--document-title" in result.output
     assert "--document-version" in result.output
     assert "--verbose" in result.output
@@ -116,6 +117,8 @@ def test_normalize_issues_with_all_options(mock_run_service, runner):
             "Test Document",
             "--document-version",
             "1.0.0",
+            "--view",
+            "release",
             "--verbose",
         ],
     )
@@ -130,6 +133,30 @@ def test_normalize_issues_with_all_options(mock_run_service, runner):
     assert options["source"] == "collector-gh"
     assert options["document_title"] == "Test Document"
     assert options["document_version"] == "1.0.0"
+    assert options["view"] == "release"
+
+
+@patch("living_doc_cli.commands.normalize_issues.run_service")
+def test_normalize_issues_view_defaults_to_inner(mock_run_service, runner):
+    """The --view option defaults to 'inner' when omitted."""
+    mock_run_service.return_value = None
+
+    result = runner.invoke(cli, ["normalize-issues", "--input", "input.json", "--output", "output.json"])
+
+    assert result.exit_code == 0
+    assert mock_run_service.call_args[0][2]["view"] == "inner"
+
+
+@patch("living_doc_cli.commands.normalize_issues.run_service")
+def test_normalize_issues_view_rejects_unknown_value(mock_run_service, runner):
+    """An unsupported --view value is rejected before the service runs."""
+    result = runner.invoke(
+        cli,
+        ["normalize-issues", "--input", "input.json", "--output", "output.json", "--view", "public"],
+    )
+
+    assert result.exit_code != 0
+    mock_run_service.assert_not_called()
 
 
 @patch("living_doc_cli.commands.normalize_issues.run_service")

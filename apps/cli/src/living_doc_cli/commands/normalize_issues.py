@@ -86,6 +86,12 @@ def format_error_message(error: ToolkitError) -> str:
     help="Producer adapter selection",
 )
 @click.option(
+    "--view",
+    type=click.Choice(["inner", "release"], case_sensitive=False),
+    default="inner",
+    help="Content view: 'inner' (comprehensive) or 'release' (drops planned/in_review entities and planned/in_review ACs)",
+)
+@click.option(
     "--document-title",
     type=str,
     help="Override document title in meta.document_title",
@@ -102,6 +108,7 @@ def normalize_issues(  # pylint: disable=too-many-arguments,too-many-positional-
     input_path: str,
     output_path: str,
     source: str,
+    view: str,
     document_title: Optional[str],
     document_version: Optional[str],
     verbose: bool,
@@ -127,6 +134,7 @@ def normalize_issues(  # pylint: disable=too-many-arguments,too-many-positional-
     options = {
         "verbose": effective_verbose,
         "source": source,
+        "view": view.lower(),
     }
 
     if document_title:

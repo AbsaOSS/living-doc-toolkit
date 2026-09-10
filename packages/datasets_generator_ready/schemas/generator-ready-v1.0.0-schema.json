@@ -212,6 +212,18 @@
           },
           "title": "Source Set",
           "type": "array"
+        },
+        "view": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ViewSummary"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Applied content view and filter counts (optional)"
         }
       },
       "required": [
@@ -732,6 +744,36 @@
         "sections"
       ],
       "title": "UserStory",
+      "type": "object"
+    },
+    "ViewSummary": {
+      "additionalProperties": false,
+      "description": "Records which content view was applied and how much content it filtered out.",
+      "properties": {
+        "filtered_acceptance_criteria": {
+          "default": 0,
+          "description": "Acceptance criteria dropped by the view (>= 0)",
+          "minimum": 0,
+          "title": "Filtered Acceptance Criteria",
+          "type": "integer"
+        },
+        "filtered_user_stories": {
+          "default": 0,
+          "description": "User stories dropped by the view (>= 0)",
+          "minimum": 0,
+          "title": "Filtered User Stories",
+          "type": "integer"
+        },
+        "view": {
+          "description": "Applied view: 'inner' (comprehensive) or 'release' (filtered)",
+          "title": "View",
+          "type": "string"
+        }
+      },
+      "required": [
+        "view"
+      ],
+      "title": "ViewSummary",
       "type": "object"
     }
   },
