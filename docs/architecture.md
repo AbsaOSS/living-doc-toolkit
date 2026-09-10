@@ -62,10 +62,16 @@ graph LR
 
 Per-`document-type` generator inputs (artifact + schema) are specified in
 [`contracts.md`](contracts.md#generator-inputs-by-document-type). `ui-tests.json` is consumed
-by a generator directly and deliberately: it is a toolkit-owned, schema-versioned contract
-(the same artifact `coverage-matrix` reads as `--tests-input`), not raw collector scraping.
+by a generator directly and deliberately: it is a first-class, schema-versioned ecosystem
+contract (schema owned by `living-doc-collector-gh`; the same artifact `coverage-matrix`
+reads as `--tests-input`), not raw collector scraping.
 
-**Pipeline Stages:**
+**Pipeline Stages** — the stages below trace the `doc-issues.json` → `generator-ready.json`
+flow. The `coverage-matrix` path joins `doc-source.json` + `ui-tests.json` in the
+`coverage_matrix` service (its own loader and schema, not `datasets_generator_ready`);
+`ui-tests.json` reaches the `ui-test-catalog` generator with no toolkit stage in between.
+Both are shown in the diagram above and specified in
+[`contracts.md`](contracts.md#generator-inputs-by-document-type).
 
 1. **Collector Action** (`AbsaOSS/living-doc-collector-gh`)
    - Collects issues from GitHub
@@ -81,12 +87,13 @@ by a generator directly and deliberately: it is a toolkit-owned, schema-versione
    - `coverage_matrix`: Cross-references User Stories with UI tests into an AC-level coverage matrix
 
 4. **Dataset** (`packages/datasets_generator_ready`)
-   - Validates output against schema
-   - Ensures compliance with generator contract
+   - Validates the service output against its owned schema
+   - Ensures compliance with the generator input contract
 
-5. **Generator Action** (`AbsaOSS/living-doc-generator-pdf`)
-   - Generates PDF document
-   - Outputs: `living-documentation.pdf`
+5. **Generator Action** (e.g. `AbsaOSS/living-doc-generator-pdf`)
+   - Consumes the validated `document-type` input artifact
+   - Generates the document (PDF, catalog, coverage report, …)
+   - Outputs: e.g. `living-documentation.pdf`
 
 ---
 

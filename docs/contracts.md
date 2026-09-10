@@ -65,10 +65,13 @@ Error format: `{prefix} {detail}. {guidance}`
 
 ## Generator Inputs by `document-type`
 
-Design rule: **a generator never consumes a collector's output directly — the input it reads
-is always a toolkit-produced (or toolkit-owned) artifact with an owned, versioned schema.**
-The table below is the authoritative statement of which artifact + schema is the generator
-input for each `document-type`.
+Design rule: **a generator's input is always an artifact with an owned, versioned schema —
+never raw, unschematized scraping.** Usually that artifact is toolkit-produced (a
+`normalize-*` pass does real work, as for `user-stories`); where a collector already emits a
+first-class, schema-versioned ecosystem contract, the generator consumes it directly and no
+toolkit copy step is added (see `ui-test-catalog` below). The table below is the
+authoritative statement of which artifact + schema is the generator input for each
+`document-type`.
 
 | `document-type` | Generator input artifact | Schema (`schema_version`) | Producer | Provenance envelope |
 |-----------------|--------------------------|---------------------------|----------|---------------------|
@@ -120,14 +123,15 @@ for `document-type: coverage-matrix` never touches a collector output — the ru
 
 - the output is a deterministic join of two already-provenanced inputs; the useful provenance
   (collector producer/version, run context) lives in those inputs, and no generator consumes
-  it today;
+  an upstream-provenance envelope from `coverage-matrix.json` today;
 - adding `meta.audit` is a **purely additive** change (new optional object — *Safe to change*
   under [Change Control](#change-control)), so it can be introduced without a major bump the
   moment a consumer needs upstream provenance parity with `generator-ready.json`.
 
 Tracked as a follow-up: add a `meta.audit` envelope to `coverage-matrix.json` (mapping
 `doc-source.json` / `ui-tests.json` producer metadata + a `coverage-matrix` `trace[]` step)
-when a generator requires it.
+when a generator requires it. This is net-new work — the loader, the `coverage_matrix` model,
+and the output schema/serializer carry no provenance fields today.
 
 ---
 
@@ -225,7 +229,9 @@ Issue body `##` headings map to canonical section keys (case-insensitive):
 
 **Schema version:** `"coverage-matrix-v1.0.0"` (field `schema_version`)
 
-Produced by `living-doc coverage-matrix`. Consumed by downstream PDF / reporting generators.
+Produced by `living-doc coverage-matrix`. Consumed by downstream PDF / reporting generators,
+which read the coverage data only — none consumes an upstream-provenance envelope from it
+today (see [Generator Inputs by `document-type`](#generator-inputs-by-document-type)).
 
 ### Structure
 
