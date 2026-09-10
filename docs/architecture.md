@@ -48,7 +48,7 @@ graph LR
     UT --> CM
     CM -->|coverage-matrix.json| G2[Generator: coverage-matrix]
 
-    UT -->|ui-tests.json — owned schema, generator-ready as-is| G3[Generator: ui-test-catalog]
+    UT -->|ui-tests.json — collector-owned schema, generator-ready as-is| G3[Generator: ui-test-catalog]
 
     style DI fill:#e1f5ff,stroke:#0288d1
     style DS fill:#e1f5ff,stroke:#0288d1

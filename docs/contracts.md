@@ -90,8 +90,11 @@ This is the reference shape for the rule.
 
 **Decision: option (a).** No `normalize-test-catalog` service is added. The generator input
 for `document-type: ui-test-catalog` is `ui-tests.json` exactly as `living-doc-collector-gh`
-emits it, validated against `ui-tests-v1.0.0-schema.json` (owned by `living-doc-collector-gh`,
-per `packages/services/coverage_matrix/.../schema/README.md`).
+emits it. `living-doc-collector-gh` owns the `ui-tests-v1.0.0` schema; this repo does not
+vendor it and does not schema-validate `ui-tests.json` — `coverage-matrix`'s
+`loader.load_tests_input()` only checks for an `items` array. See
+[`packages/services/coverage_matrix/src/living_doc_service_coverage_matrix/schema/README.md`](../packages/services/coverage_matrix/src/living_doc_service_coverage_matrix/schema/README.md)
+for the ownership split and the condition under which a vendored copy would be added.
 
 Rationale:
 
