@@ -1,0 +1,85 @@
+name: 'Living Documentation Toolkit'
+description: 'Run one Living Documentation Toolkit command over its input files and write the file it produces.'
+inputs:
+  command:
+    description: 'Command to run: `normalize-issues`, `normalize-tests` or `coverage-matrix`.'
+    required: true
+  input:
+    description: 'Path to the input JSON file; for `coverage-matrix`, the documentation file.'
+    required: true
+  output:
+    description: 'Path of the JSON file the command writes.'
+    required: true
+  view:
+    description: '`normalize-issues` only: `inner` (the CLI default) or `release`.'
+    required: false
+    default: ''
+  document-title:
+    description: '`normalize-issues` only: the document title, overriding the one the input implies.'
+    required: false
+    default: ''
+  tests-input:
+    description: '`coverage-matrix` only, and required by it: path to the tests JSON file.'
+    required: false
+    default: ''
+  fail-under:
+    description: '`coverage-matrix` only: fail when the coverage percentage is below this number.'
+    required: false
+    default: ''
+  verbose-logging:
+    description: 'Enable or disable verbose logging.'
+    required: false
+    default: 'false'
+
+outputs:
+  output-path:
+    description: 'Absolute path of the file the command wrote.'
+    value: ${{ steps.living-doc-toolkit.outputs.output-path }}
+
+branding:
+  icon: 'layers'
+  color: 'green'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Check Python and create the toolkit's venv
+      id: venv
+      shell: bash
+      run: |
+        unset PIP_TARGET PIP_PREFIX PIP_USER PIP_ROOT PIP_PYTHON PYTHONPATH
+        PY="$(command -v python3 || command -v python || true)"
+        if [ -z "$PY" ] || ! "$PY" -c 'import sys; sys.exit(0 if sys.version_info >= (3, 10) else 1)'; then
+          echo "::error::living-doc-toolkit needs Python >= 3.10 on PATH. Add actions/setup-python before this step."; exit 1
+        fi
+        VENV="$RUNNER_TEMP/living-doc-toolkit-venv"
+        IDENTITY='import sys; print(sys.base_prefix, sys.version_info[:3])'
+        WANT="$("$PY" -c "$IDENTITY")"
+        HAVE=""
+        if [ -x "$VENV/bin/python" ]; then
+          HAVE="$("$VENV/bin/python" -c "$IDENTITY" 2>/dev/null || true)"
+        fi
+        if [ "$HAVE" != "$WANT" ]; then
+          rm -rf "$VENV"
+          "$PY" -m venv "$VENV" || { echo "::error::living-doc-toolkit: '$PY -m venv' failed; install the venv module."; exit 1; }
+        fi
+        cd "${{ github.action_path }}"
+        "$VENV/bin/pip" install -r requirements.txt
+        "$VENV/bin/python" -E -c 'import living_doc_cli.main' || {
+          echo "::error::living-doc-toolkit's packages did not land in $VENV; check the runner's pip configuration for a 'target' or 'prefix' setting that redirects them."; exit 1; }
+        echo "python=$VENV/bin/python" >> "$GITHUB_OUTPUT"
+
+    - name: Run Living Documentation Toolkit
+      id: living-doc-toolkit
+      env:
+        INPUT_COMMAND: ${{ inputs.command }}
+        INPUT_INPUT: ${{ inputs.input }}
+        INPUT_OUTPUT: ${{ inputs.output }}
+        INPUT_VIEW: ${{ inputs.view }}
+        INPUT_DOCUMENT_TITLE: ${{ inputs.document-title }}
+        INPUT_TESTS_INPUT: ${{ inputs.tests-input }}
+        INPUT_FAIL_UNDER: ${{ inputs.fail-under }}
+        INPUT_VERBOSE_LOGGING: ${{ inputs.verbose-logging }}
+      run: |
+        "${{ steps.venv.outputs.python }}" -E "${{ github.action_path }}/main.py"
+      shell: bash

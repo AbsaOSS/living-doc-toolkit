@@ -11,6 +11,7 @@ A monorepo hosting multiple independent Python services that transform and enric
 
 - [Overview](#overview)
 - [Quickstart](#quickstart)
+- [GitHub Action](#github-action)
 - [Documentation](#documentation)
 - [Services](#services)
 - [License](#license)
@@ -69,6 +70,70 @@ living-doc coverage-matrix \
 
 > The canonical output is `generator-ready.json`. The legacy name `pdf_ready.json` is still
 > accepted as a deprecated alias (`normalize-issues` prints a notice when it is used).
+
+## GitHub Action
+
+The repository root is a composite action. One step runs one command over its input files
+and writes the file the command produces.
+
+```yaml
+- uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+  with:
+    python-version: '3.14'
+
+- name: Normalize the collected issues
+  id: normalize
+  uses: AbsaOSS/living-doc-toolkit@<ref>
+  with:
+    command: normalize-issues
+    input: doc-issues.json
+    output: output/generator-ready.json
+    view: release
+
+- name: Build the coverage matrix
+  id: coverage
+  uses: AbsaOSS/living-doc-toolkit@<ref>
+  with:
+    command: coverage-matrix
+    input: doc-source.json
+    tests-input: ui-tests.json
+    output: output/coverage-matrix.json
+    fail-under: '80'
+```
+
+- **Python:** the action uses the Python on `PATH`, 3.10 or later, so put `actions/setup-python`
+  before it. Below 3.10 it fails with one line before it installs anything.
+- It installs the toolkit into a venv of its own under `$RUNNER_TEMP` and leaves the job's
+  `python` unchanged. [DEVELOPER.md](DEVELOPER.md#action-venv) holds the venv's rules.
+
+### Inputs
+
+| Input | Required | Default | Taken by | Description |
+|---|---|---|---|---|
+| `command` | yes | | | `normalize-issues`, `normalize-tests` or `coverage-matrix`. `normalize-tests` is not available yet. |
+| `input` | yes | | every command | Path to the input JSON file; for `coverage-matrix`, the documentation file (`--doc-input`). |
+| `output` | yes | | every command | Path of the JSON file the command writes. |
+| `view` | no | `''` | `normalize-issues` | `inner` (the CLI default) or `release`. |
+| `document-title` | no | `''` | `normalize-issues` | The document title, overriding the one the input implies. |
+| `tests-input` | for `coverage-matrix` | `''` | `coverage-matrix` | Path to the tests JSON file (`--tests-input`). |
+| `fail-under` | no | `''` | `coverage-matrix` | Fail the step when the coverage percentage is below this number (`--fail-under`). |
+| `verbose-logging` | no | `'false'` | every command | `'true'` adds `--verbose` and logs the command line at DEBUG. |
+
+- An input left empty is not passed, so the CLI's default applies.
+- A non-empty input the command does not take fails the step with one line naming the input
+  and the command; so does an empty required one, and a `fail-under` that is not a number.
+- An unknown `command` fails with one line listing the valid commands.
+- A failed command fails the step with the CLI's own error line and exit code
+  ([Troubleshooting](docs/troubleshooting.md)).
+
+### Output
+
+| Output | Description |
+|---|---|
+| `output-path` | Absolute path of the file the command wrote; set once the command succeeds. |
+
+A later step reads it as `${{ steps.normalize.outputs.output-path }}`, for example as a
+generator's input file.
 
 ## Documentation
 

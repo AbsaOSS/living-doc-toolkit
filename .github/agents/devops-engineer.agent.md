@@ -95,6 +95,6 @@ Repo specifics
   - Must pin every `uses:` to a full commit SHA with a trailing `# vX.Y.Z` comment, and Must keep one SHA per action across all workflow files.
 - Dependencies
   - Editable install order matters — `core` → `datasets_generator_ready` → `adapters/collector_gh` → `services/*` → `apps/cli`; `make install` and the CI install step follow it.
-  - There is no pinned root `requirements.txt` — dependencies are declared in each package's `pyproject.toml`.
+  - Runtime dependencies are declared in each package's `pyproject.toml`; the root `requirements.txt` lists the six package directories, which the action installs, and `requirements-dev.txt` adds the pinned development tools.
 - Contract-sensitive outputs
   - CLI exit codes and error-message prefixes; the per-package `--cov-fail-under=80` gate.
