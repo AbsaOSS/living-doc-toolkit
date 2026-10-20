@@ -361,9 +361,11 @@ are `living-doc-generator-markdown`'s; what differs here follows them.
 
 What differs from `living-doc-generator-markdown`:
 
-- The install and the import check run from the action's own directory, `${{ github.action_path }}`.
+- The install and the import check run from the action's own directory, `$GITHUB_ACTION_PATH`.
   - Why: `requirements.txt` names `./packages/...`, which pip reads against the directory it runs
     in; from the caller's workspace the paths do not exist.
+  - Why the variable, not `${{ github.action_path }}`: in a `container:` job the expression gives
+    the runner host's path, which does not exist inside the container.
 - The import check imports `living_doc_cli.main`, which imports the other five packages through the
   two commands.
 - pip rebuilds a local directory on every install, so each run reinstalls the six packages into the
@@ -410,13 +412,18 @@ python3 main.py
 `test.yml` runs the gates, `integration.yml` runs the verifications and the action itself, and
 `link-check.yml` checks the Markdown links.
 
-- `QA Gate` is the job to mark as the one required check: it always runs, passes over a skipped job
-  and fails on a failed or cancelled one.
-  - Why: a required check must report on every pull request, also on one that changed no Python.
+- The checks to mark as required are `QA Gate` and every `integration.yml` job.
+  - `QA Gate` always runs, passes over a skipped job and fails on a failed or cancelled one. Why: a
+    required check must report on every pull request, also on one that changed no Python.
+  - `integration.yml` runs on every pull request to `master`, so its jobs always report. Why: its
+    action jobs are the only ones that run the action itself; without them a broken action merges
+    green.
 - The gates run when a Python-related file changed: `*.py`, `requirements.txt`,
-  `requirements-dev.txt`, a `pyproject.toml`, a `tests/fixtures/` file, `Makefile`, `action.yml` or
-  `test.yml`.
+  `requirements-dev.txt`, a `pyproject.toml`, a `tests/fixtures/` file, a JSON file under
+  `packages/`, `Makefile`, `action.yml` or `test.yml`.
   - The fixtures are in the list because the golden tests compare against them.
+  - JSON under `packages/` is in the list because the services load their JSON schemas at run time
+    and the tests check them.
   - `action.yml` is in the list because `tests/test_action_yml.py` reads it.
   - On a pull request a renamed file counts by its old path too, so moving a file out of that set
     still runs the tests.
@@ -431,6 +438,10 @@ python3 main.py
   a failed run fails the job, then assert on the files written and on the `output-path` output.
   - `Action - Commands Over the Fixtures` runs `normalize-issues` and `coverage-matrix` and uploads
     what they wrote as the `action-output` artifact.
+  - It checks the repository out under `toolkit/`, runs the action as `uses: ./toolkit`, and puts a
+    `click.py` that exits in the workspace. Why: with `uses: ./` the action's directory is the
+    working directory, so the job would still pass without the `cd` into `$GITHUB_ACTION_PATH` or
+    without the CLI's `-I`.
   - The 3.9 job runs the action with `continue-on-error` and asserts the failure.
   - Why: a run that passed without writing its file would be a broken action.
 - The jobs need only `contents: read`: they run the repository's code and make no GitHub API call.

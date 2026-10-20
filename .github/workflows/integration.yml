@@ -57,9 +57,11 @@ jobs:
     runs-on: ubuntu-latest
     name: Action - Commands Over the Fixtures
     steps:
+      # Under `toolkit/`, so the action's directory is not the working directory, as in a caller's job.
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          path: toolkit
           persist-credentials: false
 
       - name: Set up Python
@@ -67,12 +69,15 @@ jobs:
         with:
           python-version: '3.14'
 
+      - name: Put a click.py in the workspace, which the CLI must not import
+        run: echo 'raise SystemExit("the workspace click.py shadowed the venv click")' > click.py
+
       - name: Run normalize-issues
         id: normalize-issues
-        uses: ./
+        uses: ./toolkit
         with:
           command: normalize-issues
-          input: tests/fixtures/collector_gh/v1.2.0/input/doc-issues.json
+          input: toolkit/tests/fixtures/collector_gh/v1.2.0/input/doc-issues.json
           output: output/normalize-issues/generator-ready.json
           view: release
           document-title: Checkout tests
@@ -80,11 +85,11 @@ jobs:
 
       - name: Run coverage-matrix
         id: coverage-matrix
-        uses: ./
+        uses: ./toolkit
         with:
           command: coverage-matrix
-          input: packages/services/coverage_matrix/tests/fixtures/golden/doc_source.json
-          tests-input: packages/services/coverage_matrix/tests/fixtures/golden/ui_tests.json
+          input: toolkit/packages/services/coverage_matrix/tests/fixtures/golden/doc_source.json
+          tests-input: toolkit/packages/services/coverage_matrix/tests/fixtures/golden/ui_tests.json
           output: output/coverage-matrix/coverage-matrix.json
           fail-under: '75'
 

@@ -63,7 +63,7 @@ runs:
           rm -rf "$VENV"
           "$PY" -m venv "$VENV" || { echo "::error::living-doc-toolkit: '$PY -m venv' failed; install the venv module."; exit 1; }
         fi
-        cd "${{ github.action_path }}"
+        cd "$GITHUB_ACTION_PATH"
         "$VENV/bin/pip" install -r requirements.txt
         "$VENV/bin/python" -E -c 'import living_doc_cli.main' || {
           echo "::error::living-doc-toolkit's packages did not land in $VENV; check the runner's pip configuration for a 'target' or 'prefix' setting that redirects them."; exit 1; }
@@ -81,5 +81,5 @@ runs:
         INPUT_FAIL_UNDER: ${{ inputs.fail-under }}
         INPUT_VERBOSE_LOGGING: ${{ inputs.verbose-logging }}
       run: |
-        "${{ steps.venv.outputs.python }}" -E "${{ github.action_path }}/main.py"
+        "${{ steps.venv.outputs.python }}" -E "$GITHUB_ACTION_PATH/main.py"
       shell: bash

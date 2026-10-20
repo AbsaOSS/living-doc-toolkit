@@ -82,14 +82,14 @@ def _run_venv_step(tmp_path: Path, env: dict[str, str] | None = None, **fake) ->
     pip.write_text(FAKE_PIP.format(calls=tmp_path / "pip.calls"), encoding="utf-8")
     pip.chmod(0o755)
     (tmp_path / "runner").mkdir(exist_ok=True)
-    script = STEPS["venv"]["run"].replace("${{ github.action_path }}", os.fspath(REPO_ROOT))
     return subprocess.run(
-        ["bash", "--noprofile", "--norc", "-eo", "pipefail", "-c", script],
+        ["bash", "--noprofile", "--norc", "-eo", "pipefail", "-c", STEPS["venv"]["run"]],
         capture_output=True,
         check=False,
         cwd=tmp_path,
         env={
             "PATH": f"{tmp_path / 'bin'}{os.pathsep}{os.environ['PATH']}",
+            "GITHUB_ACTION_PATH": os.fspath(REPO_ROOT),
             "RUNNER_TEMP": os.fspath(tmp_path / "runner"),
             "GITHUB_OUTPUT": os.fspath(tmp_path / "github-output"),
             "GITHUB_ENV": os.fspath(tmp_path / "github-env"),
