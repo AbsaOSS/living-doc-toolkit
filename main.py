@@ -16,7 +16,7 @@
 
 """
 The entry point `action.yml` runs. It validates the action inputs, builds the `living-doc <command>` command line
-from them, runs it on this interpreter with `-E`, and sets the `output-path` output to the file the command wrote.
+from them, runs it on this interpreter with `-I`, and sets the `output-path` output to the file the command wrote.
 """
 
 import logging
@@ -26,7 +26,7 @@ import shlex
 import subprocess
 import sys
 
-from living_doc_core.logging_config import setup_logging  # type: ignore[import-untyped]
+from living_doc_core.logging_config import setup_logging
 
 logger = logging.getLogger("living_doc.action")
 
@@ -115,7 +115,7 @@ def build_command_line(verbose: bool) -> tuple[list[str], str]:
     Validate the inputs, stopping at the first invalid one, and build the CLI's arguments from them.
 
     @param verbose: Whether `verbose-logging` is on, which adds `--verbose`.
-    @return: The arguments after `python -E -m living_doc_cli.main`, and the absolute path of the file the command
+    @return: The arguments after `python -I -m living_doc_cli.main`, and the absolute path of the file the command
         writes.
     @raise ActionInputError: `command` is empty, unknown or not available yet; an input the command does not take
         is set; an input the command requires is empty; `output` holds a line break; or `fail-under` is not a
@@ -183,7 +183,9 @@ def run() -> None:
         logger.error("%s", error)
         sys.exit(1)
 
-    command_line = [sys.executable, "-E", "-m", "living_doc_cli.main", *arguments]
+    # `-I` is `-E` that also keeps the working directory, the caller's checkout, off `sys.path`: with `-m` alone a
+    # `click.py` or `json.py` there would shadow the venv's module.
+    command_line = [sys.executable, "-I", "-m", "living_doc_cli.main", *arguments]
     logger.info("Living Documentation Toolkit action - running `%s`.", arguments[0])
     logger.debug("Living Documentation Toolkit action - command line: %s", shlex.join(command_line))
     completed = subprocess.run(command_line, check=False)

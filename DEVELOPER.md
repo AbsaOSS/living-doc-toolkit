@@ -360,6 +360,9 @@ are `living-doc-generator-markdown`'s; what differs here follows them.
   packages landed there. Its failure is one line pointing at the runner's pip configuration.
 - `main.py` runs with `-E`, so a caller's `PYTHONPATH` cannot shadow the venv. Every input reaches it
   through the run step's `env:`; no `run:` script holds `${{ inputs.* }}`.
+- `main.py` runs the CLI with `-I`, which is `-E` that also keeps the working directory off `sys.path`.
+  - Why: the run step runs in the caller's checkout, and `python -m` searches the working directory
+    first, so a `click.py` or `json.py` there would replace the venv's module.
 - Linux runners only: the venv's POSIX `bin/` layout is assumed.
 - `tests/test_action_yml.py` runs the venv step against a fake interpreter. `integration.yml` shows
   the reuse, the rebuild on an interpreter change, and the rejection of Python 3.9 on real ones
@@ -379,7 +382,7 @@ What differs from `living-doc-generator-markdown`:
 
 ### The entry point
 
-`main.py` checks the inputs, then runs `python -E -m living_doc_cli.main <command> --<option>=<value> …`
+`main.py` checks the inputs, then runs `python -I -m living_doc_cli.main <command> --<option>=<value> …`
 on the venv's interpreter. The CLI's exit code is the step's.
 
 - An unknown `command` fails with one line listing the valid commands. `normalize-tests` fails with

@@ -26,7 +26,7 @@ from main import run
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DOC_ISSUES = REPO_ROOT / "tests" / "fixtures" / "collector_gh" / "v1.2.0" / "input" / "doc-issues.json"
 GOLDEN = REPO_ROOT / "packages" / "services" / "coverage_matrix" / "tests" / "fixtures" / "golden"
-CLI = [sys.executable, "-E", "-m", "living_doc_cli.main"]
+CLI = [sys.executable, "-I", "-m", "living_doc_cli.main"]
 
 
 def _errors(err: str) -> list[str]:
@@ -456,6 +456,20 @@ def test_the_entry_point_with_verbose_logging_logs_debug_lines(tmp_path):
     # Assert
     assert result.returncode == 0, result.stderr
     assert "[DEBUG] Living Documentation Toolkit action - command line: " in result.stderr
+
+
+def test_a_module_in_the_callers_working_directory_does_not_shadow_the_clis(tmp_path):
+    # Arrange: the run step runs in the caller's checkout, which may hold a module named like one the CLI imports.
+    (tmp_path / "click.py").write_text("import sys\nsys.exit(42)\n", encoding="utf-8")
+
+    # Act
+    result = _run_entry_point(
+        tmp_path, {"command": "normalize-issues", "input": os.fspath(DOC_ISSUES), "output": "generator-ready.json"}
+    )
+
+    # Assert
+    assert result.returncode == 0, result.stderr
+    assert (tmp_path / "generator-ready.json").is_file()
 
 
 def test_the_entry_point_passes_a_failed_commands_exit_code_through(tmp_path):
