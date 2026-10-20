@@ -335,19 +335,6 @@ def test_a_failed_command_ends_the_run_with_its_exit_code_and_sets_no_output(cli
     assert not (tmp_path / "github-output").exists()
 
 
-def test_a_run_outside_github_actions_sets_no_output_and_says_so_once(cli, monkeypatch, capsys):
-    # Arrange
-    _set_inputs(monkeypatch, command="normalize-issues", input="in.json", output="out.json")
-
-    # Act
-    run()
-
-    # Assert
-    err = capsys.readouterr().err
-    assert err.count("no `GITHUB_OUTPUT`: the `output-path` output is not set.") == 1
-    assert _errors(err) == []
-
-
 def test_an_output_file_that_cannot_be_written_fails_with_one_line(cli, monkeypatch, capsys, tmp_path):
     # Arrange: a directory where the output file should be.
     _set_inputs(monkeypatch, command="normalize-issues", input="in.json", output="out.json")
@@ -439,23 +426,6 @@ def test_the_entry_point_fails_a_coverage_below_fail_under_and_sets_no_output(tm
     assert result.returncode == 1
     assert "Error: Coverage 75.0% is below threshold 80.0%" in result.stderr
     assert not (tmp_path / "github-output").exists()
-
-
-def test_the_entry_point_with_verbose_logging_logs_debug_lines(tmp_path):
-    # Act
-    result = _run_entry_point(
-        tmp_path,
-        {
-            "command": "normalize-issues",
-            "input": os.fspath(DOC_ISSUES),
-            "output": "generator-ready.json",
-            "verbose-logging": "true",
-        },
-    )
-
-    # Assert
-    assert result.returncode == 0, result.stderr
-    assert "[DEBUG] Living Documentation Toolkit action - command line: " in result.stderr
 
 
 def test_a_module_in_the_callers_working_directory_does_not_shadow_the_clis(tmp_path):

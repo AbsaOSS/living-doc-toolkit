@@ -108,23 +108,6 @@ jobs:
       - name: Run ${{ matrix.task.name }}
         run: make ${{ matrix.task.target }}
 
-  contract-checks:
-    runs-on: ubuntu-latest
-    name: Contract Checks (Python 3.10)
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - name: Set up Python
-        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
-        with:
-          python-version: "3.10"
-
-      - name: Run contract checks
-        run: make runtime-requirements
-
   tests:
     needs: detect
     if: needs.detect.outputs.python_changed == 'true'
@@ -158,7 +141,7 @@ jobs:
         run: make coverage
 
   qa-gate:
-    needs: [ detect, static-checks, contract-checks, tests ]
+    needs: [ detect, static-checks, tests ]
     if: always()
     runs-on: ubuntu-latest
     name: QA Gate

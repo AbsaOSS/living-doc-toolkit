@@ -68,11 +68,11 @@ pip install -e "apps/cli[dev]"
 - A plain install builds each package in place and leaves a `build/` directory beside its `src/`.
   Each package's mypy `exclude` skips `build/`.
   - Why: `make types-<alias>` runs `mypy .`, which would otherwise find every module twice.
-- `make qa` fails when `requirements.txt` misses a `packages/**/pyproject.toml` or
-  `apps/**/pyproject.toml` (`tests/test_requirements_txt.py`), or names a development tool
-  (`make runtime-requirements`).
+- A new package under `packages/` or `apps/` goes into `requirements.txt` after the packages it
+  depends on, and a development tool goes into `requirements-dev.txt`, never `requirements.txt`.
   - Why: `apps/cli` depends on the other packages by name and none of them is on PyPI, so an
-    unlisted package fails the install with "No matching distribution found".
+    unlisted package fails the install with "No matching distribution found"; and the action
+    installs `requirements.txt` on every run.
 - Dependabot covers both files from its `pip` entry on `/`, beside one entry per package
   directory, in `.github/dependabot.yml`.
 
@@ -91,9 +91,9 @@ Each package has its own `pyproject.toml`, `src/` layout, and `tests/` directory
 All quality-gate commands below are designed to run **per-package** from within the
 package directory, matching how CI executes them.
 
-The repository root holds the action: `action.yml`, its entry point `main.py`, the
-`tools/check_runtime_requirements.py` guard, and the root `tests/` for all three. The root
-gates run from the repository root with the root `pyproject.toml` (see [Root checks](#root-checks)).
+The repository root holds the action: `action.yml`, its entry point `main.py`, and the root
+`tests/` for both. The root gates run from the repository root with the root `pyproject.toml`
+(see [Root checks](#root-checks)).
 
 ## QA Automation with Make
 
@@ -163,24 +163,15 @@ make coverage-core            # tests + coverage gate on packages/core
 
 ### Root checks
 
-`make qa-root` runs the gates over the root's own files, then `make runtime-requirements`.
-`make qa` runs it after the packages, and each aggregate target (`make lint`, `make test`, …)
-includes its `-root` form.
+`make qa-root` runs the gates over the root's own files. `make qa` runs it after the packages,
+and each aggregate target (`make lint`, `make test`, …) includes its `-root` form.
 
 | Target | Runs | Gate |
 |---|---|---|
-| `format-check-root` / `format-root` | Black over `main.py`, `tools/` and `tests/` | line length **120** |
-| `lint-root` | ruff over `main.py`, `tools/` and `tests/`, then Pylint over `main.py` and `tools/` | score ≥ **9.5** / 10 |
-| `types-root` | mypy over `main.py` and `tools/` | clean |
-| `test-root` / `coverage-root` | pytest over `tests/`, measuring `main.py` and `tools/` | ≥ **80 %** |
-| `runtime-requirements` | `tools/check_runtime_requirements.py` | no test, lint or type tool, and no line that is neither a pin nor a package directory, in `requirements.txt` |
-
-- `tools/check_runtime_requirements.py` is `living-doc-generator-markdown`'s, with one change:
-  it accepts a relative path to a directory below the repository root that holds a
-  `pyproject.toml`.
-  - Why: the toolkit's runtime set is its own six packages, which are on no index. Everything
-    else that is not a pin is still rejected: `-e`, `-r`, an extra on a path, a VCS or URL
-    reference, a wheel, an absolute path, the root itself, and a path outside the repository.
+| `format-check-root` / `format-root` | Black over `main.py` and `tests/` | line length **120** |
+| `lint-root` | ruff over `main.py` and `tests/`, then Pylint over `main.py` | score ≥ **9.5** / 10 |
+| `types-root` | mypy over `main.py` | clean |
+| `test-root` / `coverage-root` | pytest over `tests/`, measuring `main.py` | ≥ **80 %** |
 
 ### Deprecated target names
 
@@ -377,8 +368,6 @@ What differs from `living-doc-generator-markdown`:
   two commands.
 - pip rebuilds a local directory on every install, so each run reinstalls the six packages into the
   reused venv; their dependencies stay installed.
-- `requirements.txt` holds the repository's own package directories, which `make runtime-requirements`
-  accepts ([Root checks](#root-checks)).
 
 ### The entry point
 
@@ -438,10 +427,6 @@ python3 main.py
     fails.
 - `make coverage` runs on Python 3.10 to 3.14.
   - Why: the action runs on whatever Python ≥ 3.10 the caller puts on `PATH`.
-- `Contract Checks` runs `make runtime-requirements` on every change.
-  - Why: the check reads `requirements.txt`, not only Python.
-  - With the static checks and the tests it covers every `make qa` target, so a local run and CI
-    never drift.
 - `integration.yml`'s action jobs run the action through `uses: ./` over the committed fixtures, so
   a failed run fails the job, then assert on the files written and on the `output-path` output.
   - `Action - Commands Over the Fixtures` runs `normalize-issues` and `coverage-matrix` and uploads

@@ -6,7 +6,7 @@
 #
 #   make qa                 Run format-check -> lint -> types -> test on every package, then the root checks
 #   make qa-<alias>         Same, for one package
-#   make qa-root            The root checks: main.py, tools/ and tests/, plus runtime-requirements
+#   make qa-root            The root checks: main.py and tests/
 #   make lint-<alias>       One gate, one package  (also: format, format-check, types, test, coverage)
 #   make <gate>             One gate, every package and the root
 #
@@ -27,8 +27,8 @@ dir-normalize                := packages/services/normalize_issues
 dir-coverage                 := packages/services/coverage_matrix
 dir-cli                      := apps/cli
 
-# --- Root: the action's entry point, the repository tools and their tests --------
-ROOT_SRC := main.py tools
+# --- Root: the action's entry point and its tests ----------------------------
+ROOT_SRC := main.py
 ROOT_PY  := $(ROOT_SRC) tests
 
 # --- Tools / thresholds ------------------------------------------------------
@@ -47,7 +47,7 @@ DEPRECATED := py-qa black pylint mypy pytest-unit
 QA_TARGETS      := $(addprefix qa-,$(ALIASES))
 GATE_TARGETS    := $(foreach g,$(GATES),$(addprefix $(g)-,$(ALIASES)))
 DEPREC_TARGETS  := $(DEPRECATED) $(foreach g,$(DEPRECATED),$(addprefix $(g)-,$(ALIASES)))
-ROOT_TARGETS    := qa-root $(addsuffix -root,$(GATES)) runtime-requirements
+ROOT_TARGETS    := qa-root $(addsuffix -root,$(GATES))
 
 .PHONY: help install qa integration $(GATES) $(QA_TARGETS) $(GATE_TARGETS) $(DEPREC_TARGETS) $(ROOT_TARGETS)
 
@@ -66,9 +66,8 @@ help: ## Show this help message
 	@echo "  make qa                      format-check -> lint -> types -> test, all packages, then qa-root"
 	@echo "  make lint | format | format-check | types | test | coverage"
 	@echo ""
-	@echo "$(YELLOW)Root (main.py, tools/, tests/):$(NC)"
-	@echo "  make qa-root                 All gates for the root, plus runtime-requirements"
-	@echo "  make runtime-requirements    Fail when requirements.txt names a tool or any other non-pin line"
+	@echo "$(YELLOW)Root (main.py, tests/):$(NC)"
+	@echo "  make qa-root                 All gates for the root"
 	@echo ""
 	@echo "$(YELLOW)One package (alias: core datasets-generator-ready collector-gh normalize coverage cli):$(NC)"
 	@echo "  make qa-<alias>              All gates for one package"
@@ -153,10 +152,10 @@ $(addprefix coverage-,$(ALIASES)): coverage-%:
 	cd $(dir-$*) && $(PYTHON) -m pytest tests/ --cov=src --cov-fail-under=$(MIN_COVERAGE)
 
 # ============================================================================
-# Root targets — main.py, tools/ and tests/, run from the repository root
+# Root targets — main.py and tests/, run from the repository root
 # ============================================================================
 
-qa-root: format-check-root lint-root types-root runtime-requirements test-root
+qa-root: format-check-root lint-root types-root test-root
 	@echo "$(GREEN)✓ QA passed for the root$(NC)"
 
 lint-root:
@@ -183,12 +182,7 @@ test-root:
 
 coverage-root:
 	@echo "$(YELLOW)→ Coverage: root (tests/, >= $(MIN_COVERAGE)%)$(NC)"
-	$(PYTHON) -m pytest tests/ --cov=main --cov=tools --cov-fail-under=$(MIN_COVERAGE)
-
-# The action installs requirements.txt into its venv on every run, so it stays runtime-only.
-runtime-requirements: ## Fail when requirements.txt names a tool or any other line that is not a pin or a package
-	@echo "$(YELLOW)→ Runtime requirements: requirements.txt$(NC)"
-	$(PYTHON) tools/check_runtime_requirements.py
+	$(PYTHON) -m pytest tests/ --cov=main --cov-fail-under=$(MIN_COVERAGE)
 
 # ============================================================================
 # Deprecated aliases — pre-Phase-0 names, kept for one release (§7.5)

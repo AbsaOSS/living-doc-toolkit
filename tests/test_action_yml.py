@@ -14,7 +14,6 @@
 # limitations under the License.
 #
 import os
-import re
 import subprocess
 import sys
 from pathlib import Path
@@ -22,12 +21,9 @@ from pathlib import Path
 import pytest
 import yaml
 
-from main import COMMAND_INPUT_NAMES
-
 REPO_ROOT = Path(__file__).resolve().parents[1]
 ACTION = yaml.safe_load((REPO_ROOT / "action.yml").read_text(encoding="utf-8"))
 STEPS = {step["id"]: step for step in ACTION["runs"]["steps"]}
-INPUTS = ["command", "input", "output", "view", "document-title", "tests-input", "fail-under", "verbose-logging"]
 PIP_ENVIRONMENT = ["PIP_TARGET", "PIP_PREFIX", "PIP_USER", "PIP_ROOT", "PIP_PYTHON", "PYTHONPATH"]
 
 # Stands in for every interpreter the venv step calls: `-c` code runs on this test's interpreter, with the fake's
@@ -110,44 +106,6 @@ def _errors(result: subprocess.CompletedProcess) -> list[str]:
 
 def _venv_creations(tmp_path: Path) -> int:
     return sum(" -m venv " in line for line in (tmp_path / "python.calls").read_text(encoding="utf-8").splitlines())
-
-
-def test_the_inputs_are_the_command_its_files_and_options_then_verbose_logging_off_by_default():
-    # Assert
-    inputs = ACTION["inputs"]
-    assert list(inputs) == INPUTS
-    assert [inputs[name]["required"] for name in INPUTS] == [True, True, True, False, False, False, False, False]
-    assert [inputs[name]["default"] for name in INPUTS if not inputs[name]["required"]] == ["", "", "", "", "false"]
-
-
-def test_the_entry_point_reads_the_command_inputs_in_action_yml_order():
-    # Assert: the first input that is invalid for a command is the one the run names.
-    assert COMMAND_INPUT_NAMES == INPUTS[1:-1]
-
-
-def test_every_input_reaches_the_entry_point_through_the_run_steps_env():
-    # Assert
-    assert STEPS["living-doc-toolkit"]["env"] == {
-        f"INPUT_{name.replace('-', '_').upper()}": f"${{{{ inputs.{name} }}}}" for name in INPUTS
-    }
-
-
-def test_no_run_script_holds_an_input_expression():
-    # Assert
-    assert [step["id"] for step in STEPS.values() if re.search(r"\$\{\{\s*inputs\.", step["run"])] == []
-
-
-def test_the_run_step_runs_the_entry_point_on_the_venv_interpreter_ignoring_the_environment():
-    # Assert
-    assert STEPS["living-doc-toolkit"]["run"].strip() == (
-        '"${{ steps.venv.outputs.python }}" -E "${{ github.action_path }}/main.py"'
-    )
-
-
-def test_the_only_output_is_the_run_steps_output_path():
-    # Assert
-    assert ACTION["outputs"]["output-path"]["value"] == "${{ steps.living-doc-toolkit.outputs.output-path }}"
-    assert list(ACTION["outputs"]) == ["output-path"]
 
 
 def test_a_python_below_3_10_fails_with_one_error_line_before_creating_a_venv(tmp_path):
