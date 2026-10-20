@@ -103,6 +103,7 @@ and writes the file the command produces.
 
 - **Python:** the action uses the Python on `PATH`, 3.10 or later, so put `actions/setup-python`
   before it. Below 3.10 it fails with one line before it installs anything.
+- **Runner:** Linux only. The action assumes the venv's POSIX `bin/` layout.
 - It installs the toolkit into a venv of its own under `$RUNNER_TEMP` and leaves the job's
   `python` unchanged. [DEVELOPER.md](DEVELOPER.md#action-venv) holds the venv's rules.
 

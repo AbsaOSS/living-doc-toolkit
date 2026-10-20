@@ -160,13 +160,13 @@ qa-root: format-check-root lint-root types-root runtime-requirements test-root
 	@echo "$(GREEN)✓ QA passed for the root$(NC)"
 
 lint-root:
-	@echo "$(YELLOW)→ Ruff + Pylint: root ($(ROOT_SRC), Pylint threshold >= $(MIN_PYLINT_SCORE))$(NC)"
-	$(PYTHON) -m ruff check $(ROOT_SRC)
+	@echo "$(YELLOW)→ Ruff + Pylint: root (Ruff: $(ROOT_PY); Pylint: $(ROOT_SRC), threshold >= $(MIN_PYLINT_SCORE))$(NC)"
+	$(PYTHON) -m ruff check $(ROOT_PY)
 	$(PYTHON) -m pylint --fail-under=$(MIN_PYLINT_SCORE) $(ROOT_SRC)
 
 format-root:
 	@echo "$(YELLOW)→ Ruff autofix + Black: root ($(ROOT_PY))$(NC)"
-	$(PYTHON) -m ruff check --fix $(ROOT_SRC)
+	$(PYTHON) -m ruff check --fix $(ROOT_PY)
 	$(PYTHON) -m black $(ROOT_PY)
 
 format-check-root:

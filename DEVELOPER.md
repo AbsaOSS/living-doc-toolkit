@@ -170,7 +170,7 @@ includes its `-root` form.
 | Target | Runs | Gate |
 |---|---|---|
 | `format-check-root` / `format-root` | Black over `main.py`, `tools/` and `tests/` | line length **120** |
-| `lint-root` | ruff, then Pylint, over `main.py` and `tools/` | score ≥ **9.5** / 10 |
+| `lint-root` | ruff over `main.py`, `tools/` and `tests/`, then Pylint over `main.py` and `tools/` | score ≥ **9.5** / 10 |
 | `types-root` | mypy over `main.py` and `tools/` | clean |
 | `test-root` / `coverage-root` | pytest over `tests/`, measuring `main.py` and `tools/` | ≥ **80 %** |
 | `runtime-requirements` | `tools/check_runtime_requirements.py` | no test, lint or type tool, and no line that is neither a pin nor a package directory, in `requirements.txt` |
