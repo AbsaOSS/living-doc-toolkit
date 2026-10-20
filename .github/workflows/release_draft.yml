@@ -64,6 +64,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
+          release-notes-title: '## [Rr]elease [Nn]otes'
           tag-name: ${{ github.event.inputs.tag-name }}
           from-tag-name: ${{ github.event.inputs.from-tag-name }}
           chapters: |

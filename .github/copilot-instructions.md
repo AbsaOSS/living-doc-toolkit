@@ -134,7 +134,7 @@ QA commands — the per-package `Makefile` targets (`.github/workflows/test.yml`
 
 ## Common pitfalls
 
-- Must verify a new dependency supports Python 3.10 before adding it, and Must add it to the owning package's `pyproject.toml` (there is no root `requirements.txt` of pinned deps — `requirements.txt` only lists the editable packages).
+- Must verify a new dependency supports Python 3.10 before adding it, and Must add it to the owning package's `pyproject.toml` (the root `requirements.txt` lists the six package directories, not their dependencies; `requirements-dev.txt` adds the development tools).
 - Must keep a change within the package dependency rules — Avoid importing a service from `core`, or an adapter from another adapter.
 - Must remove unused imports and variables in the same change, and Avoid leaving dead code.
 - Avoid changing externally visible strings, exit codes, `schema_version` values, or schema structure unless the task calls for it and the version impact is stated.

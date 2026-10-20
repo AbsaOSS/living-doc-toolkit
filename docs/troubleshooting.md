@@ -557,19 +557,18 @@ If you need to install Python 3.14, see: https://www.python.org/downloads/
 
 ### Q: How do I update the toolkit?
 
-**A:** Use pip to upgrade:
-
-```bash
-pip install --upgrade living-doc-toolkit
-```
-
-Or reinstall from source:
+**A:** The toolkit is not on PyPI. Pull your clone, then reinstall from the repository root:
 
 ```bash
 cd living-doc-toolkit
 git pull
-pip install -e packages/core packages/datasets_generator_ready packages/adapters/collector_gh packages/services/normalize_issues apps/cli
+pip install -r requirements.txt
 ```
+
+`requirements.txt` lists all six packages, `packages/services/coverage_matrix` included. For a
+development checkout, run `make install` instead; it gives the editable install
+([DEVELOPER.md](../DEVELOPER.md)). In a workflow, move the action's `uses: AbsaOSS/living-doc-toolkit@<ref>`
+to the newer ref.
 
 ---
 

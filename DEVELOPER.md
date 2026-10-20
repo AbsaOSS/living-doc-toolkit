@@ -10,6 +10,8 @@
 - [Running Integration Tests](#running-integration-tests)
 - [Code Coverage](#code-coverage)
 - [Run CLI Locally](#run-cli-locally)
+- [Action venv](#action-venv)
+- [CI](#ci)
 - [Branch Naming Convention (PID:H-1)](#branch-naming-convention-pidh-1)
 
 ## Get Started
@@ -34,10 +36,11 @@ pip install --upgrade pip
 
 ### Install All Packages (editable mode)
 
-Packages must be installed in dependency order. The following commands install every
-package together with the `[dev]` extras needed for tooling:
+Run `make install` from the repository root. It installs `requirements-dev.txt`, then
+reinstalls every package editable with its `[dev]` extra, in dependency order:
 
 ```shell
+pip install -r requirements-dev.txt
 pip install -e packages/core[dev]
 pip install -e packages/datasets_generator_ready[dev]
 pip install -e packages/adapters/collector_gh[dev]
@@ -46,8 +49,32 @@ pip install -e packages/services/coverage_matrix[dev]
 pip install -e "apps/cli[dev]"
 ```
 
-> **Note:** No `requirements.txt` exists — all dependencies are declared in per-package
-> `pyproject.toml` files.
+| File | What it holds | Who installs it |
+|---|---|---|
+| `requirements.txt` | Runtime only: the six package directories, each after the ones it depends on (`./packages/core` … `./apps/cli`) | `action.yml`, into its venv, on every run; the README Quickstart |
+| `requirements-dev.txt` | `-r requirements.txt`, the gate and test tools pinned, and `PyYAML` for `tests/test_action_yml.py` | `make install` and CI |
+
+- Each package declares its own runtime dependencies in its `pyproject.toml`; `requirements.txt`
+  names the packages, not their dependencies.
+- The development tools live in both places. Each package's `[dev]` extra keeps the ranges that
+  package needs on its own; `requirements-dev.txt` pins the versions `make install` and CI use.
+- Run both installs from the repository root: pip reads `./packages/...` against the directory
+  it runs in, not against the file.
+- `requirements.txt` carries no `-e`. `make install` gives the editable install for development;
+  the action and the Quickstart need a plain one.
+  - Why the order in `make install`: a later `pip install -r requirements.txt` would reinstall the
+    six packages non-editable, and one call holding both `./packages/core` and `-e packages/core`
+    does not resolve.
+- A plain install builds each package in place and leaves a `build/` directory beside its `src/`.
+  Each package's mypy `exclude` skips `build/`.
+  - Why: `make types-<alias>` runs `mypy .`, which would otherwise find every module twice.
+- A new package under `packages/` or `apps/` goes into `requirements.txt` after the packages it
+  depends on, and a development tool goes into `requirements-dev.txt`, never `requirements.txt`.
+  - Why: `apps/cli` depends on the other packages by name and none of them is on PyPI, so an
+    unlisted package fails the install with "No matching distribution found"; and the action
+    installs `requirements.txt` on every run.
+- Dependabot covers both files from its `pip` entry on `/`, beside one entry per package
+  directory, in `.github/dependabot.yml`.
 
 ## Monorepo Layout
 
@@ -64,6 +91,10 @@ Each package has its own `pyproject.toml`, `src/` layout, and `tests/` directory
 All quality-gate commands below are designed to run **per-package** from within the
 package directory, matching how CI executes them.
 
+The repository root holds the action: `action.yml`, its entry point `main.py`, and the root
+`tests/` for both. The root gates run from the repository root with the root `pyproject.toml`
+(see [Root checks](#root-checks)).
+
 ## QA Automation with Make
 
 This project includes a `Makefile` exposing the shared **command vocabulary**
@@ -79,7 +110,8 @@ First, install all packages with dev dependencies:
 make install
 ```
 
-Then run every QA gate (`format-check` → `lint` → `types` → `test`) on all packages:
+Then run every QA gate (`format-check` → `lint` → `types` → `test`) on all packages, then
+the [root checks](#root-checks):
 
 ```shell
 make qa
@@ -98,7 +130,7 @@ Seven targets. Each has an **aggregate** form (every package) and a **per-packag
 
 | Target | Runs | Gate |
 |--------|------|------|
-| `qa` | `format-check` → `lint` → `types` → `test`, failing on the first | all of the below |
+| `qa` | `format-check` → `lint` → `types` → `test` per package, then `qa-root`, failing on the first | all of the below |
 | `lint` | Pylint over tracked `*.py` (tests excluded) | score ≥ **9.5** / 10 |
 | `format` | Black, rewriting files | line length **120** |
 | `format-check` | Black `--check` (no writes) | line length **120** |
@@ -128,6 +160,18 @@ make types-core               # mypy on packages/core
 make test-core                # tests on packages/core
 make coverage-core            # tests + coverage gate on packages/core
 ```
+
+### Root checks
+
+`make qa-root` runs the gates over the root's own files. `make qa` runs it after the packages,
+and each aggregate target (`make lint`, `make test`, …) includes its `-root` form.
+
+| Target | Runs | Gate |
+|---|---|---|
+| `format-check-root` / `format-root` | Black over `main.py` and `tests/` | line length **120** |
+| `lint-root` | ruff over `main.py` and `tests/`, then Pylint over `main.py` | score ≥ **9.5** / 10 |
+| `types-root` | mypy over `main.py` | clean |
+| `test-root` / `coverage-root` | pytest over `tests/`, measuring `main.py` | ≥ **80 %** |
 
 ### Deprecated target names
 
@@ -224,7 +268,8 @@ gate that CI enforces.
 
 Integration tests are executed in a separate CI workflow
 (`.github/workflows/integration.yml`). They run golden-file and compatibility
-verifications across the installed packages.
+verifications across the installed packages; the same workflow runs the action
+itself ([CI](#ci)).
 
 ### Run locally
 
@@ -285,6 +330,139 @@ living-doc coverage-matrix \
   --output coverage-matrix.json \
   --fail-under 80
 ```
+
+## Action venv
+
+`action.yml` runs the toolkit in a venv of its own, built from the caller's Python. The rules
+are `living-doc-generator-markdown`'s; what differs here follows them.
+
+- The action uses the Python on `PATH`; the caller prepares it, for example with `actions/setup-python`.
+- Below 3.10 it fails before creating anything, with one line:
+  `::error::living-doc-toolkit needs Python >= 3.10 on PATH. Add actions/setup-python before this step.`
+- It installs `requirements.txt` into `$RUNNER_TEMP/living-doc-toolkit-venv`. It never changes the
+  caller's interpreter, `PATH` or environment, and writes nothing to `$GITHUB_ENV` or `$GITHUB_PATH`.
+- `PIP_TARGET`, `PIP_PREFIX`, `PIP_USER`, `PIP_ROOT`, `PIP_PYTHON` and `PYTHONPATH` are unset before
+  the install.
+  - Why: pip reads them as configuration, so a caller exporting one would empty or shadow the venv,
+    or (`PIP_PYTHON`) install into the caller's own interpreter.
+- The venv is reused only when the interpreter now on `PATH` built it, compared as `sys.base_prefix`
+  plus version; otherwise it is rebuilt.
+- After the install, one import of `living_doc_cli.main` through the venv's interpreter proves the
+  packages landed there. Its failure is one line pointing at the runner's pip configuration.
+- `main.py` runs with `-E`, so a caller's `PYTHONPATH` cannot shadow the venv. Every input reaches it
+  through the run step's `env:`; no `run:` script holds `${{ inputs.* }}`.
+- `main.py` runs the CLI with `-I`, which is `-E` that also keeps the working directory off `sys.path`.
+  - Why: the run step runs in the caller's checkout, and `python -m` searches the working directory
+    first, so a `click.py` or `json.py` there would replace the venv's module.
+- Linux runners only: the venv's POSIX `bin/` layout is assumed.
+- `tests/test_action_yml.py` runs the venv step against a fake interpreter. `integration.yml` shows
+  the reuse, the rebuild on an interpreter change, and the rejection of Python 3.9 on real ones
+  ([CI](#ci)).
+
+What differs from `living-doc-generator-markdown`:
+
+- The install and the import check run from the action's own directory, `$GITHUB_ACTION_PATH`.
+  - Why: `requirements.txt` names `./packages/...`, which pip reads against the directory it runs
+    in; from the caller's workspace the paths do not exist.
+  - Why the variable, not `${{ github.action_path }}`: in a `container:` job the expression gives
+    the runner host's path, which does not exist inside the container.
+- The import check imports `living_doc_cli.main`, which imports the other five packages through the
+  two commands.
+- pip rebuilds a local directory on every install, so each run reinstalls the six packages into the
+  reused venv; their dependencies stay installed.
+
+### The entry point
+
+`main.py` checks the inputs, then runs `python -I -m living_doc_cli.main <command> --<option>=<value> …`
+on the venv's interpreter. The CLI's exit code is the step's.
+
+- An unknown `command` fails with one line listing the valid commands. `normalize-tests` fails with
+  one line saying it is not available yet: `action.yml` declares it, and no CLI command runs it yet.
+- Each input goes only to the commands that take it. A non-empty input the command does not take
+  fails with one line naming the input and the command. An empty one is not passed, so the CLI's
+  default applies.
+  - Why: `action.yml` passes every input on every run, an unset one as its empty default.
+- `tests-input` and `fail-under` are `coverage-matrix`'s own inputs, as decided on issue #81.
+  An empty required input, `tests-input` for `coverage-matrix` included, fails with one line naming
+  it, and so does a `fail-under` that is not a finite number.
+- `verbose-logging: 'true'`, in any case, adds `--verbose` and logs the command line at DEBUG.
+  `INPUT_VERBOSE_LOGGING` stays in the run step's `env:`.
+  - Why: the CLI reads no environment variable, so `--verbose` is the way in. The variable is there
+    for when the toolkit reads it, as `living-doc-utilities`' logging does.
+  - Under `--verbose` the services log at DEBUG level but emit no DEBUG line of their own today, so
+    the DEBUG lines are the entry point's.
+- Once the command succeeds, `output-path` is set to the absolute path of `output`.
+
+A debug run, from the repository root after `make install`:
+
+```shell
+export INPUT_COMMAND=normalize-issues
+export INPUT_INPUT=tests/fixtures/collector_gh/v1.2.0/input/doc-issues.json
+export INPUT_OUTPUT=output/generator-ready.json
+export INPUT_VERBOSE_LOGGING=true      # optional: --verbose and DEBUG lines; default false
+python3 main.py
+```
+
+- Each input is an `INPUT_<NAME>` variable, upper case with `_` for `-`, as `action.yml` passes it.
+- Without `GITHUB_OUTPUT`, as outside GitHub Actions, the run sets no `output-path` output and logs
+  that once.
+
+## CI
+
+`test.yml` runs the gates, `integration.yml` runs the verifications and the action itself, and
+`link-check.yml` checks the Markdown links.
+
+- The checks to mark as required are `QA Gate` and every `integration.yml` job.
+  - `QA Gate` always runs, passes over a skipped job and fails on a failed or cancelled one. Why: a
+    required check must report on every pull request, also on one that changed no Python.
+  - `integration.yml` runs on every pull request to `master`, so its jobs always report. Why: its
+    action jobs are the only ones that run the action itself; without them a broken action merges
+    green.
+- The gates run when a Python-related file changed: `*.py`, `requirements.txt`,
+  `requirements-dev.txt`, a `pyproject.toml`, a `tests/fixtures/` file, a JSON file under
+  `packages/`, `Makefile`, `action.yml` or `test.yml`.
+  - The fixtures are in the list because the golden tests compare against them.
+  - JSON under `packages/` is in the list because the services load their JSON schemas at run time
+    and the tests check them.
+  - `action.yml` is in the list because `tests/test_action_yml.py` reads it.
+  - On a pull request a renamed file counts by its old path too, so moving a file out of that set
+    still runs the tests.
+- A manual run runs every gate, and a manual run of `link-check.yml` checks every page.
+  - Why: a manual run is a request to re-check the branch, whatever its last commit touched.
+- `format-check`, `lint` and `types` run once, on Python 3.10, over every package and the root.
+  - Why: they give the same result on every interpreter, and on the floor a syntax newer than 3.10
+    fails.
+- `make coverage` runs on Python 3.10 to 3.14.
+  - Why: the action runs on whatever Python ≥ 3.10 the caller puts on `PATH`.
+- `integration.yml`'s action jobs run the action through `uses: ./` over the committed fixtures, so
+  a failed run fails the job, then assert on the files written and on the `output-path` output.
+  - `Action - Commands Over the Fixtures` runs `normalize-issues` and `coverage-matrix` and uploads
+    what they wrote as the `action-output` artifact.
+  - It checks the repository out under `toolkit/`, runs the action as `uses: ./toolkit`, and puts a
+    `click.py` that exits in the workspace. Why: with `uses: ./` the action's directory is the
+    working directory, so the job would still pass without the `cd` into `$GITHUB_ACTION_PATH` or
+    without the CLI's `-I`.
+  - The 3.9 job runs the action with `continue-on-error` and asserts the failure.
+  - Why: a run that passed without writing its file would be a broken action.
+- The jobs need only `contents: read`: they run the repository's code and make no GitHub API call.
+- The isolation job installs `pydantic<2` into the runner's interpreter and compares its `python`,
+  version and pydantic before and after. It runs on 3.12, a version pydantic 1.x publishes wheels for.
+  - Why: the toolkit's packages need pydantic 2, so an action on that interpreter would fail its
+    import check, and an action installing into it would replace that pydantic.
+- It proves the reuse by `pyvenv.cfg`'s mtime, unchanged across its runs of the action.
+  - Why: `python -m venv` without `--clear` keeps the files already in the directory, so a marker
+    file survives a re-create; `pyvenv.cfg` is rewritten on every create.
+- It runs `normalize-issues`, then `coverage-matrix`, then `normalize-issues` again with `view` and
+  `document-title`. It then replays `main.py` on the action's venv, as the action runs it, and
+  expects the command's success line and the `output-path` line.
+  - Why: a failed install would stop on an import, and a wrong input on reading it.
+- The rebuild job runs the action on 3.12, switches `setup-python` to 3.11, runs it again, and asks
+  the venv's own interpreter for its version.
+  - Why: the isolation job runs on one Python, so it cannot see the interpreter comparison; a reused
+    venv would still report 3.12, so the version proves the rebuild, where an mtime would not.
+- The 3.9 job asserts that `PATH`'s Python is 3.9 before it checks the failure.
+  - Why: otherwise it would also pass if `setup-python` resolved something newer and the action
+    failed for another reason.
 
 ## Branch Naming Convention (PID:H-1)
 

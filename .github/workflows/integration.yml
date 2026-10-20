@@ -33,24 +33,255 @@ jobs:
     name: Run Integration Tests
     steps:
       - name: Checkout repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
       - name: Set up Python
-        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: '3.14'
           cache: 'pip'
+          cache-dependency-path: |
+            requirements*.txt
+            packages/**/pyproject.toml
+            apps/**/pyproject.toml
 
       - name: Install all packages
-        run: |
-          pip install -e packages/core[dev]
-          pip install -e packages/datasets_generator_ready[dev]
-          pip install -e packages/adapters/collector_gh[dev]
-          pip install -e packages/services/normalize_issues[dev]
-          pip install -e packages/services/coverage_matrix[dev]
-          pip install -e "apps/cli[dev]"
+        run: make install
 
       - name: Run integration verification
         run: make integration
+
+  action-run:
+    runs-on: ubuntu-latest
+    name: Action - Commands Over the Fixtures
+    steps:
+      # Under `toolkit/`, so the action's directory is not the working directory, as in a caller's job.
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: toolkit
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.14'
+
+      - name: Put a click.py in the workspace, which the CLI must not import
+        run: echo 'raise SystemExit("the workspace click.py shadowed the venv click")' > click.py
+
+      - name: Run normalize-issues
+        id: normalize-issues
+        uses: ./toolkit
+        with:
+          command: normalize-issues
+          input: toolkit/tests/fixtures/collector_gh/v1.2.0/input/doc-issues.json
+          output: output/normalize-issues/generator-ready.json
+          view: release
+          document-title: Checkout tests
+          verbose-logging: 'true'
+
+      - name: Run coverage-matrix
+        id: coverage-matrix
+        uses: ./toolkit
+        with:
+          command: coverage-matrix
+          input: toolkit/packages/services/coverage_matrix/tests/fixtures/golden/doc_source.json
+          tests-input: toolkit/packages/services/coverage_matrix/tests/fixtures/golden/ui_tests.json
+          output: output/coverage-matrix/coverage-matrix.json
+          fail-under: '75'
+
+      - name: Each command wrote its file and set output-path
+        env:
+          NORMALIZED: ${{ steps.normalize-issues.outputs.output-path }}
+          MATRIX: ${{ steps.coverage-matrix.outputs.output-path }}
+        run: |
+          set -euo pipefail
+          test "$NORMALIZED" = "${{ github.workspace }}/output/normalize-issues/generator-ready.json"
+          jq -e '.schema_version == "generator-ready-v1.0.0" and .meta.document_title == "Checkout tests"
+            and .meta.view.view == "release" and (.content.user_stories | length) == 14' "$NORMALIZED"
+          test "$MATRIX" = "${{ github.workspace }}/output/coverage-matrix/coverage-matrix.json"
+          jq -e '.schema_version == "coverage-matrix-v1.0.0" and .summary.coverage_pct == 75' "$MATRIX"
+          echo '::notice::normalize-issues and coverage-matrix each wrote their file and set output-path.'
+
+      - name: Upload what the commands wrote
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: action-output
+          path: output/
+          if-no-files-found: error
+
+  action-venv-isolation:
+    runs-on: ubuntu-latest
+    name: Action Venv - Isolation and Reuse
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+
+      - name: Install a conflicting pydantic into the runner's interpreter
+        run: |
+          set -euo pipefail
+          pip install 'pydantic<2'
+          {
+            which python
+            python --version
+            python -c 'import pydantic; print(pydantic.VERSION)'
+          } | tee "${RUNNER_TEMP}/before.txt"
+
+      - name: Run the action (first step)
+        id: first
+        uses: ./
+        with:
+          command: normalize-issues
+          input: tests/fixtures/collector_gh/v1.2.0/input/doc-issues.json
+          output: output/first/generator-ready.json
+
+      - name: Stamp the venv
+        run: stat -c %Y "${RUNNER_TEMP}/living-doc-toolkit-venv/pyvenv.cfg" > "${RUNNER_TEMP}/venv-cfg-mtime.txt"
+
+      - name: Run the action (second step)
+        id: second
+        uses: ./
+        with:
+          command: coverage-matrix
+          input: packages/services/coverage_matrix/tests/fixtures/golden/doc_source.json
+          tests-input: packages/services/coverage_matrix/tests/fixtures/golden/ui_tests.json
+          output: output/second/coverage-matrix.json
+
+      - name: Run the action (third step)
+        id: third
+        uses: ./
+        with:
+          command: normalize-issues
+          input: tests/fixtures/collector_gh/v1.2.0/input/doc-issues.json
+          output: output/third/generator-ready.json
+          view: release
+          document-title: Checkout tests
+
+      - name: Every step wrote its file, the venv was reused, the caller's environment is unchanged
+        env:
+          VENV: ${{ runner.temp }}/living-doc-toolkit-venv
+          FIRST: ${{ steps.first.outputs.output-path }}
+          SECOND: ${{ steps.second.outputs.output-path }}
+          THIRD: ${{ steps.third.outputs.output-path }}
+        run: |
+          set -euo pipefail
+          test "$FIRST" = "${{ github.workspace }}/output/first/generator-ready.json"
+          test "$SECOND" = "${{ github.workspace }}/output/second/coverage-matrix.json"
+          test "$THIRD" = "${{ github.workspace }}/output/third/generator-ready.json"
+          jq -e '.schema_version == "generator-ready-v1.0.0" and .meta.view.view == "inner"' "$FIRST"
+          jq -e '.schema_version == "coverage-matrix-v1.0.0"' "$SECOND"
+          jq -e '.meta.document_title == "Checkout tests" and .meta.view.view == "release"' "$THIRD"
+          test "$(stat -c %Y "$VENV/pyvenv.cfg")" = "$(cat "${RUNNER_TEMP}/venv-cfg-mtime.txt")"
+          out="${RUNNER_TEMP}/replay"
+          INPUT_COMMAND=normalize-issues INPUT_INPUT=tests/fixtures/collector_gh/v1.2.0/input/doc-issues.json \
+            INPUT_OUTPUT="$out/generator-ready.json" GITHUB_OUTPUT="$out.output" \
+            "$VENV/bin/python" -E main.py > "$out.log" 2>&1 || { cat "$out.log"; exit 1; }
+          cat "$out.log"
+          grep -F 'Successfully normalized' "$out.log"
+          test "$(cat "$out.output")" = "output-path=$out/generator-ready.json"
+          {
+            which python
+            python --version
+            python -c 'import pydantic; print(pydantic.VERSION)'
+          } | tee "${RUNNER_TEMP}/after.txt"
+          diff "${RUNNER_TEMP}/before.txt" "${RUNNER_TEMP}/after.txt"
+          echo '::notice::every step wrote its file and set output-path, the replay on the venv did too, the venv was reused, and the runner interpreter is unchanged.'
+
+  action-venv-rebuilt-when-python-changes:
+    runs-on: ubuntu-latest
+    name: Action Venv - Rebuilt When Python Changes
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+
+      - name: Run the action on 3.12
+        id: on-312
+        uses: ./
+        with:
+          command: normalize-issues
+          input: tests/fixtures/collector_gh/v1.2.0/input/doc-issues.json
+          output: output/on-312/generator-ready.json
+
+      - name: The venv was built from 3.12, and the file written
+        env:
+          OUTPUT_PATH: ${{ steps.on-312.outputs.output-path }}
+        run: |
+          set -euo pipefail
+          test -s "$OUTPUT_PATH"
+          "${RUNNER_TEMP}/living-doc-toolkit-venv/bin/python" \
+            -c 'import sys; assert sys.version_info[:2] == (3, 12), sys.version'
+
+      - name: Switch the interpreter on PATH to 3.11
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.11'
+
+      - name: Run the action on 3.11
+        id: on-311
+        uses: ./
+        with:
+          command: normalize-issues
+          input: tests/fixtures/collector_gh/v1.2.0/input/doc-issues.json
+          output: output/on-311/generator-ready.json
+
+      - name: The venv was rebuilt from the interpreter now on PATH
+        env:
+          OUTPUT_PATH: ${{ steps.on-311.outputs.output-path }}
+        run: |
+          set -euo pipefail
+          test -s "$OUTPUT_PATH"
+          "${RUNNER_TEMP}/living-doc-toolkit-venv/bin/python" \
+            -c 'import sys, living_doc_cli.main; assert sys.version_info[:2] == (3, 11), sys.version'
+          echo '::notice::switching the interpreter rebuilt the venv instead of reusing the 3.12 one.'
+
+  action-rejects-python-39:
+    runs-on: ubuntu-latest
+    name: Action Venv - Python 3.9 Is Rejected
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python 3.9
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.9'
+
+      - name: Run the action, which must fail
+        id: run-on-39
+        continue-on-error: true
+        uses: ./
+        with:
+          command: normalize-issues
+          input: tests/fixtures/collector_gh/v1.2.0/input/doc-issues.json
+          output: output/on-39/generator-ready.json
+
+      - name: The action failed on the version check, before creating a venv
+        run: |
+          set -euo pipefail
+          python3 -c 'import sys; assert sys.version_info[:2] == (3, 9), sys.version'
+          if [[ "${{ steps.run-on-39.outcome }}" != "failure" ]]; then
+            echo "::error::the action must fail when PATH's Python is older than 3.10."; exit 1
+          fi
+          if [[ -d "${RUNNER_TEMP}/living-doc-toolkit-venv" ]]; then
+            echo "::error::the action must fail the version check before it creates a venv."; exit 1
+          fi

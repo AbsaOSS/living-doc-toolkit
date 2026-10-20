@@ -19,6 +19,28 @@ updates:
         patterns:
           - "*"
 
+  # The root: `requirements.txt` and `requirements-dev.txt`.
+  - package-ecosystem: "pip"
+    directory: "/"
+    target-branch: "master"
+    schedule:
+      interval: "weekly"
+      day: "sunday"
+    labels:
+      - "auto update"
+      - "infrastructure"
+      - "no RN"
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    allow:
+      - dependency-type: "direct"
+    groups:
+      pip-root:
+        patterns:
+          - "*"
+
   # Monorepo adaptation (repo-conventions.md §10.1): one `pip` block per package
   # directory, each grouped into a single PR.
   - package-ecosystem: "pip"

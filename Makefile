@@ -4,10 +4,11 @@
 # Canonical targets (see living-doc/docs/specs/repo-conventions.md §7 "Command
 # vocabulary"):  qa · lint · format · format-check · types · test · coverage
 #
-#   make qa                 Run format-check -> lint -> types -> test on every package
+#   make qa                 Run format-check -> lint -> types -> test on every package, then the root checks
 #   make qa-<alias>         Same, for one package
+#   make qa-root            The root checks: main.py and tests/
 #   make lint-<alias>       One gate, one package  (also: format, format-check, types, test, coverage)
-#   make <gate>             One gate, every package
+#   make <gate>             One gate, every package and the root
 #
 # Package aliases:  core · datasets-generator-ready · collector-gh · normalize · coverage · cli
 #
@@ -26,6 +27,10 @@ dir-normalize                := packages/services/normalize_issues
 dir-coverage                 := packages/services/coverage_matrix
 dir-cli                      := apps/cli
 
+# --- Root: the action's entry point and its tests ----------------------------
+ROOT_SRC := main.py
+ROOT_PY  := $(ROOT_SRC) tests
+
 # --- Tools / thresholds ------------------------------------------------------
 PYTHON ?= python3
 MIN_PYLINT_SCORE := 9.5
@@ -42,8 +47,9 @@ DEPRECATED := py-qa black pylint mypy pytest-unit
 QA_TARGETS      := $(addprefix qa-,$(ALIASES))
 GATE_TARGETS    := $(foreach g,$(GATES),$(addprefix $(g)-,$(ALIASES)))
 DEPREC_TARGETS  := $(DEPRECATED) $(foreach g,$(DEPRECATED),$(addprefix $(g)-,$(ALIASES)))
+ROOT_TARGETS    := qa-root $(addsuffix -root,$(GATES))
 
-.PHONY: help install qa integration $(GATES) $(QA_TARGETS) $(GATE_TARGETS) $(DEPREC_TARGETS)
+.PHONY: help install qa integration $(GATES) $(QA_TARGETS) $(GATE_TARGETS) $(DEPREC_TARGETS) $(ROOT_TARGETS)
 
 # ============================================================================
 # Help / install
@@ -53,12 +59,15 @@ help: ## Show this help message
 	@echo "$(GREEN)Living Documentation Toolkit — QA commands$(NC)"
 	@echo ""
 	@echo "$(YELLOW)Setup:$(NC)"
-	@echo "  make install                 Install all packages with [dev] dependencies"
+	@echo "  make install                 Install requirements-dev.txt, then every package editable with [dev]"
 	@echo "  make integration             Golden-file + compatibility verification"
 	@echo ""
 	@echo "$(YELLOW)Every package:$(NC)"
-	@echo "  make qa                      format-check -> lint -> types -> test, all packages"
+	@echo "  make qa                      format-check -> lint -> types -> test, all packages, then qa-root"
 	@echo "  make lint | format | format-check | types | test | coverage"
+	@echo ""
+	@echo "$(YELLOW)Root (main.py, tests/):$(NC)"
+	@echo "  make qa-root                 All gates for the root"
 	@echo ""
 	@echo "$(YELLOW)One package (alias: core datasets-generator-ready collector-gh normalize coverage cli):$(NC)"
 	@echo "  make qa-<alias>              All gates for one package"
@@ -66,8 +75,9 @@ help: ## Show this help message
 	@echo ""
 	@echo "$(YELLOW)Thresholds (match CI):$(NC) Pylint >= $(MIN_PYLINT_SCORE) · Black line length 120 · mypy clean · coverage >= $(MIN_COVERAGE)%"
 
-install: ## Install all packages with [dev] dependencies (dependency order)
-	@echo "$(YELLOW)Installing packages in dependency order...$(NC)"
+install: ## Install requirements-dev.txt, then every package editable with [dev] (dependency order)
+	@echo "$(YELLOW)Installing requirements-dev.txt, then the packages editable in dependency order...$(NC)"
+	$(PYTHON) -m pip install -r requirements-dev.txt
 	$(PYTHON) -m pip install -e packages/core[dev]
 	$(PYTHON) -m pip install -e packages/datasets_generator_ready[dev]
 	$(PYTHON) -m pip install -e packages/adapters/collector_gh[dev]
@@ -87,25 +97,25 @@ integration: ## Golden-file + cross-version compatibility verification (same as 
 # Canonical aggregate targets — one gate across every package
 # ============================================================================
 
-qa: $(QA_TARGETS) ## format-check -> lint -> types -> test, every package
-	@echo "$(GREEN)✓ QA passed for all packages$(NC)"
+qa: $(QA_TARGETS) qa-root ## format-check -> lint -> types -> test, every package, then the root checks
+	@echo "$(GREEN)✓ QA passed for all packages and the root$(NC)"
 
-lint: $(addprefix lint-,$(ALIASES)) ## Ruff + Pylint (score >= 9.5), every package
+lint: $(addprefix lint-,$(ALIASES)) lint-root ## Ruff + Pylint (score >= 9.5), every package
 	@echo "$(GREEN)✓ Ruff + Pylint passed for all packages (Pylint score >= $(MIN_PYLINT_SCORE))$(NC)"
 
-format: $(addprefix format-,$(ALIASES)) ## Ruff autofix + Black (rewrite), every package
+format: $(addprefix format-,$(ALIASES)) format-root ## Ruff autofix + Black (rewrite), every package
 	@echo "$(GREEN)✓ Ruff + Black formatting complete for all packages$(NC)"
 
-format-check: $(addprefix format-check-,$(ALIASES)) ## Black --check (no writes), every package
+format-check: $(addprefix format-check-,$(ALIASES)) format-check-root ## Black --check (no writes), every package
 	@echo "$(GREEN)✓ Black check passed for all packages$(NC)"
 
-types: $(addprefix types-,$(ALIASES)) ## mypy, every package
+types: $(addprefix types-,$(ALIASES)) types-root ## mypy, every package
 	@echo "$(GREEN)✓ mypy passed for all packages$(NC)"
 
-test: $(addprefix test-,$(ALIASES)) ## pytest, every package
+test: $(addprefix test-,$(ALIASES)) test-root ## pytest, every package
 	@echo "$(GREEN)✓ Unit tests passed for all packages$(NC)"
 
-coverage: $(addprefix coverage-,$(ALIASES)) ## pytest with coverage gate, every package
+coverage: $(addprefix coverage-,$(ALIASES)) coverage-root ## pytest with coverage gate, every package
 	@echo "$(GREEN)✓ Coverage passed for all packages (>= $(MIN_COVERAGE)%)$(NC)"
 
 # ============================================================================
@@ -140,6 +150,39 @@ $(addprefix test-,$(ALIASES)): test-%:
 $(addprefix coverage-,$(ALIASES)): coverage-%:
 	@echo "$(YELLOW)→ Coverage: $* ($(dir-$*), >= $(MIN_COVERAGE)%)$(NC)"
 	cd $(dir-$*) && $(PYTHON) -m pytest tests/ --cov=src --cov-fail-under=$(MIN_COVERAGE)
+
+# ============================================================================
+# Root targets — main.py and tests/, run from the repository root
+# ============================================================================
+
+qa-root: format-check-root lint-root types-root test-root
+	@echo "$(GREEN)✓ QA passed for the root$(NC)"
+
+lint-root:
+	@echo "$(YELLOW)→ Ruff + Pylint: root (Ruff: $(ROOT_PY); Pylint: $(ROOT_SRC), threshold >= $(MIN_PYLINT_SCORE))$(NC)"
+	$(PYTHON) -m ruff check $(ROOT_PY)
+	$(PYTHON) -m pylint --fail-under=$(MIN_PYLINT_SCORE) $(ROOT_SRC)
+
+format-root:
+	@echo "$(YELLOW)→ Ruff autofix + Black: root ($(ROOT_PY))$(NC)"
+	$(PYTHON) -m ruff check --fix $(ROOT_PY)
+	$(PYTHON) -m black $(ROOT_PY)
+
+format-check-root:
+	@echo "$(YELLOW)→ Black --check: root ($(ROOT_PY))$(NC)"
+	$(PYTHON) -m black --check $(ROOT_PY)
+
+types-root:
+	@echo "$(YELLOW)→ mypy: root ($(ROOT_SRC))$(NC)"
+	$(PYTHON) -m mypy $(ROOT_SRC)
+
+test-root:
+	@echo "$(YELLOW)→ Tests: root (tests/)$(NC)"
+	$(PYTHON) -m pytest tests/
+
+coverage-root:
+	@echo "$(YELLOW)→ Coverage: root (tests/, >= $(MIN_COVERAGE)%)$(NC)"
+	$(PYTHON) -m pytest tests/ --cov=main --cov-fail-under=$(MIN_COVERAGE)
 
 # ============================================================================
 # Deprecated aliases — pre-Phase-0 names, kept for one release (§7.5)

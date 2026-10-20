@@ -23,6 +23,8 @@
 
 This recipe shows how to run the `normalize-issues` service in GitHub Actions, either as a standalone job or as part of a complete living documentation pipeline (Collector → Builder → Generator).
 
+Each run is one step of the toolkit's action, `AbsaOSS/living-doc-toolkit@<ref>`. The action installs the toolkit into a venv of its own, so the job needs no `pip install` step. [README § GitHub Action](../../README.md#github-action) lists its inputs and its output.
+
 **Workflow File:** `docs/recipes/github-actions-normalize-issues.yml`
 
 ---
@@ -30,6 +32,8 @@ This recipe shows how to run the `normalize-issues` service in GitHub Actions, e
 ## Prerequisites
 
 - GitHub repository with Actions enabled
+- A Linux runner, such as `ubuntu-latest`
+- Python 3.10 or later on `PATH`, set up with `actions/setup-python` before the action
 - Input file (`doc-issues.json`) available in the repository or from a previous job
 - Write access to repository settings (for workflow configuration)
 
@@ -49,7 +53,7 @@ cp docs/recipes/github-actions-normalize-issues.yml \
 
 ### Step 2: Customize the Workflow
 
-Edit `.github/workflows/normalize-issues.yml` to match your needs:
+Edit `.github/workflows/normalize-issues.yml` to match your needs, and replace `<ref>` with a release tag or a commit SHA of `living-doc-toolkit`:
 
 ```yaml
 name: Normalize Issues
@@ -65,26 +69,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Set up Python 3.14
         uses: actions/setup-python@v5
         with:
           python-version: '3.14'
-          cache: 'pip'
-      
-      - name: Install living-doc-toolkit
-        run: |
-          pip install --upgrade pip
-          pip install -r requirements.txt
-      
+
       - name: Normalize issues
-        run: |
-          living-doc normalize-issues \
-            --input doc-issues.json \
-            --output generator-ready.json \
-            --document-title "Product Requirements" \
-            --document-version "${{ github.ref_name }}"
-      
+        uses: AbsaOSS/living-doc-toolkit@<ref>
+        with:
+          command: normalize-issues
+          input: doc-issues.json
+          output: generator-ready.json
+          document-title: Product Requirements
+
       - name: Upload generator-ready JSON
         uses: actions/upload-artifact@v4
         with:
@@ -112,9 +110,9 @@ git push
 
 ## Customization Options
 
-### Option 1: Custom Document Title and Version
+### Option 1: Custom Document Title
 
-Override document metadata using workflow inputs:
+Set the title from a workflow input:
 
 ```yaml
 on:
@@ -124,53 +122,51 @@ on:
         description: 'Document title'
         required: true
         default: 'Product Requirements'
-      document_version:
-        description: 'Document version'
-        required: true
-        default: '1.0.0'
 
 jobs:
   normalize-issues:
     steps:
       - name: Normalize issues
-        run: |
-          living-doc normalize-issues \
-            --input doc-issues.json \
-            --output generator-ready.json \
-            --document-title "${{ inputs.document_title }}" \
-            --document-version "${{ inputs.document_version }}"
+        uses: AbsaOSS/living-doc-toolkit@<ref>
+        with:
+          command: normalize-issues
+          input: doc-issues.json
+          output: generator-ready.json
+          document-title: ${{ inputs.document_title }}
 ```
 
-### Option 2: Dynamic Versioning
+### Option 2: Release View
 
-Use Git tags or branch names for versioning:
+`view: release` drops planned and in-review entities and ACs. The default view is `inner`:
 
 ```yaml
-- name: Get version from Git
-  id: version
-  run: echo "version=$(git describe --tags --always)" >> $GITHUB_OUTPUT
-
-- name: Normalize issues
-  run: |
-    living-doc normalize-issues \
-      --input doc-issues.json \
-      --output generator-ready.json \
-      --document-version "${{ steps.version.outputs.version }}"
+- name: Normalize issues for the release document
+  uses: AbsaOSS/living-doc-toolkit@<ref>
+  with:
+    command: normalize-issues
+    input: doc-issues.json
+    output: generator-ready.json
+    view: release
 ```
 
 ### Option 3: Multiple Input Files
 
-Process multiple collector outputs:
+One step runs one command over one file. For several files, run one step per file, or a matrix ([Pattern 2](#pattern-2-parallel-processing)):
 
 ```yaml
-- name: Normalize multiple files
-  run: |
-    for input in outputs/*.json; do
-      output="normalized/$(basename $input)"
-      living-doc normalize-issues \
-        --input "$input" \
-        --output "$output"
-    done
+- name: Normalize the team A issues
+  uses: AbsaOSS/living-doc-toolkit@<ref>
+  with:
+    command: normalize-issues
+    input: outputs/team-a.json
+    output: normalized/team-a.json
+
+- name: Normalize the team B issues
+  uses: AbsaOSS/living-doc-toolkit@<ref>
+  with:
+    command: normalize-issues
+    input: outputs/team-b.json
+    output: normalized/team-b.json
 ```
 
 ---
@@ -219,32 +215,24 @@ jobs:
     needs: collect
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      
       - name: Download collector output
         uses: actions/download-artifact@v4
         with:
           name: collector-output
-      
+
       - name: Set up Python 3.14
         uses: actions/setup-python@v5
         with:
           python-version: '3.14'
-          cache: 'pip'
-      
-      - name: Install living-doc-toolkit
-        run: |
-          pip install --upgrade pip
-          pip install -r requirements.txt
-      
+
       - name: Normalize issues
-        run: |
-          living-doc normalize-issues \
-            --input doc-issues.json \
-            --output generator-ready.json \
-            --document-title "Product Requirements - Sprint ${{ github.run_number }}" \
-            --document-version "${{ github.ref_name }}"
-      
+        uses: AbsaOSS/living-doc-toolkit@<ref>
+        with:
+          command: normalize-issues
+          input: doc-issues.json
+          output: generator-ready.json
+          document-title: Product Requirements - Sprint ${{ github.run_number }}
+
       - name: Upload generator-ready JSON
         uses: actions/upload-artifact@v4
         with:
@@ -321,15 +309,21 @@ jobs:
   
   normalize:
     needs: collect
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         repo: [repo1, repo2, repo3]
     steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+
       - name: Normalize ${{ matrix.repo }}
-        run: |
-          living-doc normalize-issues \
-            --input doc-issues-${{ matrix.repo }}.json \
-            --output generator-ready-${{ matrix.repo }}.json
+        uses: AbsaOSS/living-doc-toolkit@<ref>
+        with:
+          command: normalize-issues
+          input: doc-issues-${{ matrix.repo }}.json
+          output: generator-ready-${{ matrix.repo }}.json
 ```
 
 ### Pattern 3: Scheduled Pipeline
@@ -349,16 +343,17 @@ on:
 
 ### Handling Workflow Failures
 
-Add error handling to continue on non-critical failures:
+A failed command fails the step with the CLI's own error line and exit code. Add error handling to continue on non-critical failures:
 
 ```yaml
 - name: Normalize issues
   id: normalize
   continue-on-error: true
-  run: |
-    living-doc normalize-issues \
-      --input doc-issues.json \
-      --output generator-ready.json
+  uses: AbsaOSS/living-doc-toolkit@<ref>
+  with:
+    command: normalize-issues
+    input: doc-issues.json
+    output: generator-ready.json
 
 - name: Check normalization result
   if: steps.normalize.outcome == 'failure'
@@ -368,29 +363,13 @@ Add error handling to continue on non-critical failures:
     exit 1
 ```
 
-### Retry Logic
-
-Add retries for transient failures:
-
-```yaml
-- name: Normalize issues
-  uses: nick-fields/retry@v2
-  with:
-    timeout_minutes: 10
-    max_attempts: 3
-    command: |
-      living-doc normalize-issues \
-        --input doc-issues.json \
-        --output generator-ready.json
-```
-
 ---
 
 ## Best Practices
 
 ### 1. Pin Python Version
 
-Always pin Python to 3.14 to ensure compatibility:
+The action needs Python 3.10 or later on `PATH`. Pin the version you test with:
 
 ```yaml
 - uses: actions/setup-python@v5
@@ -398,26 +377,15 @@ Always pin Python to 3.14 to ensure compatibility:
     python-version: '3.14'
 ```
 
-### 2. Cache Dependencies
+### 2. Pin the Toolkit's Ref
 
-Enable pip caching to speed up workflow:
-
-```yaml
-- uses: actions/setup-python@v5
-  with:
-    python-version: '3.14'
-    cache: 'pip'
-```
-
-### 3. Use Semantic Versioning
-
-Version your documents using semantic versioning:
+Use a release tag or a commit SHA, not a branch, so a toolkit change does not change your documents unannounced:
 
 ```yaml
---document-version "1.2.3"
+uses: AbsaOSS/living-doc-toolkit@<release tag or commit SHA>
 ```
 
-### 4. Store Artifacts
+### 3. Store Artifacts
 
 Always upload artifacts for debugging:
 
@@ -429,33 +397,33 @@ Always upload artifacts for debugging:
     retention-days: 30
 ```
 
-### 5. Enable Verbose Logging
+### 4. Enable Verbose Logging
 
-Use `--verbose` flag in workflows for detailed logs:
+Set `verbose-logging: 'true'` for detailed logs:
 
 ```yaml
 - name: Normalize issues
-  run: |
-    living-doc normalize-issues \
-      --input doc-issues.json \
-      --output generator-ready.json \
-      --verbose
+  uses: AbsaOSS/living-doc-toolkit@<ref>
+  with:
+    command: normalize-issues
+    input: doc-issues.json
+    output: generator-ready.json
+    verbose-logging: 'true'
 ```
 
 ---
 
 ## Troubleshooting
 
-### Issue: "Command not found: living-doc"
+### Issue: "living-doc-toolkit needs Python >= 3.10 on PATH"
 
-**Cause:** Toolkit not installed correctly
+**Cause:** No `actions/setup-python` before the action, or a Python older than 3.10 on `PATH`
 
 **Solution:**
 ```yaml
-- name: Install living-doc-toolkit
-  run: |
-    pip install --upgrade pip
-    pip install -r requirements.txt
+- uses: actions/setup-python@v5
+  with:
+    python-version: '3.14'
 ```
 
 ### Issue: "File not found: doc-issues.json"
@@ -481,10 +449,11 @@ Use `--verbose` flag in workflows for detailed logs:
 ```yaml
 - name: Normalize issues
   timeout-minutes: 15
-  run: |
-    living-doc normalize-issues \
-      --input doc-issues.json \
-      --output generator-ready.json
+  uses: AbsaOSS/living-doc-toolkit@<ref>
+  with:
+    command: normalize-issues
+    input: doc-issues.json
+    output: generator-ready.json
 ```
 
 ---
@@ -492,6 +461,7 @@ Use `--verbose` flag in workflows for detailed logs:
 ## Additional Resources
 
 - **[Workflow YAML](github-actions-normalize-issues.yml)** — Ready-to-use workflow file
+- **[README § GitHub Action](../../README.md#github-action)** — The action's inputs and output
 - **[Cookbook: normalize-issues](../cookbooks/normalize-issues.md)** — How detection, compatibility, and normalization work
 - **[Troubleshooting](../troubleshooting.md)** — Exit codes, common errors, FAQ
 - **[GitHub Actions Documentation](https://docs.github.com/en/actions)** — Official GitHub Actions docs
