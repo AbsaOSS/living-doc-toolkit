@@ -11,15 +11,15 @@ guessing.
 
 ## Rules
 
-- Must use `pytest` + `pytest-mock` (`mocker`) + `pytest-cov`. Tests live in each package's
-  own `tests/` directory, mirroring its `src/` layout; cross-package golden and
-  compatibility checks live in the repo-root `tests/` and per-service `verifications/`.
+- Must use `pytest` + `pytest-cov`. Tests live in each package's own `tests/` directory,
+  mirroring its `src/` layout; the action's entry point and venv step are tested in the
+  repo-root `tests/`.
 - The pipeline makes no network calls — there is nothing external to stub. Must isolate
   file I/O to `tmp_path` and fixtures, never the ambient filesystem.
-- Must mock `datetime.now` where a test compares against a golden file, so `generated_at`
-  is deterministic.
-- Must assert on behavior — return values, raised errors, error-message prefixes, exit
-  codes, serialized JSON keys and `schema_version`.
+- Must read contract inputs from the one fixture copy under the repo-root `tests/fixtures/`,
+  or write a changed copy of it under `tmp_path`; never hand-write a whole contract file.
+- Must assert on behavior — return values, the contract model a read returns, raised errors,
+  each `InputProblem`'s code, location and message, exit codes and error lines.
 - Prefer adding to each package's `tests/conftest.py` over duplicating setup.
 - Must keep the suite green under `make test-<alias>` / `make coverage-<alias>` (≥ 80% per
   package).
@@ -28,22 +28,15 @@ guessing.
 
 | What you need to fake | Pattern used in this repo | Where to copy it from |
 |---|---|---|
-| Input / output JSON files | write the payload under `tmp_path`, pass its path to `loader.py` / the service; assert on the written output file | `packages/services/*/tests/test_service.py` |
-| Pure transforms (`normalizer`, `matcher`, `summary`, `loader`, adapter `parser`) | call with parsed dict/list input, assert on the returned structure — no mocks | `packages/services/coverage_matrix/tests/test_matcher.py`, `test_summary.py`, `test_loader.py` |
-| Adapter selection | shape the payload so `detector.can_handle()` matches, or pass `--source collector-gh`; assert the chosen adapter | `packages/adapters/collector_gh/tests/` |
-| Version-compatibility warning | set `metadata.producer.version` outside the confirmed range; assert a `VERSION_MISMATCH` entry in `audit.trace[].warnings[]`, not a raise | `packages/adapters/collector_gh/tests/` |
-| collector-gh schema compatibility across versions | golden JSON fixtures, one directory per version, parametrized over the discovered set | Repo-root: `tests/fixtures/collector_gh/v0.1.0/`, `v1.0.0/`, `v1.2.0/`, `v2.0.0/`; Adapter: `packages/adapters/collector_gh/tests/fixtures/collector_v0.1.1/`, `collector_v1.0.0/`, `collector_v1.2.0/`; `verifications/verify_compatibility.py` |
-| Golden output regression | compare the built output against `tests/fixtures/golden/v<X.Y.Z>/expected_output.json` | `packages/services/coverage_matrix/tests/integration/test_golden_files.py`; `verifications/verify_golden.py` |
-| Pydantic model / dataclass round-trip (`GeneratorReadyV1`, `AuditEnvelopeV1`, `CoverageItem`) | build the object, serialize, assert on keys/structure and `schema_version`; no I/O | `packages/datasets_generator_ready/tests/` |
-| Exported JSON Schema drift | regenerate the dataset's `schema_export` / `schema.py` and diff against `schemas/*.schema.json` — adapter schema is a vendored copy, not regenerated here | `packages/datasets_generator_ready/tests/test_schema_export.py` |
-| CLI invocation + exit code + output prefix | `click.testing.CliRunner().invoke(cli, [...])`, assert `result.exit_code` and `result.output` | `apps/cli/tests/test_cli.py`, `apps/cli/tests/integration/test_cli_invocation.py` |
-| Clock (`datetime.now(timezone.utc)`) | `mocker.patch("<module>.datetime")`, set `.now.return_value` | `packages/services/*/tests/` |
-| Logging assertions | `mocker.patch("<module>.logger")`, assert on `.warning` / `.error` | `packages/services/*/tests/` |
-
-**Adding a new collector-gh compatibility case:** drop a `doc-issues.json` under
-`tests/fixtures/collector_gh/v<X.Y.Z>/input/`. The parametrized compatibility tests and
-`verifications/verify_compatibility.py` discover it automatically — do not hard-code the
-version list.
+| A valid contract input | `living-doc`'s example `doc-source.json` / `ui-tests.json`, via the `doc_source` / `ui_tests` fixtures | `tests/fixtures/collector-gh/`; `packages/core/tests/conftest.py` |
+| An input that fails one validation step | `changed_copy(fixture, change)` writes the fixture under `tmp_path` with `change` applied to its parsed JSON | `packages/core/tests/conftest.py`, `test_input_validation.py` |
+| Every optional field of a contract filled | `living_doc_utilities.contracts.testing.full_sample(contract_id)` | `living-doc-utilities` |
+| A read through `read_artifact` | `monkeypatch.setattr(readers, "read_artifact", ...)` around the real one, to record the call | `packages/core/tests/test_readers.py` |
+| The CLI the action runs | `_FakeCli` replaces `subprocess.run`; the `available` fixture empties `NOT_AVAILABLE_YET` to test the run itself | `tests/test_main.py` |
+| Action inputs | `INPUT_<NAME>` environment variables via `monkeypatch.setenv`; `tests/conftest.py` clears inherited ones | `tests/test_main.py`, `tests/conftest.py` |
+| The action's venv step | a fake interpreter and pip, run through bash | `tests/test_action_yml.py` |
+| CLI invocation + exit code + output | `click.testing.CliRunner().invoke(cli, [...])`, assert `result.exit_code` and `result.output` | `apps/cli/tests/test_cli.py` |
+| Logging assertions | `caplog` / `capsys` on the `[LEVEL] message` lines | `tests/test_main.py`, `packages/core/tests/test_input_validation.py` |
 
 **No HTTP surface:** the toolkit never calls a network service. If a change ever
 introduces one, that is a design red flag — the pipeline is offline and AI-free by

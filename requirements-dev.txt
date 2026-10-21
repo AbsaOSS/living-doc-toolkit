@@ -2,8 +2,9 @@
 # suites need. The action never installs this file.
 -r requirements.txt
 
-# Lint, format and type tools (`make format-check lint types`).
+# Lint, format, type and dependency tools (`make format-check lint types deptry`).
 black==26.10.1
+deptry==0.25.1
 mypy==2.4.0
 mypy-extensions==1.1.0
 pylint==4.1.3

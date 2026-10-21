@@ -1,6 +1,6 @@
 # Rule: docs lifecycle — specs shrink as code ships
 
-`SPEC.md` describes what does **not** exist yet — a prospective service, adapter, or
+`SPEC.md` describes what does **not** exist yet — a prospective command, package, or
 external-contract change. Once a section is implemented, that section stops being a spec
 and becomes a fact about the codebase — so it belongs in the live docs, not in `SPEC.md`.
 
@@ -11,23 +11,19 @@ When a PR implements a `SPEC.md` section, that same PR must:
 1. **Delete** the implemented content from `SPEC.md` (the whole section, or the specific
    subsections that are now shipped).
 2. **Add** the equivalent, "what actually exists" description to the live docs:
-   - `docs/architecture.md` for system shape, data flow, and package structure;
-   - `docs/contracts.md` for CLI arguments, schemas, exit codes, and change control;
-   - the package `README.md` or `docs/cookbooks/<service>.md` for service-specific
-     behaviour;
-   - `docs/recipes/<name>.md` for run-it-in-an-environment guides;
-   - `DEVELOPER.md` for local-dev workflow;
-   - `README.md` for user-facing usage and examples.
+   - `README.md` for user-facing usage and examples: the action's commands, inputs and output;
+   - `DEVELOPER.md` for local-dev workflow, the quality gates and CI;
+   - the package's own `README.md` (`packages/core/README.md`, `apps/cli/README.md`, or a new
+     package's) for package-specific behaviour.
 
 This is a **move**, not a copy. After the PR, the information exists in exactly one place —
 the live docs — and `SPEC.md` is smaller. `SPEC.md` trends toward its process-only skeleton
-as services ship.
+as commands ship.
 
 ## What "move" means
 
 - Do not leave the section in `SPEC.md` with a "✅ implemented" marker. Remove it.
-- Do not duplicate the schema/flow/table in both `SPEC.md` and `docs/contracts.md`. One
-  home.
+- Do not duplicate the schema/flow/table in both `SPEC.md` and a live page. One home.
 - If only part of a section shipped, split it: the shipped part moves to live docs, the
   unshipped part stays in `SPEC.md`.
 - Cross-references that pointed at the moved `SPEC.md` section must be repointed to its new

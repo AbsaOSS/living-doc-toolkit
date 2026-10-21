@@ -1,0 +1,627 @@
+{
+  "features": [
+    {
+      "acceptance_criteria": [],
+      "business_value": [],
+      "deprecated_at": null,
+      "deprecation_reason": null,
+      "entity_id": "FEAT-001",
+      "external_dependencies": [
+        "auth-api"
+      ],
+      "feature_dependencies": [],
+      "func_type": null,
+      "functionalities": [
+        "FUNC-001",
+        "FUNC-002"
+      ],
+      "narrative": null,
+      "not_in_scope": [],
+      "notes": [],
+      "owners": [
+        "Identity Team"
+      ],
+      "pages": [
+        {
+          "functionalities": [],
+          "is_primary": true,
+          "notes": [],
+          "owners": [
+            "Identity Team"
+          ],
+          "page_object": "LoginPage.ts",
+          "purpose": "The screen where a registered customer enters an email and password to sign in.",
+          "route": "/login"
+        }
+      ],
+      "parent": null,
+      "preconditions": [],
+      "purpose": "The screen where a registered customer enters an email and password to sign in.",
+      "rationale": null,
+      "source": null,
+      "source_ref": {
+        "area_path": null,
+        "iteration_path": null,
+        "native_id": "docs/examples/pageobject/LoginPage.ts",
+        "native_type": "page-object",
+        "system": "GitHub",
+        "tracker_state": "committed",
+        "url": "https://github.com/AbsaOSS/living-doc/blob/<normalized-for-snapshot>/docs/examples/pageobject/LoginPage.ts"
+      },
+      "state": "active",
+      "state_origin": "derived",
+      "stub_reason": "Login template carries no test-id attributes yet; surface documented from the interface spec. discovered 2026-09-08",
+      "superseded_by": null,
+      "surface_type": "UI",
+      "tags": [],
+      "timestamps": {
+        "closed_at": null,
+        "created_at": null,
+        "updated_at": null
+      },
+      "title": "FEAT-001 · Login Page",
+      "type": "DocumentedFeature",
+      "user_stories": [
+        "US-001"
+      ],
+      "wizard_steps": []
+    },
+    {
+      "acceptance_criteria": [],
+      "business_value": [],
+      "deprecated_at": null,
+      "deprecation_reason": null,
+      "entity_id": "FEAT-003",
+      "external_dependencies": [],
+      "feature_dependencies": [
+        "FEAT-002"
+      ],
+      "func_type": null,
+      "functionalities": [],
+      "narrative": null,
+      "not_in_scope": [],
+      "notes": [],
+      "owners": [
+        "Identity Team"
+      ],
+      "pages": [
+        {
+          "functionalities": [],
+          "is_primary": true,
+          "notes": [],
+          "owners": [
+            "Identity Team"
+          ],
+          "page_object": "RegistrationPage.ts",
+          "purpose": "The screen where a new customer creates an account by entering an email and choosing a password.",
+          "route": "/register"
+        }
+      ],
+      "parent": null,
+      "preconditions": [],
+      "purpose": "The screen where a new customer creates an account by entering an email and choosing a password.",
+      "rationale": null,
+      "source": null,
+      "source_ref": {
+        "area_path": null,
+        "iteration_path": null,
+        "native_id": "docs/examples/pageobject/RegistrationPage.ts",
+        "native_type": "page-object",
+        "system": "GitHub",
+        "tracker_state": "committed",
+        "url": "https://github.com/AbsaOSS/living-doc/blob/<normalized-for-snapshot>/docs/examples/pageobject/RegistrationPage.ts"
+      },
+      "state": "planned",
+      "state_origin": "derived",
+      "stub_reason": null,
+      "superseded_by": null,
+      "surface_type": "UI",
+      "tags": [],
+      "timestamps": {
+        "closed_at": null,
+        "created_at": null,
+        "updated_at": null
+      },
+      "title": "FEAT-003 · Registration Page",
+      "type": "DocumentedFeature",
+      "user_stories": [],
+      "wizard_steps": []
+    }
+  ],
+  "functionalities": [
+    {
+      "acceptance_criteria": [
+        {
+          "aspect": [
+            "minimum-length",
+            "character-classes",
+            "no-username"
+          ],
+          "description": "Returns valid=false when the candidate password fails a complexity rule.",
+          "id": "FUNC-001-01",
+          "not_in_scope": [],
+          "placeholder_values": {},
+          "preconditions": [],
+          "rationale": null,
+          "removal_planned": null,
+          "state": "active",
+          "version": "1.0.0"
+        },
+        {
+          "aspect": [],
+          "description": "Returns valid=true when the candidate password satisfies every complexity rule.",
+          "id": "FUNC-001-02",
+          "not_in_scope": [],
+          "placeholder_values": {},
+          "preconditions": [],
+          "rationale": null,
+          "removal_planned": null,
+          "state": "active",
+          "version": "1.0.0"
+        },
+        {
+          "aspect": [
+            "minimum-length",
+            "character-classes",
+            "no-username"
+          ],
+          "description": "Shows the failed {rule} under the password field.",
+          "id": "FUNC-001-03",
+          "not_in_scope": [],
+          "placeholder_values": {
+            "rule": [
+              "minimum-length",
+              "character-classes",
+              "no-username"
+            ]
+          },
+          "preconditions": [],
+          "rationale": null,
+          "removal_planned": null,
+          "state": "active",
+          "version": "1.0.0"
+        }
+      ],
+      "business_value": [],
+      "deprecated_at": null,
+      "deprecation_reason": null,
+      "entity_id": "FUNC-001",
+      "external_dependencies": [],
+      "feature_dependencies": [],
+      "func_type": "field_validation",
+      "functionalities": [],
+      "narrative": null,
+      "not_in_scope": [],
+      "notes": [],
+      "owners": [],
+      "pages": [],
+      "parent": "FEAT-001",
+      "preconditions": [],
+      "purpose": null,
+      "rationale": null,
+      "source": null,
+      "source_ref": {
+        "area_path": null,
+        "iteration_path": null,
+        "native_id": "docs/examples/gherkin/liv_doc_func/func-001-validate-password-strength.feature",
+        "native_type": "feature-file",
+        "system": "GitHub",
+        "tracker_state": "committed",
+        "url": "https://github.com/AbsaOSS/living-doc/blob/<normalized-for-snapshot>/docs/examples/gherkin/liv_doc_func/func-001-validate-password-strength.feature"
+      },
+      "state": "active",
+      "state_origin": "authored",
+      "stub_reason": null,
+      "superseded_by": null,
+      "surface_type": null,
+      "tags": [],
+      "timestamps": {
+        "closed_at": null,
+        "created_at": null,
+        "updated_at": null
+      },
+      "title": "FUNC-001 · Login Page - Validate Password Strength",
+      "type": "DocumentedFunctionality",
+      "user_stories": [],
+      "wizard_steps": []
+    },
+    {
+      "acceptance_criteria": [
+        {
+          "aspect": [],
+          "description": "Returns valid=false when the candidate password appears in the breached-password list.",
+          "id": "FUNC-002-01",
+          "not_in_scope": [],
+          "placeholder_values": {},
+          "preconditions": [],
+          "rationale": null,
+          "removal_planned": null,
+          "state": "planned",
+          "version": null
+        }
+      ],
+      "business_value": [],
+      "deprecated_at": null,
+      "deprecation_reason": null,
+      "entity_id": "FUNC-002",
+      "external_dependencies": [],
+      "feature_dependencies": [],
+      "func_type": "field_validation",
+      "functionalities": [],
+      "narrative": null,
+      "not_in_scope": [
+        "Forcing a reset of a stored password that is found in the breached-password list later."
+      ],
+      "notes": [],
+      "owners": [],
+      "pages": [],
+      "parent": "FEAT-001",
+      "preconditions": [],
+      "purpose": null,
+      "rationale": null,
+      "source": null,
+      "source_ref": {
+        "area_path": null,
+        "iteration_path": null,
+        "native_id": "docs/examples/gherkin/liv_doc_func/func-002-reject-breached-password.feature",
+        "native_type": "feature-file",
+        "system": "GitHub",
+        "tracker_state": "committed",
+        "url": "https://github.com/AbsaOSS/living-doc/blob/<normalized-for-snapshot>/docs/examples/gherkin/liv_doc_func/func-002-reject-breached-password.feature"
+      },
+      "state": "planned",
+      "state_origin": "authored",
+      "stub_reason": null,
+      "superseded_by": null,
+      "surface_type": null,
+      "tags": [],
+      "timestamps": {
+        "closed_at": null,
+        "created_at": null,
+        "updated_at": null
+      },
+      "title": "FUNC-002 · Login Page - Reject Breached Password",
+      "type": "DocumentedFunctionality",
+      "user_stories": [],
+      "wizard_steps": []
+    }
+  ],
+  "metadata": {
+    "generated_at": "2026-10-21T06:47:26Z",
+    "producer": {
+      "build": null,
+      "name": "AbsaOSS/living-doc-collector-gh",
+      "utilities_version": "0.7.0",
+      "version": "0.1.1"
+    },
+    "run": {
+      "actor": null,
+      "ref": null,
+      "run_attempt": null,
+      "run_id": null,
+      "sha": null,
+      "workflow": null
+    },
+    "source": {
+      "extraction_mode": null,
+      "organizations": [
+        "AbsaOSS"
+      ],
+      "project_id": "living-doc-examples",
+      "repositories": [
+        "AbsaOSS/living-doc"
+      ],
+      "systems": [
+        "GitHub"
+      ]
+    },
+    "source_inputs": [],
+    "stats": {
+      "cardinality": {
+        "acceptance_criteria": 8,
+        "entities": 5,
+        "entities_by_type": {
+          "DocumentedFeature": 2,
+          "DocumentedFunctionality": 2,
+          "DocumentedUserStory": 1
+        },
+        "entities_skipped": 0,
+        "scenarios": 0,
+        "sources_configured": 1,
+        "sources_failed": 0,
+        "unresolved_refs": 1,
+        "warnings_by_code": {
+          "FEATURE_WITHOUT_FUNCTIONALITY": 1,
+          "UNRESOLVED_RELATION": 1
+        }
+      },
+      "field_occupancy": {
+        "features[].acceptance_criteria[].aspect[]": 0,
+        "features[].acceptance_criteria[].description": 0,
+        "features[].acceptance_criteria[].id": 0,
+        "features[].acceptance_criteria[].not_in_scope[]": 0,
+        "features[].acceptance_criteria[].placeholder_values": 0,
+        "features[].acceptance_criteria[].preconditions[]": 0,
+        "features[].acceptance_criteria[].rationale": 0,
+        "features[].acceptance_criteria[].removal_planned": 0,
+        "features[].acceptance_criteria[].state": 0,
+        "features[].acceptance_criteria[].version": 0,
+        "features[].business_value[]": 0,
+        "features[].deprecated_at": 0,
+        "features[].deprecation_reason": 0,
+        "features[].entity_id": 2,
+        "features[].external_dependencies[]": 1,
+        "features[].feature_dependencies[]": 1,
+        "features[].func_type": 0,
+        "features[].functionalities[]": 1,
+        "features[].narrative": 0,
+        "features[].not_in_scope[]": 0,
+        "features[].notes[]": 0,
+        "features[].owners[]": 2,
+        "features[].pages[].functionalities[]": 0,
+        "features[].pages[].is_primary": 2,
+        "features[].pages[].notes[]": 0,
+        "features[].pages[].owners[]": 2,
+        "features[].pages[].page_object": 2,
+        "features[].pages[].purpose": 2,
+        "features[].pages[].route": 2,
+        "features[].parent": 0,
+        "features[].preconditions[]": 0,
+        "features[].purpose": 2,
+        "features[].rationale": 0,
+        "features[].source": 0,
+        "features[].source_ref.area_path": 0,
+        "features[].source_ref.iteration_path": 0,
+        "features[].source_ref.native_id": 2,
+        "features[].source_ref.native_type": 2,
+        "features[].source_ref.system": 2,
+        "features[].source_ref.tracker_state": 2,
+        "features[].source_ref.url": 2,
+        "features[].state": 2,
+        "features[].state_origin": 2,
+        "features[].stub_reason": 1,
+        "features[].superseded_by": 0,
+        "features[].surface_type": 2,
+        "features[].tags[]": 0,
+        "features[].timestamps.closed_at": 0,
+        "features[].timestamps.created_at": 0,
+        "features[].timestamps.updated_at": 0,
+        "features[].title": 2,
+        "features[].type": 2,
+        "features[].user_stories[]": 1,
+        "features[].wizard_steps[]": 0,
+        "functionalities[].acceptance_criteria[].aspect[]": 2,
+        "functionalities[].acceptance_criteria[].description": 4,
+        "functionalities[].acceptance_criteria[].id": 4,
+        "functionalities[].acceptance_criteria[].not_in_scope[]": 0,
+        "functionalities[].acceptance_criteria[].placeholder_values": 1,
+        "functionalities[].acceptance_criteria[].preconditions[]": 0,
+        "functionalities[].acceptance_criteria[].rationale": 0,
+        "functionalities[].acceptance_criteria[].removal_planned": 0,
+        "functionalities[].acceptance_criteria[].state": 4,
+        "functionalities[].acceptance_criteria[].version": 3,
+        "functionalities[].business_value[]": 0,
+        "functionalities[].deprecated_at": 0,
+        "functionalities[].deprecation_reason": 0,
+        "functionalities[].entity_id": 2,
+        "functionalities[].external_dependencies[]": 0,
+        "functionalities[].feature_dependencies[]": 0,
+        "functionalities[].func_type": 2,
+        "functionalities[].functionalities[]": 0,
+        "functionalities[].narrative": 0,
+        "functionalities[].not_in_scope[]": 1,
+        "functionalities[].notes[]": 0,
+        "functionalities[].owners[]": 0,
+        "functionalities[].pages[].functionalities[]": 0,
+        "functionalities[].pages[].is_primary": 0,
+        "functionalities[].pages[].notes[]": 0,
+        "functionalities[].pages[].owners[]": 0,
+        "functionalities[].pages[].page_object": 0,
+        "functionalities[].pages[].purpose": 0,
+        "functionalities[].pages[].route": 0,
+        "functionalities[].parent": 2,
+        "functionalities[].preconditions[]": 0,
+        "functionalities[].purpose": 0,
+        "functionalities[].rationale": 0,
+        "functionalities[].source": 0,
+        "functionalities[].source_ref.area_path": 0,
+        "functionalities[].source_ref.iteration_path": 0,
+        "functionalities[].source_ref.native_id": 2,
+        "functionalities[].source_ref.native_type": 2,
+        "functionalities[].source_ref.system": 2,
+        "functionalities[].source_ref.tracker_state": 2,
+        "functionalities[].source_ref.url": 2,
+        "functionalities[].state": 2,
+        "functionalities[].state_origin": 2,
+        "functionalities[].stub_reason": 0,
+        "functionalities[].superseded_by": 0,
+        "functionalities[].surface_type": 0,
+        "functionalities[].tags[]": 0,
+        "functionalities[].timestamps.closed_at": 0,
+        "functionalities[].timestamps.created_at": 0,
+        "functionalities[].timestamps.updated_at": 0,
+        "functionalities[].title": 2,
+        "functionalities[].type": 2,
+        "functionalities[].user_stories[]": 0,
+        "functionalities[].wizard_steps[]": 0,
+        "user_stories[].acceptance_criteria[].aspect[]": 0,
+        "user_stories[].acceptance_criteria[].description": 4,
+        "user_stories[].acceptance_criteria[].id": 4,
+        "user_stories[].acceptance_criteria[].not_in_scope[]": 0,
+        "user_stories[].acceptance_criteria[].placeholder_values": 0,
+        "user_stories[].acceptance_criteria[].preconditions[]": 1,
+        "user_stories[].acceptance_criteria[].rationale": 0,
+        "user_stories[].acceptance_criteria[].removal_planned": 1,
+        "user_stories[].acceptance_criteria[].state": 4,
+        "user_stories[].acceptance_criteria[].version": 4,
+        "user_stories[].business_value[]": 1,
+        "user_stories[].deprecated_at": 0,
+        "user_stories[].deprecation_reason": 0,
+        "user_stories[].entity_id": 1,
+        "user_stories[].external_dependencies[]": 0,
+        "user_stories[].feature_dependencies[]": 0,
+        "user_stories[].func_type": 0,
+        "user_stories[].functionalities[]": 0,
+        "user_stories[].narrative": 0,
+        "user_stories[].not_in_scope[]": 0,
+        "user_stories[].notes[]": 0,
+        "user_stories[].owners[]": 0,
+        "user_stories[].pages[].functionalities[]": 0,
+        "user_stories[].pages[].is_primary": 0,
+        "user_stories[].pages[].notes[]": 0,
+        "user_stories[].pages[].owners[]": 0,
+        "user_stories[].pages[].page_object": 0,
+        "user_stories[].pages[].purpose": 0,
+        "user_stories[].pages[].route": 0,
+        "user_stories[].parent": 0,
+        "user_stories[].preconditions[]": 0,
+        "user_stories[].purpose": 0,
+        "user_stories[].rationale": 0,
+        "user_stories[].source": 0,
+        "user_stories[].source_ref.area_path": 0,
+        "user_stories[].source_ref.iteration_path": 0,
+        "user_stories[].source_ref.native_id": 1,
+        "user_stories[].source_ref.native_type": 1,
+        "user_stories[].source_ref.system": 1,
+        "user_stories[].source_ref.tracker_state": 1,
+        "user_stories[].source_ref.url": 1,
+        "user_stories[].state": 1,
+        "user_stories[].state_origin": 1,
+        "user_stories[].stub_reason": 0,
+        "user_stories[].superseded_by": 0,
+        "user_stories[].surface_type": 0,
+        "user_stories[].tags[]": 0,
+        "user_stories[].timestamps.closed_at": 0,
+        "user_stories[].timestamps.created_at": 0,
+        "user_stories[].timestamps.updated_at": 0,
+        "user_stories[].title": 1,
+        "user_stories[].type": 1,
+        "user_stories[].user_stories[]": 0,
+        "user_stories[].wizard_steps[]": 0
+      }
+    }
+  },
+  "schema_version": "doc-source-v1.0.0",
+  "user_stories": [
+    {
+      "acceptance_criteria": [
+        {
+          "aspect": [],
+          "description": "A customer who submits valid credentials lands on the account dashboard.",
+          "id": "US-001-01",
+          "not_in_scope": [],
+          "placeholder_values": {},
+          "preconditions": [
+            "A registered customer account exists and is not locked."
+          ],
+          "rationale": null,
+          "removal_planned": null,
+          "state": "active",
+          "version": "1.0.0"
+        },
+        {
+          "aspect": [],
+          "description": "An inline error is shown when the customer submits invalid credentials, without leaving the login screen.",
+          "id": "US-001-02",
+          "not_in_scope": [],
+          "placeholder_values": {},
+          "preconditions": [],
+          "rationale": null,
+          "removal_planned": null,
+          "state": "active",
+          "version": "1.0.0"
+        },
+        {
+          "aspect": [],
+          "description": "A customer who forgot the password can request a reset link from the login screen.",
+          "id": "US-001-03",
+          "not_in_scope": [],
+          "placeholder_values": {},
+          "preconditions": [],
+          "rationale": null,
+          "removal_planned": null,
+          "state": "planned",
+          "version": "1.1.0"
+        },
+        {
+          "aspect": [],
+          "description": "A \"Remember me\" choice keeps the customer signed in across browser restarts.",
+          "id": "US-001-04",
+          "not_in_scope": [],
+          "placeholder_values": {},
+          "preconditions": [],
+          "rationale": null,
+          "removal_planned": "2.0.0",
+          "state": "deprecated",
+          "version": "1.0.0"
+        }
+      ],
+      "business_value": [
+        "Registered customers can reach their account area, so returning users convert without friction."
+      ],
+      "deprecated_at": null,
+      "deprecation_reason": null,
+      "entity_id": "US-001",
+      "external_dependencies": [],
+      "feature_dependencies": [],
+      "func_type": null,
+      "functionalities": [],
+      "narrative": null,
+      "not_in_scope": [],
+      "notes": [],
+      "owners": [],
+      "pages": [],
+      "parent": null,
+      "preconditions": [],
+      "purpose": null,
+      "rationale": null,
+      "source": null,
+      "source_ref": {
+        "area_path": null,
+        "iteration_path": null,
+        "native_id": "docs/examples/gherkin/liv_doc_us/us-001-customer-login.feature",
+        "native_type": "feature-file",
+        "system": "GitHub",
+        "tracker_state": "committed",
+        "url": "https://github.com/AbsaOSS/living-doc/blob/<normalized-for-snapshot>/docs/examples/gherkin/liv_doc_us/us-001-customer-login.feature"
+      },
+      "state": "active",
+      "state_origin": "authored",
+      "stub_reason": null,
+      "superseded_by": null,
+      "surface_type": null,
+      "tags": [],
+      "timestamps": {
+        "closed_at": null,
+        "created_at": null,
+        "updated_at": null
+      },
+      "title": "US-001 · Customer Login",
+      "type": "DocumentedUserStory",
+      "user_stories": [],
+      "wizard_steps": []
+    }
+  ],
+  "warnings": [
+    {
+      "ac_id": null,
+      "code": "FEATURE_WITHOUT_FUNCTIONALITY",
+      "context": "entity_id='FEAT-003'",
+      "entity_id": "FEAT-003",
+      "line_no": null,
+      "message": "Feature has no linked Functionality in this run — either it is not yet populated, or it has been fully retired. Author its Functionalities, or remove the Feature.",
+      "path": null,
+      "source_url": null
+    },
+    {
+      "ac_id": null,
+      "code": "UNRESOLVED_RELATION",
+      "context": "entity_id='FEAT-003' target='FEAT-002'",
+      "entity_id": "FEAT-003",
+      "line_no": null,
+      "message": "'feature_dependencies' points outside the collected entity set.",
+      "path": null,
+      "source_url": null
+    }
+  ]
+}

@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import json
 import os
 import subprocess
 import sys
@@ -21,12 +20,13 @@ from pathlib import Path
 
 import pytest
 
+import main
 from main import run
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-DOC_ISSUES = REPO_ROOT / "tests" / "fixtures" / "collector_gh" / "v1.2.0" / "input" / "doc-issues.json"
-GOLDEN = REPO_ROOT / "packages" / "services" / "coverage_matrix" / "tests" / "fixtures" / "golden"
+DOC_SOURCE = REPO_ROOT / "tests" / "fixtures" / "collector-gh" / "doc-source.json"
 CLI = [sys.executable, "-I", "-m", "living_doc_cli.main"]
+COMMANDS = ["normalize-docs", "normalize-tests", "coverage-matrix"]
 
 
 def _errors(err: str) -> list[str]:
@@ -36,6 +36,12 @@ def _errors(err: str) -> list[str]:
 def _set_inputs(monkeypatch, **inputs: str) -> None:
     for name, value in inputs.items():
         monkeypatch.setenv(f"INPUT_{name.upper()}", value)
+
+
+def _set_required_inputs(monkeypatch, command: str) -> None:
+    _set_inputs(monkeypatch, command=command, input="in.json", output="out.json")
+    if command == "coverage-matrix":
+        _set_inputs(monkeypatch, tests_input="tests.json")
 
 
 class _FakeCli:
@@ -60,6 +66,12 @@ def _cli(monkeypatch, tmp_path) -> _FakeCli:
     return fake
 
 
+@pytest.fixture(name="available")
+def _available(monkeypatch) -> None:
+    """Every command available, as once the CLI runs them, so the run path is tested while none runs yet."""
+    monkeypatch.setattr(main, "NOT_AVAILABLE_YET", ())
+
+
 def _run_failing(capsys) -> tuple[int, list[str]]:
     with pytest.raises(SystemExit) as exit_info:
         run()
@@ -73,14 +85,14 @@ def test_an_empty_command_fails_with_one_line_listing_the_valid_commands(cli, ca
     # Assert
     assert code == 1
     assert errors == [
-        "[ERROR] Input `command` is required; valid commands: normalize-issues, normalize-tests, coverage-matrix."
+        "[ERROR] Input `command` is required; valid commands: normalize-docs, normalize-tests, coverage-matrix."
     ]
     assert cli.runs == []
 
 
 def test_an_unknown_command_fails_with_one_line_listing_the_valid_commands(cli, monkeypatch, capsys):
     # Arrange
-    _set_inputs(monkeypatch, command="normalize\nissues", input="in.json", output="out.json")
+    _set_inputs(monkeypatch, command="normalize\ndocs", input="in.json", output="out.json")
 
     # Act
     code, errors = _run_failing(capsys)
@@ -88,39 +100,49 @@ def test_an_unknown_command_fails_with_one_line_listing_the_valid_commands(cli, 
     # Assert
     assert code == 1
     assert errors == [
-        "[ERROR] Input `command` is 'normalize\\nissues', not a valid command; "
-        "valid commands: normalize-issues, normalize-tests, coverage-matrix."
+        "[ERROR] Input `command` is 'normalize\\ndocs', not a valid command; "
+        "valid commands: normalize-docs, normalize-tests, coverage-matrix."
     ]
     assert cli.runs == []
 
 
-def test_normalize_tests_fails_with_one_line_saying_it_is_not_available_yet(cli, monkeypatch, capsys):
+@pytest.mark.parametrize("command", COMMANDS)
+def test_a_command_with_valid_inputs_fails_with_one_line_saying_it_is_not_available_yet(
+    cli, monkeypatch, capsys, command
+):
     # Arrange
-    _set_inputs(monkeypatch, command="normalize-tests", input="in.json", output="out.json")
+    _set_required_inputs(monkeypatch, command)
 
     # Act
     code, errors = _run_failing(capsys)
 
     # Assert
     assert code == 1
-    assert errors == [
-        "[ERROR] Command `normalize-tests` is not available yet; "
-        "the commands available now: normalize-issues, coverage-matrix."
-    ]
+    assert errors == [f"[ERROR] Command `{command}` is not available yet; no command runs yet."]
     assert cli.runs == []
+
+
+def test_every_command_the_action_declares_is_not_available_yet():
+    # Assert
+    assert list(main.NOT_AVAILABLE_YET) == COMMANDS == list(main.COMMAND_INPUTS)
 
 
 @pytest.mark.parametrize(
     ("inputs", "untaken"),
     [
-        ({"command": "coverage-matrix", "tests_input": "tests.json", "view": "release"}, "view"),
+        ({"command": "normalize-docs", "tests_input": "tests.json"}, "tests-input"),
+        ({"command": "normalize-docs", "fail_under": "80"}, "fail-under"),
+        ({"command": "normalize-tests", "view": "release"}, "view"),
+        ({"command": "normalize-tests", "document_title": "Title"}, "document-title"),
+        ({"command": "normalize-tests", "tests_input": "tests.json"}, "tests-input"),
+        ({"command": "normalize-tests", "fail_under": "80"}, "fail-under"),
         ({"command": "coverage-matrix", "tests_input": "tests.json", "document_title": "Title"}, "document-title"),
-        ({"command": "normalize-issues", "tests_input": "tests.json"}, "tests-input"),
-        ({"command": "normalize-issues", "fail_under": "80"}, "fail-under"),
     ],
 )
-def test_an_input_the_command_does_not_take_fails_with_one_line_naming_it(cli, monkeypatch, capsys, inputs, untaken):
-    # Arrange
+def test_an_input_the_command_does_not_take_fails_with_one_line_naming_it_before_it_is_refused(
+    cli, monkeypatch, capsys, inputs, untaken
+):
+    # Arrange: no command is available, so the untaken input is rejected before the command is refused.
     _set_inputs(monkeypatch, input="in.json", output="out.json", **inputs)
 
     # Act
@@ -132,32 +154,13 @@ def test_an_input_the_command_does_not_take_fails_with_one_line_naming_it(cli, m
     assert cli.runs == []
 
 
-def test_an_empty_input_the_command_does_not_take_is_not_passed(cli, monkeypatch, capsys):
-    # Arrange: `action.yml` passes every input, an unset optional one as its empty default.
-    _set_inputs(
-        monkeypatch,
-        command="coverage-matrix",
-        input="doc.json",
-        tests_input="tests.json",
-        output="out.json",
-        view="",
-        document_title="",
-    )
-
-    # Act
-    run()
-
-    # Assert
-    assert _errors(capsys.readouterr().err) == []
-    assert cli.runs[0][len(CLI) :][:2] == ["coverage-matrix", "--doc-input=doc.json"]
-    assert not [argument for argument in cli.runs[0] if argument.startswith(("--view", "--document-title"))]
-
-
 @pytest.mark.parametrize(
     ("command", "missing"),
     [
-        ("normalize-issues", "input"),
-        ("normalize-issues", "output"),
+        ("normalize-docs", "input"),
+        ("normalize-docs", "output"),
+        ("normalize-tests", "input"),
+        ("normalize-tests", "output"),
         ("coverage-matrix", "input"),
         ("coverage-matrix", "output"),
         ("coverage-matrix", "tests-input"),
@@ -165,9 +168,7 @@ def test_an_empty_input_the_command_does_not_take_is_not_passed(cli, monkeypatch
 )
 def test_a_required_input_left_empty_fails_with_one_line_naming_it(cli, monkeypatch, capsys, command, missing):
     # Arrange
-    _set_inputs(monkeypatch, command=command, input="in.json", output="out.json")
-    if command == "coverage-matrix":
-        _set_inputs(monkeypatch, tests_input="tests.json")
+    _set_required_inputs(monkeypatch, command)
     monkeypatch.setenv(f"INPUT_{missing.replace('-', '_').upper()}", "  ")
 
     # Act
@@ -181,7 +182,7 @@ def test_a_required_input_left_empty_fails_with_one_line_naming_it(cli, monkeypa
 
 def test_an_output_with_a_line_break_fails_with_one_line_naming_it(cli, monkeypatch, capsys):
     # Arrange
-    _set_inputs(monkeypatch, command="normalize-issues", input="in.json", output="out\nput.json")
+    _set_inputs(monkeypatch, command="normalize-docs", input="in.json", output="out\nput.json")
 
     # Act
     code, errors = _run_failing(capsys)
@@ -198,7 +199,7 @@ def test_an_output_with_a_line_break_fails_with_one_line_naming_it(cli, monkeypa
 @pytest.mark.parametrize("value", ["eighty", "80%", "nan", "inf"])
 def test_a_fail_under_that_is_not_a_number_fails_with_one_line_naming_it(cli, monkeypatch, capsys, value):
     # Arrange
-    _set_inputs(monkeypatch, command="coverage-matrix", input="doc.json", tests_input="tests.json", output="out.json")
+    _set_required_inputs(monkeypatch, "coverage-matrix")
     _set_inputs(monkeypatch, fail_under=value)
 
     # Act
@@ -210,14 +211,36 @@ def test_a_fail_under_that_is_not_a_number_fails_with_one_line_naming_it(cli, mo
     assert cli.runs == []
 
 
-def test_coverage_matrix_gets_each_input_as_its_option_and_the_output_as_an_absolute_path(cli, monkeypatch):
+def test_an_empty_input_the_command_does_not_take_is_not_passed(cli, available, monkeypatch, capsys):
+    # Arrange: `action.yml` passes every input, an unset optional one as its empty default.
+    _set_inputs(
+        monkeypatch,
+        command="normalize-tests",
+        input="ui-tests.json",
+        output="out.json",
+        view="",
+        document_title="",
+        tests_input="",
+        fail_under="",
+    )
+
+    # Act
+    run()
+
+    # Assert
+    assert _errors(capsys.readouterr().err) == []
+    assert cli.runs == [[*CLI, "normalize-tests", "--input=ui-tests.json", f"--output={Path.cwd() / 'out.json'}"]]
+
+
+def test_coverage_matrix_gets_each_input_as_its_option_and_the_output_as_an_absolute_path(cli, available, monkeypatch):
     # Arrange
     _set_inputs(
         monkeypatch,
         command="coverage-matrix",
-        input="doc_source.json",
-        tests_input="ui_tests.json",
+        input="doc-source.json",
+        tests_input="ui-tests.json",
         output="coverage-matrix.json",
+        view="release",
         fail_under="72.5",
     )
 
@@ -229,20 +252,21 @@ def test_coverage_matrix_gets_each_input_as_its_option_and_the_output_as_an_abso
         [
             *CLI,
             "coverage-matrix",
-            "--doc-input=doc_source.json",
+            "--doc-input=doc-source.json",
             f"--output={Path.cwd() / 'coverage-matrix.json'}",
-            "--tests-input=ui_tests.json",
+            "--view=release",
+            "--tests-input=ui-tests.json",
             "--fail-under=72.5",
         ]
     ]
 
 
-def test_normalize_issues_gets_each_input_as_its_option_and_the_output_as_an_absolute_path(cli, monkeypatch):
+def test_normalize_docs_gets_each_input_as_its_option_and_the_output_as_an_absolute_path(cli, available, monkeypatch):
     # Arrange
     _set_inputs(
         monkeypatch,
-        command="normalize-issues",
-        input="doc-issues.json",
+        command="normalize-docs",
+        input="doc-source.json",
         output="out/generator-ready.json",
         view="release",
         document_title="-Release notes",
@@ -255,8 +279,8 @@ def test_normalize_issues_gets_each_input_as_its_option_and_the_output_as_an_abs
     assert cli.runs == [
         [
             *CLI,
-            "normalize-issues",
-            "--input=doc-issues.json",
+            "normalize-docs",
+            "--input=doc-source.json",
             f"--output={Path.cwd() / 'out' / 'generator-ready.json'}",
             "--view=release",
             "--document-title=-Release notes",
@@ -264,23 +288,25 @@ def test_normalize_issues_gets_each_input_as_its_option_and_the_output_as_an_abs
     ]
 
 
-def test_an_optional_input_left_empty_is_not_passed_so_the_cli_default_applies(cli, monkeypatch):
+def test_an_optional_input_left_empty_is_not_passed_so_the_cli_default_applies(cli, available, monkeypatch):
     # Arrange
-    _set_inputs(monkeypatch, command="normalize-issues", input="doc-issues.json", output="generator-ready.json")
+    _set_inputs(monkeypatch, command="normalize-docs", input="doc-source.json", output="generator-ready.json")
 
     # Act
     run()
 
     # Assert
     assert cli.runs == [
-        [*CLI, "normalize-issues", "--input=doc-issues.json", f"--output={Path.cwd() / 'generator-ready.json'}"]
+        [*CLI, "normalize-docs", "--input=doc-source.json", f"--output={Path.cwd() / 'generator-ready.json'}"]
     ]
 
 
 @pytest.mark.parametrize("value", ["true", "TRUE", " True "])
-def test_verbose_logging_true_passes_verbose_and_logs_the_command_line_at_debug(cli, monkeypatch, capsys, value):
+def test_verbose_logging_true_passes_verbose_and_logs_the_command_line_at_debug(
+    cli, available, monkeypatch, capsys, value
+):
     # Arrange
-    _set_inputs(monkeypatch, command="normalize-issues", input="in.json", output="out.json", verbose_logging=value)
+    _set_inputs(monkeypatch, command="normalize-docs", input="in.json", output="out.json", verbose_logging=value)
 
     # Act
     run()
@@ -294,9 +320,9 @@ def test_verbose_logging_true_passes_verbose_and_logs_the_command_line_at_debug(
 
 
 @pytest.mark.parametrize("value", ["false", "", "yes"])
-def test_verbose_logging_off_passes_no_verbose_and_logs_no_debug_line(cli, monkeypatch, capsys, value):
+def test_verbose_logging_off_passes_no_verbose_and_logs_no_debug_line(cli, available, monkeypatch, capsys, value):
     # Arrange
-    _set_inputs(monkeypatch, command="normalize-issues", input="in.json", output="out.json", verbose_logging=value)
+    _set_inputs(monkeypatch, command="normalize-docs", input="in.json", output="out.json", verbose_logging=value)
 
     # Act
     run()
@@ -306,9 +332,9 @@ def test_verbose_logging_off_passes_no_verbose_and_logs_no_debug_line(cli, monke
     assert not [line for line in capsys.readouterr().err.splitlines() if line.startswith("[DEBUG]")]
 
 
-def test_a_successful_run_sets_the_output_path_to_the_absolute_output(cli, monkeypatch, tmp_path):
+def test_a_successful_run_sets_the_output_path_to_the_absolute_output(cli, available, monkeypatch, tmp_path):
     # Arrange
-    _set_inputs(monkeypatch, command="normalize-issues", input="in.json", output="out/generator-ready.json")
+    _set_inputs(monkeypatch, command="normalize-docs", input="in.json", output="out/generator-ready.json")
     monkeypatch.setenv("GITHUB_OUTPUT", os.fspath(tmp_path / "github-output"))
 
     # Act
@@ -320,9 +346,22 @@ def test_a_successful_run_sets_the_output_path_to_the_absolute_output(cli, monke
     )
 
 
-def test_a_failed_command_ends_the_run_with_its_exit_code_and_sets_no_output(cli, monkeypatch, capsys, tmp_path):
+def test_a_run_outside_github_actions_sets_no_output_and_says_so(cli, available, monkeypatch, capsys):
     # Arrange
-    _set_inputs(monkeypatch, command="normalize-issues", input="in.json", output="out.json")
+    _set_inputs(monkeypatch, command="normalize-docs", input="in.json", output="out.json")
+
+    # Act
+    run()
+
+    # Assert
+    assert "[INFO] Living Documentation Toolkit action - no `GITHUB_OUTPUT`" in capsys.readouterr().err
+
+
+def test_a_failed_command_ends_the_run_with_its_exit_code_and_sets_no_output(
+    cli, available, monkeypatch, capsys, tmp_path
+):
+    # Arrange
+    _set_inputs(monkeypatch, command="normalize-docs", input="in.json", output="out.json")
     monkeypatch.setenv("GITHUB_OUTPUT", os.fspath(tmp_path / "github-output"))
     cli.returncode = 3
 
@@ -335,9 +374,9 @@ def test_a_failed_command_ends_the_run_with_its_exit_code_and_sets_no_output(cli
     assert not (tmp_path / "github-output").exists()
 
 
-def test_an_output_file_that_cannot_be_written_fails_with_one_line(cli, monkeypatch, capsys, tmp_path):
+def test_an_output_file_that_cannot_be_written_fails_with_one_line(cli, available, monkeypatch, capsys, tmp_path):
     # Arrange: a directory where the output file should be.
-    _set_inputs(monkeypatch, command="normalize-issues", input="in.json", output="out.json")
+    _set_inputs(monkeypatch, command="normalize-docs", input="in.json", output="out.json")
     (tmp_path / "github-output").mkdir()
     monkeypatch.setenv("GITHUB_OUTPUT", os.fspath(tmp_path / "github-output"))
 
@@ -367,64 +406,15 @@ def _run_entry_point(tmp_path: Path, inputs: dict[str, str]) -> subprocess.Compl
     )
 
 
-def test_the_entry_point_runs_normalize_issues_over_the_fixture_and_sets_the_output(tmp_path):
+def test_the_entry_point_stops_a_command_over_the_fixture_with_the_not_available_line(tmp_path):
     # Act
     result = _run_entry_point(
-        tmp_path,
-        {
-            "command": "normalize-issues",
-            "input": os.fspath(DOC_ISSUES),
-            "output": "out/generator-ready.json",
-            "view": "release",
-            "document-title": "Release notes",
-        },
+        tmp_path, {"command": "normalize-docs", "input": os.fspath(DOC_SOURCE), "output": "generator-ready.json"}
     )
 
     # Assert
-    assert result.returncode == 0, result.stderr
-    written = tmp_path / "out" / "generator-ready.json"
-    meta = json.loads(written.read_text(encoding="utf-8"))["meta"]
-    assert (meta["document_title"], meta["view"]["view"]) == ("Release notes", "release")
-    assert (tmp_path / "github-output").read_text(encoding="utf-8") == f"output-path={written}\n"
-    assert "[DEBUG]" not in result.stderr
-
-
-def test_the_entry_point_runs_coverage_matrix_over_the_fixtures_and_sets_the_output(tmp_path):
-    # Act: the fixtures' coverage is 75 %.
-    result = _run_entry_point(
-        tmp_path,
-        {
-            "command": "coverage-matrix",
-            "input": os.fspath(GOLDEN / "doc_source.json"),
-            "tests-input": os.fspath(GOLDEN / "ui_tests.json"),
-            "output": "coverage-matrix.json",
-            "fail-under": "75",
-        },
-    )
-
-    # Assert
-    assert result.returncode == 0, result.stderr
-    written = tmp_path / "coverage-matrix.json"
-    assert json.loads(written.read_text(encoding="utf-8"))["summary"]["coverage_pct"] == 75.0
-    assert (tmp_path / "github-output").read_text(encoding="utf-8") == f"output-path={written}\n"
-
-
-def test_the_entry_point_fails_a_coverage_below_fail_under_and_sets_no_output(tmp_path):
-    # Act
-    result = _run_entry_point(
-        tmp_path,
-        {
-            "command": "coverage-matrix",
-            "input": os.fspath(GOLDEN / "doc_source.json"),
-            "tests-input": os.fspath(GOLDEN / "ui_tests.json"),
-            "output": "coverage-matrix.json",
-            "fail-under": "80",
-        },
-    )
-
-    # Assert
-    assert result.returncode == 1
-    assert "Error: Coverage 75.0% is below threshold 80.0%" in result.stderr
+    assert result.returncode == 1, result.stderr
+    assert _errors(result.stderr) == ["[ERROR] Command `normalize-docs` is not available yet; no command runs yet."]
     assert not (tmp_path / "github-output").exists()
 
 
@@ -432,23 +422,21 @@ def test_a_module_in_the_callers_working_directory_does_not_shadow_the_clis(tmp_
     # Arrange: the run step runs in the caller's checkout, which may hold a module named like one the CLI imports.
     (tmp_path / "click.py").write_text("import sys\nsys.exit(42)\n", encoding="utf-8")
 
+    def cli_help(*flags: str) -> subprocess.CompletedProcess:
+        return subprocess.run(
+            [sys.executable, *flags, "-m", "living_doc_cli.main", "--help"],
+            capture_output=True,
+            check=False,
+            cwd=tmp_path,
+            text=True,
+        )
+
     # Act
-    result = _run_entry_point(
-        tmp_path, {"command": "normalize-issues", "input": os.fspath(DOC_ISSUES), "output": "generator-ready.json"}
-    )
+    isolated = cli_help("-I")
+    shadowed = cli_help()
 
-    # Assert
-    assert result.returncode == 0, result.stderr
-    assert (tmp_path / "generator-ready.json").is_file()
-
-
-def test_the_entry_point_passes_a_failed_commands_exit_code_through(tmp_path):
-    # Act
-    result = _run_entry_point(
-        tmp_path, {"command": "normalize-issues", "input": "missing.json", "output": "generator-ready.json"}
-    )
-
-    # Assert: 4 is the CLI's exit code for a `NormalizationError`, which a missing input file raises today.
-    assert result.returncode == 4, result.stderr
-    assert "Error: " in result.stderr
-    assert not (tmp_path / "github-output").exists()
+    # Assert: `-I`, as the entry point runs the CLI, keeps the working directory off `sys.path`; without it the
+    # `click.py` there is what the CLI imports.
+    assert isolated.returncode == 0, isolated.stderr
+    assert "Living Documentation Toolkit CLI" in isolated.stdout
+    assert shadowed.returncode == 42

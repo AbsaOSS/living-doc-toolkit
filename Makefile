@@ -4,13 +4,15 @@
 # Canonical targets (see living-doc/docs/specs/repo-conventions.md §7 "Command
 # vocabulary"):  qa · lint · format · format-check · types · test · coverage
 #
-#   make qa                 Run format-check -> lint -> types -> test on every package, then the root checks
+#   make qa                 Run format-check -> lint -> types -> deptry -> test on every package, then the root
+#                           checks, then no-vendored-schemas
 #   make qa-<alias>         Same, for one package
 #   make qa-root            The root checks: main.py and tests/
-#   make lint-<alias>       One gate, one package  (also: format, format-check, types, test, coverage)
-#   make <gate>             One gate, every package and the root
+#   make lint-<alias>       One gate, one package  (also: format, format-check, types, deptry, test, coverage)
+#   make <gate>             One gate, every package and the root (deptry: every package)
+#   make no-vendored-schemas  R12 check 1 over the whole repository
 #
-# Package aliases:  core · datasets-generator-ready · collector-gh · normalize · coverage · cli
+# Package aliases:  core · cli
 #
 # The pre-Phase-0 names (py-qa, black, pylint, mypy, pytest-unit and their
 # per-package forms) still work as deprecated aliases for one release — each
@@ -18,14 +20,10 @@
 # ============================================================================
 
 # --- Package map -----------------------------------------------------------
-ALIASES := core datasets-generator-ready collector-gh normalize coverage cli
+ALIASES := core cli
 
-dir-core                     := packages/core
-dir-datasets-generator-ready := packages/datasets_generator_ready
-dir-collector-gh             := packages/adapters/collector_gh
-dir-normalize                := packages/services/normalize_issues
-dir-coverage                 := packages/services/coverage_matrix
-dir-cli                      := apps/cli
+dir-core := packages/core
+dir-cli  := apps/cli
 
 # --- Root: the action's entry point and its tests ----------------------------
 ROOT_SRC := main.py
@@ -46,10 +44,12 @@ DEPRECATED := py-qa black pylint mypy pytest-unit
 # Concrete target lists (static pattern rules — GNU Make 3.81 compatible)
 QA_TARGETS      := $(addprefix qa-,$(ALIASES))
 GATE_TARGETS    := $(foreach g,$(GATES),$(addprefix $(g)-,$(ALIASES)))
+DEPTRY_TARGETS  := $(addprefix deptry-,$(ALIASES))
 DEPREC_TARGETS  := $(DEPRECATED) $(foreach g,$(DEPRECATED),$(addprefix $(g)-,$(ALIASES)))
 ROOT_TARGETS    := qa-root $(addsuffix -root,$(GATES))
 
-.PHONY: help install qa integration $(GATES) $(QA_TARGETS) $(GATE_TARGETS) $(DEPREC_TARGETS) $(ROOT_TARGETS)
+.PHONY: help install qa deptry no-vendored-schemas $(GATES) $(QA_TARGETS) $(GATE_TARGETS) $(DEPTRY_TARGETS) \
+	$(DEPREC_TARGETS) $(ROOT_TARGETS)
 
 # ============================================================================
 # Help / install
@@ -60,18 +60,22 @@ help: ## Show this help message
 	@echo ""
 	@echo "$(YELLOW)Setup:$(NC)"
 	@echo "  make install                 Install requirements-dev.txt, then every package editable with [dev]"
-	@echo "  make integration             Golden-file + compatibility verification"
 	@echo ""
 	@echo "$(YELLOW)Every package:$(NC)"
-	@echo "  make qa                      format-check -> lint -> types -> test, all packages, then qa-root"
-	@echo "  make lint | format | format-check | types | test | coverage"
+	@echo "  make qa                      format-check -> lint -> types -> deptry -> test, all packages, then qa-root"
+	@echo "                               and no-vendored-schemas"
+	@echo "  make lint | format | format-check | types | deptry | test | coverage"
 	@echo ""
 	@echo "$(YELLOW)Root (main.py, tests/):$(NC)"
 	@echo "  make qa-root                 All gates for the root"
 	@echo ""
-	@echo "$(YELLOW)One package (alias: core datasets-generator-ready collector-gh normalize coverage cli):$(NC)"
+	@echo "$(YELLOW)Whole repository:$(NC)"
+	@echo "  make no-vendored-schemas     Fail on a committed contract schema file (R12 check 1)"
+	@echo ""
+	@echo "$(YELLOW)One package (alias: core cli):$(NC)"
 	@echo "  make qa-<alias>              All gates for one package"
-	@echo "  make lint-<alias> | format-<alias> | format-check-<alias> | types-<alias> | test-<alias> | coverage-<alias>"
+	@echo "  make lint-<alias> | format-<alias> | format-check-<alias> | types-<alias> | deptry-<alias> | test-<alias>"
+	@echo "  make coverage-<alias>"
 	@echo ""
 	@echo "$(YELLOW)Thresholds (match CI):$(NC) Pylint >= $(MIN_PYLINT_SCORE) · Black line length 120 · mypy clean · coverage >= $(MIN_COVERAGE)%"
 
@@ -79,25 +83,14 @@ install: ## Install requirements-dev.txt, then every package editable with [dev]
 	@echo "$(YELLOW)Installing requirements-dev.txt, then the packages editable in dependency order...$(NC)"
 	$(PYTHON) -m pip install -r requirements-dev.txt
 	$(PYTHON) -m pip install -e packages/core[dev]
-	$(PYTHON) -m pip install -e packages/datasets_generator_ready[dev]
-	$(PYTHON) -m pip install -e packages/adapters/collector_gh[dev]
-	$(PYTHON) -m pip install -e packages/services/normalize_issues[dev]
-	$(PYTHON) -m pip install -e packages/services/coverage_matrix[dev]
 	$(PYTHON) -m pip install -e "apps/cli[dev]"
 	@echo "$(GREEN)✓ All packages installed$(NC)"
-
-integration: ## Golden-file + cross-version compatibility verification (same as integration.yml)
-	@echo "$(YELLOW)→ Golden-file verification$(NC)"
-	$(PYTHON) verifications/verify_golden.py
-	@echo "$(YELLOW)→ Compatibility verification$(NC)"
-	$(PYTHON) verifications/verify_compatibility.py
-	@echo "$(GREEN)✓ Integration verification passed$(NC)"
 
 # ============================================================================
 # Canonical aggregate targets — one gate across every package
 # ============================================================================
 
-qa: $(QA_TARGETS) qa-root ## format-check -> lint -> types -> test, every package, then the root checks
+qa: $(QA_TARGETS) qa-root no-vendored-schemas ## every package's gates, then the root checks, then R12 check 1
 	@echo "$(GREEN)✓ QA passed for all packages and the root$(NC)"
 
 lint: $(addprefix lint-,$(ALIASES)) lint-root ## Ruff + Pylint (score >= 9.5), every package
@@ -112,6 +105,9 @@ format-check: $(addprefix format-check-,$(ALIASES)) format-check-root ## Black -
 types: $(addprefix types-,$(ALIASES)) types-root ## mypy, every package
 	@echo "$(GREEN)✓ mypy passed for all packages$(NC)"
 
+deptry: $(DEPTRY_TARGETS) ## deptry, every package: no undeclared or unused dependency
+	@echo "$(GREEN)✓ deptry passed for all packages$(NC)"
+
 test: $(addprefix test-,$(ALIASES)) test-root ## pytest, every package
 	@echo "$(GREEN)✓ Unit tests passed for all packages$(NC)"
 
@@ -122,7 +118,7 @@ coverage: $(addprefix coverage-,$(ALIASES)) coverage-root ## pytest with coverag
 # Canonical per-package targets — <gate>-<alias> (static pattern rules)
 # ============================================================================
 
-$(QA_TARGETS): qa-%: format-check-% lint-% types-% test-%
+$(QA_TARGETS): qa-%: format-check-% lint-% types-% deptry-% test-%
 	@echo "$(GREEN)✓ QA passed for $* ($(dir-$*))$(NC)"
 
 $(addprefix lint-,$(ALIASES)): lint-%:
@@ -143,6 +139,11 @@ $(addprefix types-,$(ALIASES)): types-%:
 	@echo "$(YELLOW)→ mypy: $* ($(dir-$*))$(NC)"
 	cd $(dir-$*) && $(PYTHON) -m mypy .
 
+# Each import is a declared dependency of its package, and each declared dependency is imported ([tool.deptry]).
+$(DEPTRY_TARGETS): deptry-%:
+	@echo "$(YELLOW)→ deptry: $* ($(dir-$*))$(NC)"
+	cd $(dir-$*) && $(PYTHON) -m deptry .
+
 $(addprefix test-,$(ALIASES)): test-%:
 	@echo "$(YELLOW)→ Tests: $* ($(dir-$*))$(NC)"
 	cd $(dir-$*) && $(PYTHON) -m pytest tests/
@@ -150,6 +151,15 @@ $(addprefix test-,$(ALIASES)): test-%:
 $(addprefix coverage-,$(ALIASES)): coverage-%:
 	@echo "$(YELLOW)→ Coverage: $* ($(dir-$*), >= $(MIN_COVERAGE)%)$(NC)"
 	cd $(dir-$*) && $(PYTHON) -m pytest tests/ --cov=src --cov-fail-under=$(MIN_COVERAGE)
+
+# ============================================================================
+# Whole repository — R12 check 1 (living-doc-utilities docs/contracts/component-checks.md)
+# ============================================================================
+
+# The contract schemas come from the installed living-doc-utilities; no copy of one is committed here.
+no-vendored-schemas: ## Fail on any committed *-schema.json / *.schema.json outside a tests/ directory
+	@echo "$(YELLOW)→ No vendored schemas (R12 check 1)$(NC)"
+	$(PYTHON) -m living_doc_utilities.contracts.check_no_vendored_schemas
 
 # ============================================================================
 # Root targets — main.py and tests/, run from the repository root

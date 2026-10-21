@@ -94,14 +94,14 @@ Repo specifics
 - Review modes
   - Prefer following the repo’s review rubric in `.github/copilot-review-rules.md` (Blocker/Important/Nit, Default vs Double-check).
 - Acceptance-criteria verification — toolkit examples
-  - Criterion "deprecated ACs are excluded from `coverage_pct`" → open `coverage_matrix/summary.py`, confirm the percentage computation filters on `state == "Active"` (or equivalent) before dividing, and that deprecated ACs still appear in the matrix rows.
-  - Criterion "an out-of-range producer version still processes, with a warning" → confirm `compatibility.py` returns a `VERSION_MISMATCH` warning (not a raise) and that `service.py` appends it to `audit.trace[].warnings[]` and continues to parse.
-  - Criterion "`requires-python` is `>=3.10` in every package" → open each of the six `pyproject.toml` files plus the root and read the literal `requires-python` / `[tool.black] target-version` / `[tool.mypy] python_version` values; a green build on one interpreter is not the check.
+  - Criterion "only the first failing step's code is reported" → open `living_doc_core/input_validation.py`, confirm `validate_inputs` raises after each step that found a problem, before the next step runs, and that each step collects every occurrence before it raises.
+  - Criterion "an unfamiliar producer version passes without a warning" → confirm nothing in `living_doc_core` reads `metadata.producer.version` and that the validation logs and warns nothing.
+  - Criterion "`requires-python` is `>=3.10` in every package" → open each package's `pyproject.toml` plus the root and read the literal `requires-python` / `[tool.black] target-version` / `[tool.mypy] python_version` values; a green build on one interpreter is not the check.
 - Contract-sensitive outputs
-  - CLI argument names and defaults; exit codes (`normalize-issues` `0`–`5`, `coverage-matrix` `0`/`1`); error-message prefixes.
-  - `schema_version` values; `generator-ready.json` / `coverage-matrix.json` structure; `AdapterResult` signature; audit-envelope shape.
+  - CLI argument names and defaults; the action's inputs and `output-path` output; `main.py`'s error lines.
+  - The shared input validation's codes and order, which are `living-doc-utilities`' (`docs/contracts/errors.md`); no local contract model or committed schema.
 - High-risk areas
-  - Adapter detection and version-compatibility (`packages/adapters/collector_gh/detector.py`, `compatibility.py`, `parser.py`).
-  - Markdown normalization (`normalize_issues/normalizer.py`), coverage maths (`coverage_matrix/matcher.py`, `summary.py`), JSON Schema validation.
-  - Package dependency rules — no service imported from `core`, no adapter imported from another adapter.
+  - The shared input validation (`packages/core/src/living_doc_core/input_validation.py`) and the reader table (`readers.py`).
+  - The action's input checks and their order (`main.py`).
+  - Package dependency rules — no `apps/cli` import from `core`; every import declared (`make deptry`).
   - Logging — avoid leaking tokens/PII; keep the pipeline AI-free and offline.

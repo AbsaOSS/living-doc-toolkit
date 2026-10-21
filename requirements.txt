@@ -1,8 +1,4 @@
-# Runtime only: the six packages, each after the ones it depends on; install from the repository root.
+# Runtime only: the two packages, each after the ones it depends on; install from the repository root.
 # Development tools go in `requirements-dev.txt`.
 ./packages/core
-./packages/datasets_generator_ready
-./packages/adapters/collector_gh
-./packages/services/normalize_issues
-./packages/services/coverage_matrix
 ./apps/cli
