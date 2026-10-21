@@ -2,7 +2,7 @@ name: 'Living Documentation Toolkit'
 description: 'Run one Living Documentation Toolkit command over its input files and write the file it produces.'
 inputs:
   command:
-    description: 'Command to run: `normalize-docs`, `normalize-tests` or `coverage-matrix`. None of them runs yet.'
+    description: 'Command to run: `normalize-docs`, `normalize-tests` or `coverage-matrix`. Only `normalize-docs` runs yet.'
     required: true
   input:
     description: 'Every command: path to the input JSON file; the documentation file for `normalize-docs` and `coverage-matrix`, the tests file for `normalize-tests`.'

@@ -1,6 +1,6 @@
 # Living Documentation Core
 
-The package every toolkit command shares: logging, the reader table and the shared input validation.
+The package every toolkit command shares: logging, the reader table, the shared input validation and the view filter.
 
 ## Overview
 
@@ -9,10 +9,13 @@ The package every toolkit command shares: logging, the reader table and the shar
 | `living_doc_core.logging_config` | `setup_logging(verbose)`: the `living_doc` logger, `[LEVEL] message` on stderr |
 | `living_doc_core.readers` | The reader table, `READERS`, and the readers `read_documentation` and `read_tests` |
 | `living_doc_core.input_validation` | `validate_inputs(command, inputs)`, which runs the shared input validation over one command's inputs |
+| `living_doc_core.views` | `select_records(entities, view)`, the view filter |
 
 - It depends on `living-doc-utilities==0.7.0` and nothing else; the contract models and schemas are that package's.
-- `living_doc_core` itself exports only `setup_logging`; `readers` and `input_validation` load the contract models, so
-  they are imported by name.
+- `living_doc_core` itself exports only `setup_logging` and `__version__`; `readers`, `input_validation` and `views`
+  load the contract models, so they are imported by name.
+- Its version is the toolkit's one version, which every package declares. `metadata.producer.version` of a file the
+  toolkit writes reads it from the installed `living-doc-core`.
 
 ## The reader table
 
@@ -65,6 +68,23 @@ The steps and codes are `living-doc-utilities`' [errors](https://github.com/Absa
 page, § Shared input validation order; the one-documentation-file rule is its
 [pipeline rules](https://github.com/AbsaOSS/living-doc-utilities/blob/master/docs/contracts/pipeline-rules.md) page,
 § One project, one pipeline, one documentation source.
+
+## The view filter
+
+`select_records(entities, view)` is the one view filter: a transform runs it to pick the records a view holds. It
+returns the kept entities and the contract's own `SelectionSummary`.
+
+- `inner` keeps every record.
+- `release` drops `planned` and `in_review` entities and, of the entities it keeps, `planned` and `in_review`
+  acceptance criteria; it keeps `deprecated` ones. A Feature is dropped by its derived state.
+- It selects records only and never edits a field: a kept entity is the input's own, or a copy without its dropped
+  criteria.
+- The acceptance-criteria counts cover kept entities only; a dropped entity's criteria are not counted.
+- A view other than `inner` or `release` is a `ValueError`.
+
+The rule is `living-doc-utilities`' [rendering](https://github.com/AbsaOSS/living-doc-utilities/blob/master/docs/contracts/rendering.md)
+page, § Records and presentation; how a generator shows each view is `living-doc`'s
+[document types](https://github.com/AbsaOSS/living-doc/blob/master/docs/guides/living-doc-document-types.md) guide.
 
 ## Installation
 

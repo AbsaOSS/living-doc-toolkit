@@ -65,6 +65,27 @@ updates:
           - "*"
 
   - package-ecosystem: "pip"
+    directory: "/packages/services/normalize_docs"
+    target-branch: "master"
+    schedule:
+      interval: "weekly"
+      day: "sunday"
+    labels:
+      - "auto update"
+      - "infrastructure"
+      - "no RN"
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    allow:
+      - dependency-type: "direct"
+    groups:
+      pip-normalize-docs:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "pip"
     directory: "/apps/cli"
     target-branch: "master"
     schedule:

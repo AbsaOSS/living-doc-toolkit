@@ -47,7 +47,7 @@ Task-list source (optional override): `$2`
 ## 4. Run the `make qa` loop until green
 
 - Run `make qa` for a full-repo change, or `make qa-<alias>` for the package you touched
-  (`<alias>` ∈ `core`, `cli`) — the same targets CI runs.
+  (`<alias>` ∈ `core`, `normalize-docs`, `cli`) — the same targets CI runs.
 - Fix every failure and re-run. Repeat until QA exits clean per package:
   Pylint ≥ 9.5, Black clean, mypy clean, deptry clean, `pytest --cov-fail-under=80` passing,
   and `make no-vendored-schemas` clean.

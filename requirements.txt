@@ -1,4 +1,5 @@
-# Runtime only: the two packages, each after the ones it depends on; install from the repository root.
+# Runtime only: the three packages, each after the ones it depends on; install from the repository root.
 # Development tools go in `requirements-dev.txt`.
 ./packages/core
+./packages/services/normalize_docs
 ./apps/cli

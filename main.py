@@ -57,8 +57,8 @@ COMMAND_INPUTS: dict[str, dict[str, tuple[str, bool]]] = {
         FAIL_UNDER: ("--fail-under", False),
     },
 }
-# Declared by `action.yml`, run by no CLI yet: checked like the others, then refused.
-NOT_AVAILABLE_YET = ("normalize-docs", "normalize-tests", "coverage-matrix")
+# Declared by `action.yml`, not registered by the CLI yet: checked like the others, then refused.
+NOT_AVAILABLE_YET = ("normalize-tests", "coverage-matrix")
 
 VALID_COMMANDS = ", ".join(COMMAND_INPUTS)
 # Every input a command can take, in `action.yml` order.
@@ -146,9 +146,9 @@ def build_command_line(verbose: bool) -> tuple[list[str], str]:
     if fail_under and not _is_number(fail_under):
         raise ActionInputError(f"Input `{FAIL_UNDER}` is {fail_under!r}, not a number.")
 
-    # Last, so a wrong input is reported while no command runs.
+    # Last, so a wrong input is reported for a command not available yet too.
     if command in NOT_AVAILABLE_YET:
-        raise ActionInputError(f"Command `{command}` is not available yet; no command runs yet.")
+        raise ActionInputError(f"Command `{command}` is not available yet.")
 
     arguments = [command]
     for name, (option, _) in taken.items():

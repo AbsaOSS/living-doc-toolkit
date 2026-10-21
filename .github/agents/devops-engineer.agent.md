@@ -87,7 +87,7 @@ Repo specifics
   - Python 3.10+ (supported floor); the CI matrix runs `3.10` through `3.14`.
 - Quality gates (use the `Makefile` targets — `.github/workflows/test.yml` and `integration.yml` run the same)
   - Full gate, all packages: `make qa`
-  - Per package: `make qa-<alias>` (`<alias>` ∈ `core`, `cli`)
+  - Per package: `make qa-<alias>` (`<alias>` ∈ `core`, `normalize-docs`, `cli`)
   - Individual: `make lint-<alias>` (Pylint ≥ 9.5), `make format-check-<alias>` (Black, line length 120), `make types-<alias>` (mypy), `make deptry-<alias>` (deptry), `make test-<alias>`, `make coverage-<alias>` (`--cov-fail-under=80`)
   - Whole repository: `make no-vendored-schemas` (R12 check 1, in `make qa`)
   - Must keep the per-package invocation (each gate runs from inside the package directory) — do not flatten it to a repo-root command.
@@ -95,7 +95,7 @@ Repo specifics
   - `test.yml` (per-package QA), `integration.yml` (the action's venv jobs, run through `uses: ./`), `release_draft.yml`, `check_pr_release_notes.yml`, `dependabot.yml` (auto-merge).
   - Must pin every `uses:` to a full commit SHA with a trailing `# vX.Y.Z` comment, and Must keep one SHA per action across all workflow files.
 - Dependencies
-  - Editable install order matters — `core` → `apps/cli`; `make install` and the CI install step follow it.
+  - Editable install order matters — `core` → `packages/services/normalize_docs` → `apps/cli`; `make install` and the CI install step follow it.
   - Runtime dependencies are declared in each package's `pyproject.toml`; the root `requirements.txt` lists the package directories, which the action installs, and `requirements-dev.txt` adds the pinned development tools.
 - Contract-sensitive outputs
   - CLI exit codes and error-message prefixes; the per-package `--cov-fail-under=80` gate.
