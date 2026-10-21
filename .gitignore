@@ -207,14 +207,14 @@ marimo/_lsp/
 __marimo__/
 
 # Living Doc Toolkit specific
+# A local run's artifacts at the repository root; anchored, so the fixtures under tests/fixtures/ stay tracked.
 outputs/
 .DS_Store
-doc-issues.json
-generator-ready.json
-pdf_ready.json
-ui-tests.json
-doc-source.json
-coverage-matrix.json
+/generator-ready.json
+/pdf_ready.json
+/ui-tests.json
+/doc-source.json
+/coverage-matrix.json
 
 # SPEC.md is a tracked process document (prospective-spec process for new
 # services / adapters — see the file). The pre-Phase-0 implementation spec was

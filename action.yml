@@ -2,20 +2,20 @@ name: 'Living Documentation Toolkit'
 description: 'Run one Living Documentation Toolkit command over its input files and write the file it produces.'
 inputs:
   command:
-    description: 'Command to run: `normalize-issues`, `normalize-tests` or `coverage-matrix`.'
+    description: 'Command to run: `normalize-docs`, `normalize-tests` or `coverage-matrix`. None of them runs yet.'
     required: true
   input:
-    description: 'Path to the input JSON file; for `coverage-matrix`, the documentation file.'
+    description: 'Every command: path to the input JSON file; the documentation file for `normalize-docs` and `coverage-matrix`, the tests file for `normalize-tests`.'
     required: true
   output:
-    description: 'Path of the JSON file the command writes.'
+    description: 'Every command: path of the JSON file the command writes.'
     required: true
   view:
-    description: '`normalize-issues` only: `inner` (the CLI default) or `release`.'
+    description: '`normalize-docs` and `coverage-matrix`: `inner` (the CLI default) or `release`.'
     required: false
     default: ''
   document-title:
-    description: '`normalize-issues` only: the document title, overriding the one the input implies.'
+    description: '`normalize-docs` only: the document title, overriding the one the input implies.'
     required: false
     default: ''
   tests-input:
@@ -27,7 +27,7 @@ inputs:
     required: false
     default: ''
   verbose-logging:
-    description: 'Enable or disable verbose logging.'
+    description: 'Every command: enable or disable verbose logging.'
     required: false
     default: 'false'
 

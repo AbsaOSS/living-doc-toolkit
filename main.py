@@ -39,30 +39,37 @@ OUTPUT_PATH = "output-path"
 # Per command, the inputs it takes, in `action.yml` order, each with the CLI option it becomes and whether the
 # command requires it. `verbose-logging` is taken by every command and becomes `--verbose`.
 COMMAND_INPUTS: dict[str, dict[str, tuple[str, bool]]] = {
-    "normalize-issues": {
+    "normalize-docs": {
         "input": ("--input", True),
         OUTPUT: ("--output", True),
         "view": ("--view", False),
         "document-title": ("--document-title", False),
     },
+    "normalize-tests": {
+        "input": ("--input", True),
+        OUTPUT: ("--output", True),
+    },
     "coverage-matrix": {
         "input": ("--doc-input", True),
         OUTPUT: ("--output", True),
+        "view": ("--view", False),
         "tests-input": ("--tests-input", True),
         FAIL_UNDER: ("--fail-under", False),
     },
 }
-# Declared by `action.yml`, run by no CLI yet.
-NOT_AVAILABLE_YET = ("normalize-tests",)
+# Declared by `action.yml`, run by no CLI yet: checked like the others, then refused.
+NOT_AVAILABLE_YET = ("normalize-docs", "normalize-tests", "coverage-matrix")
 
-VALID_COMMANDS = ", ".join(("normalize-issues", "normalize-tests", "coverage-matrix"))
-AVAILABLE_COMMANDS = ", ".join(COMMAND_INPUTS)
+VALID_COMMANDS = ", ".join(COMMAND_INPUTS)
 # Every input a command can take, in `action.yml` order.
 COMMAND_INPUT_NAMES = list(dict.fromkeys(name for inputs in COMMAND_INPUTS.values() for name in inputs))
 
 
 class ActionInputError(Exception):
-    """A missing, invalid or untaken input; the message is the one line the run fails with, naming the input."""
+    """
+    A missing, invalid or untaken input, or a command not available yet; the message is the one line the run fails
+    with, naming the input or the command.
+    """
 
 
 def get_input(name: str) -> str:
@@ -79,16 +86,12 @@ def _command() -> str:
     """
     Read and validate `command`.
 
-    @return: A command the CLI runs.
-    @raise ActionInputError: `command` is empty, unknown or not available yet.
+    @return: A command `action.yml` declares.
+    @raise ActionInputError: `command` is empty or unknown.
     """
     command = get_input(COMMAND)
     if not command:
         raise ActionInputError(f"Input `{COMMAND}` is required; valid commands: {VALID_COMMANDS}.")
-    if command in NOT_AVAILABLE_YET:
-        raise ActionInputError(
-            f"Command `{command}` is not available yet; the commands available now: {AVAILABLE_COMMANDS}."
-        )
     if command not in COMMAND_INPUTS:
         # `!r` keeps a value with a line break on the one line the run fails with.
         raise ActionInputError(
@@ -117,9 +120,9 @@ def build_command_line(verbose: bool) -> tuple[list[str], str]:
     @param verbose: Whether `verbose-logging` is on, which adds `--verbose`.
     @return: The arguments after `python -I -m living_doc_cli.main`, and the absolute path of the file the command
         writes.
-    @raise ActionInputError: `command` is empty, unknown or not available yet; an input the command does not take
-        is set; an input the command requires is empty; `output` holds a line break; or `fail-under` is not a
-        number.
+    @raise ActionInputError: `command` is empty or unknown; an input the command does not take is set; an input the
+        command requires is empty; `output` holds a line break; `fail-under` is not a number; or, once its inputs
+        passed, the command is not available yet.
     """
     command = _command()
     taken = COMMAND_INPUTS[command]
@@ -142,6 +145,10 @@ def build_command_line(verbose: bool) -> tuple[list[str], str]:
     fail_under = get_input(FAIL_UNDER)
     if fail_under and not _is_number(fail_under):
         raise ActionInputError(f"Input `{FAIL_UNDER}` is {fail_under!r}, not a number.")
+
+    # Last, so a wrong input is reported while no command runs.
+    if command in NOT_AVAILABLE_YET:
+        raise ActionInputError(f"Command `{command}` is not available yet; no command runs yet.")
 
     arguments = [command]
     for name, (option, _) in taken.items():

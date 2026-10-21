@@ -39,15 +39,15 @@ repo's own risk areas and review expectations; it is not shared with other repos
 
 ## Mode — Double-check review
 
-- Must treat the change as higher risk — schema or contract changes (`datasets_generator_ready` models, `coverage-matrix` dataclasses, `AdapterResult`, the audit envelope), CLI argument or exit-code changes, adapter interface changes, wide refactors, and anything touching the golden fixtures.
+- Must treat the change as higher risk — a change to the reader table or the shared input validation, a `living-doc-utilities` pin change, CLI argument, action input or exit-code changes, wide refactors, and anything touching the committed fixtures.
 
 **Additional focus**
 
 - Prefer confirming that previous review comments were addressed correctly.
-- Must re-check high-risk areas — the adapter `detector.py` / `compatibility.py` version logic, `parser.py` payload mapping, `normalizer.py` section mapping, `matcher.py` / `summary.py` coverage maths, JSON Schema validation, and the failure-to-exit-code mapping in each `service.py`.
-- Prefer looking for hidden side effects — backward compatibility of the output contract, behaviour on missing or malformed input, deprecated-AC handling, and version-mismatch warning paths.
-- Prefer validating safe defaults — `--source auto` detection, safe error messages, predictable behaviour when an input file is empty or a producer version is out of range.
-- Must confirm the version impact of any contract change is stated — additive (no bump) vs breaking (major bump of the affected package) per `docs/contracts.md`.
+- Must re-check high-risk areas — the step order and the every-occurrence reporting in `living_doc_core/input_validation.py`, the reader table in `living_doc_core/readers.py`, and `main.py`'s input checks and their order.
+- Prefer looking for hidden side effects — behaviour on a missing or malformed input file, a step that stops at its first occurrence instead of listing every one, and a read that bypasses `read_artifact`.
+- Prefer validating safe defaults — safe error messages, and predictable behaviour when an input file is empty or names an unknown producer.
+- Must confirm the version impact of any contract change is stated — additive (no bump) vs breaking (major bump of the affected package), per `SPEC.md` § Cross-cutting contract changes.
 
 **Response format**
 
@@ -69,8 +69,9 @@ repo's own risk areas and review expectations; it is not shared with other repos
 
 ## Repo specifics
 
-- Must treat these as high-risk areas — the adapter version-compatibility logic (`packages/adapters/collector_gh/detector.py`, `compatibility.py`), the payload → `AdapterResult` mapping in `parser.py`, markdown section normalization in `normalize_issues/normalizer.py`, the coverage maths in `coverage_matrix/matcher.py` / `summary.py`, JSON Schema validation in `schema_validation.py` / `datasets_generator_ready`, and the exit-code mapping in each service's `service.py`.
-- Must treat these as contract-sensitive — CLI argument names and defaults, the exit-code taxonomies (`normalize-issues` `0`–`5`, `coverage-matrix` `0`/`1`), the error-message prefixes, `schema_version` values (`generator-ready` `"generator-ready-v1.0.0"` with legacy `"1.0"` still accepted on read, `coverage-matrix` `"coverage-matrix-v1.0.0"`, audit `"1.0"`), the `generator-ready.json` / `coverage-matrix.json` structure, and the `AdapterResult` signature. Tests and golden fixtures assert exact content.
+- Must treat these as high-risk areas — the shared input validation in `packages/core/src/living_doc_core/input_validation.py` (its step order, and every occurrence of a step reported), the reader table in `readers.py`, and the action's input checks in `main.py`.
+- Must treat these as contract-sensitive — CLI argument names and defaults, the action's inputs and `output-path` output, `main.py`'s error lines, and the shared input validation's codes and order (`living-doc-utilities`' `docs/contracts/errors.md`). Tests assert exact content.
 - Must expect the whole collect → normalize → generate pipeline to stay AI-free and offline — flag any LLM call or network request introduced into the runtime path.
-- Must expect unit tests in each package's `tests/` mirroring its `src/`, with golden fixtures under `tests/fixtures/golden/v*` and collector-gh compatibility fixtures under `tests/fixtures/collector_gh/v*` (discovered, never hard-coded).
-- Must expect QA to run through the per-package `Makefile` targets — `make qa` / `make qa-<alias>` cover `format-check`, `lint`, `types`, and `test`, and `.github/workflows/test.yml` calls the same targets.
+- Must expect unit tests in each package's `tests/` mirroring its `src/`, reading the one fixture copy under the repo-root `tests/fixtures/`.
+- Must flag any committed contract schema or local contract model — the contracts are `living-doc-utilities`' (`make no-vendored-schemas`).
+- Must expect QA to run through the per-package `Makefile` targets — `make qa` / `make qa-<alias>` cover `format-check`, `lint`, `types`, `deptry`, and `test`, `make qa` adds `no-vendored-schemas`, and `.github/workflows/test.yml` calls the same targets.

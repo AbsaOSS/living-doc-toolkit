@@ -98,11 +98,11 @@ Non-goals
 Repo specifics
 
 - Spec locations
-  - Prefer `SPEC.md` for prospective (not-yet-built) services, adapters, and external-contract changes; follow `.claude/rules/docs-lifecycle.md` — an implemented section moves out of `SPEC.md` into the live docs in the same PR.
-  - Prefer `docs/architecture.md` and `docs/contracts.md` for system shape and external contracts, each package's `README.md` / `docs/cookbooks/<service>.md` for service behavior, and `DEVELOPER.md` for local-dev workflow.
+  - Prefer `SPEC.md` for prospective (not-yet-built) commands, packages, and external-contract changes; follow `.claude/rules/docs-lifecycle.md` — an implemented section moves out of `SPEC.md` into the live docs in the same PR.
+  - Prefer `README.md` for the action's commands, inputs and output, each package's `README.md` for package behavior, `DEVELOPER.md` for local-dev workflow, and `living-doc-utilities`' `docs/contracts/` for the contracts themselves.
 - Contract-sensitive outputs
-  - CLI argument names and defaults; the exit-code taxonomies (`normalize-issues` `0`–`5`, `coverage-matrix` `0`/`1`) and error-message prefixes (`Invalid input:`, `Adapter error:`, `Schema validation failed:`, `Normalization failed:`, `File I/O error:`).
-  - `schema_version` values (`generator-ready` `"generator-ready-v1.0.0"` with legacy `"1.0"` still accepted on read, `coverage-matrix` `"coverage-matrix-v1.0.0"`, audit `"1.0"`); the `generator-ready.json` / `coverage-matrix.json` structure; the `AdapterResult` signature; the audit-envelope `trace[]` shape.
+  - CLI argument names and defaults; the action's inputs and `output-path` output; `main.py`'s error lines.
+  - The shared input validation's codes and order, which are `living-doc-utilities`' (`docs/contracts/errors.md`).
 - High-risk areas
-  - Adapter version-compatibility logic and payload → `AdapterResult` mapping in `packages/adapters/collector_gh`.
-  - Markdown section normalization in `normalize_issues`, coverage maths in `coverage_matrix` (deprecated-AC exclusion from `coverage_pct`), and JSON Schema validation of the output contract.
+  - The shared input validation in `living_doc_core.input_validation` — its step order, and every occurrence of the first failing step reported.
+  - The reader table in `living_doc_core.readers` — keyed by contract name, every read through `read_artifact`.

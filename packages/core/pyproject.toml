@@ -13,7 +13,7 @@ authors = [
 ]
 requires-python = ">=3.10"
 dependencies = [
-    "click>=8.1.0,<9.0.0"
+    "living-doc-utilities==0.7.0"
 ]
 
 [project.optional-dependencies]
@@ -23,7 +23,8 @@ dev = [
     "black>=24.0.0",
     "pylint>=3.3.0",
     "ruff>=0.8.0",
-    "mypy>=1.11.0"
+    "mypy>=1.11.0",
+    "deptry>=0.25.0"
 ]
 
 [tool.setuptools.packages.find]
@@ -35,14 +36,13 @@ target-version = ['py310']
 extend-exclude = '''
 ^(
     tests/
-    | verifications/
 )
 '''
 
 [tool.ruff]
 target-version = "py310"
 line-length = 120
-extend-exclude = ["tests", "verifications"]
+extend-exclude = ["tests"]
 
 [tool.ruff.lint]
 select = ["E4", "E7", "E9", "F", "I", "B"]
@@ -56,7 +56,12 @@ max-line-length = 120
 [tool.mypy]
 check_untyped_defs = true
 python_version = "3.10"
-exclude = '^(tests/|verifications/|build/)'
+exclude = '^(tests/|build/)'
+
+# `deptry .` from this directory: the [dev] extra holds only tools, which no module imports; `src/` is this package.
+[tool.deptry]
+optional_dependencies_dev_groups = ["dev"]
+known_first_party = ["living_doc_core"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

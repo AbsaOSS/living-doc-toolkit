@@ -1,6 +1,9 @@
 # living-doc-cli
 
-CLI wrapper for the Living Documentation Toolkit.
+CLI wrapper for the Living Documentation Toolkit: the `living-doc` command group.
+
+No command is registered yet. `normalize-docs`, `normalize-tests` and `coverage-matrix` are added to the group as each
+lands; until then the group offers only `--help`, `--version` and `--verbose`.
 
 ## Installation
 
@@ -11,36 +14,16 @@ pip install -e .
 ## Usage
 
 ```bash
-# Show help
+# Show help; it lists no command yet
 living-doc --help
 
 # Show version
 living-doc --version
-
-# Normalize issues
-living-doc normalize-issues --input doc-issues.json --output generator-ready.json
-
-# With options
-living-doc normalize-issues \
-  --input doc-issues.json \
-  --output generator-ready.json \
-  --source collector-gh \
-  --document-title "My Document" \
-  --document-version "1.0.0" \
-  --verbose
 ```
 
-The canonical output name is `generator-ready.json`. `pdf_ready.json` is still accepted as a
-deprecated alias and prints a notice when used.
-
-## Exit Codes
-
-- 0: Success
-- 1: Invalid input (missing file, malformed JSON)
-- 2: Adapter detection failed
-- 3: Schema validation failure (output)
-- 4: Normalization error (parsing failure)
-- 5: File I/O error (write failure)
+- `--verbose` is a group option: the group keeps it in its context object for the commands it will run.
+- A command name the group does not register yet, such as `living-doc normalize-docs`, fails with click's
+  "No such command" and exit code 2.
 
 ## Development
 

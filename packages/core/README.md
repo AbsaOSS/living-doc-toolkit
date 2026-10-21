@@ -1,15 +1,70 @@
-# Living Documentation Core Utilities
+# Living Documentation Core
 
-Core utilities package for the Living Documentation Toolkit.
+The package every toolkit command shares: logging, the reader table and the shared input validation.
 
 ## Overview
 
-This package provides reusable, service-agnostic helper utilities including:
+| Module | What it holds |
+|---|---|
+| `living_doc_core.logging_config` | `setup_logging(verbose)`: the `living_doc` logger, `[LEVEL] message` on stderr |
+| `living_doc_core.readers` | The reader table, `READERS`, and the readers `read_documentation` and `read_tests` |
+| `living_doc_core.input_validation` | `validate_inputs(command, inputs)`, which runs the shared input validation over one command's inputs |
 
-- **Error types**: Common exception hierarchy with exit codes
-- **JSON utilities**: Reading, writing, and validating JSON files
-- **Logging configuration**: Consistent logging setup across services
-- **Markdown utilities**: Parsing and normalizing markdown text
+- It depends on `living-doc-utilities==0.7.0` and nothing else; the contract models and schemas are that package's.
+- `living_doc_core` itself exports only `setup_logging`; `readers` and `input_validation` load the contract models, so
+  they are imported by name.
+
+## The reader table
+
+`READERS` maps each contract the toolkit reads, by contract name, to its role and the producers known to write it:
+
+| Contract | Role | Known producers |
+|---|---|---|
+| `doc-source` | documentation | `AbsaOSS/living-doc-collector-gh` |
+| `ui-tests` | tests | `AbsaOSS/living-doc-collector-gh` |
+
+- It is keyed by contract name, never by producer: the file's own `schema_version` says how it is read.
+- Every read goes through `read_artifact(path, expected=<the role's contract names>)`, which runs R5, and returns the
+  contract's model: `read_documentation` a `DocSourceResult`, `read_tests` a `UITestsResult`. Neither returns a
+  `dict`.
+- The issue-tracker documentation contract, `doc-entities`, joins the documentation role in a later release.
+
+## Shared input validation
+
+Each command declares the roles it takes, one input each:
+
+| Command | Documentation input | Tests input |
+|---|---|---|
+| `normalize-docs` | one | none |
+| `normalize-tests` | none | one |
+| `coverage-matrix` | one | one |
+
+`validate_inputs(command, {Role.DOCUMENTATION: [...], Role.TESTS: [...]})` runs these steps in order:
+
+1. `MISSING_INPUT`: a role the command takes with no path, or a path that names no file.
+2. R5 per input, through `read_artifact`: `INVALID_CONTRACT_ID`, `CONTRACT_MISMATCH`, `SCHEMA_VALIDATION_FAILED`.
+   A file that is not JSON fails here too, with a line that carries no code.
+3. `UNKNOWN_PRODUCER`: `metadata.producer.name` is not a known producer of the file's contract.
+4. `PROJECT_MISMATCH`: the inputs name different `metadata.source.project_id`s.
+5. `MULTIPLE_DOCUMENTATION_SOURCES`: more than one documentation file.
+6. `DUPLICATE_ENTITY_ID`, `DUPLICATE_AC_ID`: an entity id twice in the documentation, or a criterion id twice under one
+   entity.
+
+- The first failing step ends validation: `InputValidationError` carries every occurrence of that step, each an
+  `InputProblem` with its code, the input it is in and a hint, and nothing from a later step.
+  - Why: a reader never gets a cascade of errors caused by the first one, and no precedence rule picks a winner.
+- An `InputProblem` reads as `[CODE] <role> input '<path>': <what is wrong>; <hint>`.
+- Once every step passes, it returns `ValidatedInputs`: the documentation and tests as contract models, `None` for a
+  role the command does not take.
+- `metadata.producer.version` is audit information: it is never compared, and an unfamiliar one passes silently.
+- `MIXED_DOCUMENTATION_SOURCES` needs a second documentation contract, so it arrives with `doc-entities`.
+- A command it does not know, a role the command does not take, or a second tests path is a `ValueError`: a
+  command's own options rule them out.
+
+The steps and codes are `living-doc-utilities`' [errors](https://github.com/AbsaOSS/living-doc-utilities/blob/master/docs/contracts/errors.md)
+page, § Shared input validation order; the one-documentation-file rule is its
+[pipeline rules](https://github.com/AbsaOSS/living-doc-utilities/blob/master/docs/contracts/pipeline-rules.md) page,
+§ One project, one pipeline, one documentation source.
 
 ## Installation
 
@@ -20,19 +75,16 @@ pip install -e packages/core
 ## Usage
 
 ```python
-from living_doc_core import read_json, write_json, setup_logging
-from living_doc_core import split_by_headings, normalize_heading
-from living_doc_core.errors import FileIOError, InvalidInputError
+from living_doc_core import setup_logging
+from living_doc_core.input_validation import InputValidationError, validate_inputs
+from living_doc_core.readers import Role
 
-# Set up logging
-logger = setup_logging(verbose=True)
-
-# Read and write JSON
-data = read_json("input.json")
-write_json("output.json", data)
-
-# Parse markdown
-sections = split_by_headings(markdown_text, level=2)
+logger = setup_logging(verbose=False)
+try:
+    inputs = validate_inputs("coverage-matrix", {Role.DOCUMENTATION: ["doc-source.json"], Role.TESTS: ["ui-tests.json"]})
+except InputValidationError as error:
+    for problem in error.problems:
+        logger.error("%s", problem)
 ```
 
 ## License

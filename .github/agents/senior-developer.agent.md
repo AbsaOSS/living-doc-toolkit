@@ -92,7 +92,7 @@ Repo specifics
   - Python 3.10+ (supported floor set by `requires-python = ">=3.10"`); the CI matrix runs `3.10` through `3.14`.
   - Must keep `X | Y` unions and other 3.10-native syntax; Must guard any 3.11+ standard-library use behind a `sys.version_info` fallback.
 - Monorepo rules
-  - Must respect the dependency rules — `core` depends on nothing; `datasets_*` / `adapters/*` depend only on `core`; `services/*` depend on `core` plus optional `datasets_*` / specific `adapters/*`; `apps/cli` depends on `core` and the services.
+  - Must respect the dependency rules — `core` depends only on `living-doc-utilities`; `apps/cli` depends on `click` and, once a command imports it, on `core`.
   - Prefer a change that touches one package; add a dependency in the owning package's `pyproject.toml`.
 - Logging conventions
   - Must use lazy `%` formatting in logs; must not use f-strings in logging calls.
@@ -101,11 +101,11 @@ Repo specifics
   - Must keep Python imports at top of file (not inside functions/methods).
 - Quality gates (use the `Makefile` targets — `.github/workflows/test.yml` runs the same)
   - Full gate, all packages: `make qa`
-  - Per package: `make qa-<alias>` (`<alias>` ∈ `core`, `datasets-generator-ready`, `collector-gh`, `normalize`, `coverage`, `cli`)
-  - Individual: `make format-<alias>` (check-only `make format-check-<alias>`), `make lint-<alias>` (Pylint ≥ 9.5), `make types-<alias>`, `make test-<alias>`, `make coverage-<alias>` (`--cov-fail-under=80`)
+  - Per package: `make qa-<alias>` (`<alias>` ∈ `core`, `cli`)
+  - Individual: `make format-<alias>` (check-only `make format-check-<alias>`), `make lint-<alias>` (Pylint ≥ 9.5), `make types-<alias>`, `make deptry-<alias>`, `make test-<alias>`, `make coverage-<alias>` (`--cov-fail-under=80`)
 - Contract-sensitive outputs
-  - CLI argument names/defaults; exit codes (`normalize-issues` `0`–`5`, `coverage-matrix` `0`/`1`); error-message prefixes.
-  - `schema_version` values; `generator-ready.json` / `coverage-matrix.json` structure; `AdapterResult` signature; audit-envelope `trace[]` shape.
-  - Must regenerate the exported JSON Schema when a Pydantic model / dataclass changes.
+  - CLI argument names/defaults; the action's inputs and `output-path` output; `main.py`'s error lines.
+  - The shared input validation's codes and order, which are `living-doc-utilities`' (`docs/contracts/errors.md`).
+  - Must not define a contract model or commit a schema — the contracts are `living-doc-utilities`'; read and write them only through `read_artifact` / `write_artifact`.
 - AI-free principle
   - Must keep every collect → normalize → generate step deterministic and offline — no LLM call and no network request in the runtime path.

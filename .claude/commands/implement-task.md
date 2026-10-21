@@ -26,9 +26,8 @@ Task-list source (optional override): `$2`
 - Read the existing code the change touches and the tests that already cover it, so the
   implementation matches repo patterns (`.github/copilot-instructions.md`,
   `.github/copilot-review-rules.md`).
-- For a monorepo change, identify which of the six packages the task touches — `core`,
-  `datasets_generator_ready`, `adapters/collector_gh`, `services/normalize_issues`,
-  `services/coverage_matrix`, `apps/cli` — and respect the dependency rules.
+- For a monorepo change, identify which packages the task touches — `core`, `apps/cli`, or a
+  new one — and respect the dependency rules.
 - If the task is ambiguous after reading, stop and ask — do not guess.
 
 ## 3. Implement to the spec exactly
@@ -39,19 +38,19 @@ Task-list source (optional override): `$2`
   must change together.
 - Add or update tests for every new or changed code path (success + failure). Use the
   `test-author` agent for the test surface.
-- Do not change externally-visible contracts (CLI argument names/defaults, exit codes,
-  error-message prefixes, `schema_version` values, `generator-ready.json` / `coverage-matrix.json`
-  structure, `AdapterResult` signature) unless the task explicitly calls for it.
+- Do not change externally-visible contracts (CLI argument names/defaults, action inputs and
+  outputs, exit codes, error lines) unless the task explicitly calls for it. The artifact
+  contracts are `living-doc-utilities`'; the toolkit never redefines one.
 - If a spec section is being implemented, apply `.claude/rules/docs-lifecycle.md` in this
   same change: move that section's content out of `SPEC.md` into the live docs.
 
 ## 4. Run the `make qa` loop until green
 
 - Run `make qa` for a full-repo change, or `make qa-<alias>` for the package you touched
-  (`<alias>` ∈ `core`, `datasets-generator-ready`, `collector-gh`, `normalize`, `coverage`, `cli`) —
-  the same targets CI runs.
+  (`<alias>` ∈ `core`, `cli`) — the same targets CI runs.
 - Fix every failure and re-run. Repeat until QA exits clean per package:
-  Pylint ≥ 9.5, Black clean, mypy clean, `pytest --cov-fail-under=80` passing.
+  Pylint ≥ 9.5, Black clean, mypy clean, deptry clean, `pytest --cov-fail-under=80` passing,
+  and `make no-vendored-schemas` clean.
 - Do not lower a threshold, add an inline lint disable, or `# type: ignore` to get past a
   gate unless the repo documents that exception.
 
@@ -62,8 +61,8 @@ code / config that now exists — **not** by checking that a same-named test is 
 
 - "returns a typed `X`" → read the function's real return annotation.
 - "sorted descending" → read the actual sort call and its `reverse=`/key.
-- "deprecated ACs excluded from `coverage_pct`" → confirm the filter precedes the division
-  in `summary.py`.
+- "reports only the first failing step" → read the step order in `validate_inputs` and
+  confirm each step stops before the next.
 - "`requires-python` is `>=3.10`" → open each `pyproject.toml` and read the literal value.
 - "file X exists / contains Y" → open X and confirm Y is literally present.
 

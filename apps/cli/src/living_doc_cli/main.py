@@ -1,14 +1,13 @@
 # Copyright 2026 ABSA Group Limited. Apache License, Version 2.0.
 
 """
-Main CLI entrypoint for the Living Documentation Toolkit.
+Main CLI entrypoint for the Living Documentation Toolkit. The group registers no command yet; each command is added
+here as it lands.
 """
 
 import click
 
 from living_doc_cli import __version__
-from living_doc_cli.commands.coverage_matrix import coverage_matrix
-from living_doc_cli.commands.normalize_issues import normalize_issues
 
 
 @click.group()
@@ -25,10 +24,6 @@ def cli(ctx: click.Context, verbose: bool) -> None:
     ctx.ensure_object(dict)
     # Store verbose flag in context for subcommands
     ctx.obj["verbose"] = verbose
-
-
-cli.add_command(normalize_issues)
-cli.add_command(coverage_matrix)
 
 
 if __name__ == "__main__":

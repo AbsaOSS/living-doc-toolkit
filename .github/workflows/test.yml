@@ -64,7 +64,7 @@ jobs:
             changed_files=$(git diff --name-only --no-renames "${{ github.sha }}~1" "${{ github.sha }}")
           fi
 
-          if echo "$changed_files" | grep -E '(\.py$|(^|/)requirements(-dev)?\.txt$|(^|/)pyproject\.toml$|(^|/)tests/fixtures/|^packages/.*\.json$|^Makefile$|^action\.yml$|^\.github/workflows/test\.yml$)' > /dev/null; then
+          if echo "$changed_files" | grep -E '(\.py$|(^|/)requirements(-dev)?\.txt$|(^|/)pyproject\.toml$|(^|/)tests/fixtures/|[-.]schema\.json$|^Makefile$|^action\.yml$|^\.github/workflows/test\.yml$)' > /dev/null; then
             echo "python_changed=true" >> "$GITHUB_OUTPUT"
           else
             echo "python_changed=false" >> "$GITHUB_OUTPUT"
@@ -85,6 +85,10 @@ jobs:
             target: lint
           - name: Mypy Type Check
             target: types
+          - name: Undeclared Imports (deptry)
+            target: deptry
+          - name: No Vendored Schemas
+            target: no-vendored-schemas
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

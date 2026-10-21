@@ -86,11 +86,11 @@ Repo specifics
 
 - Test locations
   - Per-package tests: `packages/<pkg>/tests/` and `apps/cli/tests/`, mirroring each `src/` tree.
-  - Cross-package checks: repo-root `tests/` (golden files, compatibility) and per-service `verifications/` scripts.
+  - The action: repo-root `tests/` (the entry point and the venv step); the contract fixtures: repo-root `tests/fixtures/`.
   - Shared fixtures: each package's own `tests/conftest.py`.
 - Coverage target
   - Must keep coverage ≥ 80% per package when running `make coverage-<alias>` / `make qa-<alias>`.
 - Mocking rules
-  - Must isolate file I/O and the adapter registry in unit tests; the pipeline makes no network calls, so there is nothing external to stub.
+  - Must isolate file I/O in unit tests; the pipeline makes no network calls, so there is nothing external to stub.
   - Must not read the ambient filesystem outside `tmp_path` / fixtures.
 - Concrete mock/fixture targets for this repo — see `.claude/agents/test-author.md`.
