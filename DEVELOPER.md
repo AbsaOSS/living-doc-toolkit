@@ -455,6 +455,9 @@ the Markdown links.
   exists. It asserts that `PATH`'s Python is 3.9 before it checks the failure.
   - Why: otherwise it would also pass if `setup-python` resolved something newer and the action
     failed for another reason.
+- The 3.9 job runs on `ubuntu-24.04`; every other job runs on `ubuntu-latest`.
+  - Why: `setup-python` publishes no 3.9 for `ubuntu-latest` (26.04), so the job would fail setting
+    up Python before the action runs.
 
 ## Branch Naming Convention (PID:H-1)
 
