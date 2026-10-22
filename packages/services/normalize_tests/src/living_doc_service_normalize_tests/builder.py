@@ -19,10 +19,15 @@ from living_doc_utilities.contracts.ui_tests import Scenario, UITestsResult
 
 
 def _feature_file(scenario: Scenario) -> str:
-    """Use the collector id's repository-qualified file path when it matches native_id; otherwise use native_id."""
+    """Use the qualified path only when two owner/repo parts precede native_id."""
     prefix, separator, _ = scenario.scenario_id.rpartition("/")
     native_id = scenario.source_ref.native_id
-    return prefix if separator and prefix.endswith(f"/{native_id}") else native_id
+    native_id_suffix = f"/{native_id}"
+    if not separator or not native_id or not prefix.endswith(native_id_suffix):
+        return native_id
+
+    owner_and_repository = prefix[: -len(native_id_suffix)].split("/")
+    return prefix if len(owner_and_repository) == 2 and all(owner_and_repository) else native_id
 
 
 def _entity_ids(scenario: Scenario, prefix: str) -> list[str]:

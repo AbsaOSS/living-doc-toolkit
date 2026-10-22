@@ -114,3 +114,18 @@ def test_scenarios_are_grouped_once_per_entity_and_preserved_unchanged(ui_tests)
     ] + [scenario for feature_file in result.feature_files for scenario in feature_file.unlinked]
     input_by_id = {scenario.scenario_id: scenario.model_dump() for scenario in scenarios}
     assert all(scenario.model_dump() == input_by_id[scenario.scenario_id] for scenario in output_scenarios)
+
+
+def test_non_qualified_scenario_ids_fall_back_and_group_by_native_id(ui_tests):
+    invalid_prefix = _scenario(
+        ui_tests,
+        "legacy/features/login.feature/scenario-a",
+        "features/login.feature",
+    )
+    unqualified_id = _scenario(ui_tests, "SCN-005", "features/login.feature")
+    tests = ui_tests.model_copy(update={"scenarios": [invalid_prefix, unqualified_id]})
+
+    result = build_ui_test_catalog(tests, generated_at=GENERATED_AT)
+
+    assert [item.feature_file for item in result.feature_files] == ["features/login.feature"]
+    assert result.feature_files[0].unlinked == [invalid_prefix, unqualified_id]

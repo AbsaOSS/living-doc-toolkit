@@ -29,10 +29,11 @@ Nothing is written when a step fails.
 ## Grouping and order
 
 - There is one `feature_files[]` entry per feature file, named from the scenario's `scenario_id` up to its last `/`
-  when that prefix ends with `/<source_ref.native_id>`. Otherwise the key and name are `source_ref.native_id`.
+  only when that prefix ends with `/<source_ref.native_id>` and exactly two non-empty path components (`<org>/<repo>`)
+  precede the native path. Otherwise the key and name are `source_ref.native_id`.
 - The repository-qualified name relies on `collector-gh`'s `scenario_id` shape, which no contract defines. Until a
-  contract field names the repository, the fallback above handles other id shapes; the final repository identifier
-  belongs in a future contract change.
+  contract field names the repository, other id shapes use the native path; the final repository identifier belongs
+  in a future contract change.
 - A `US-` acceptance-criterion link groups its scenario under the User Story id without the final `-<n>`; `FUNC-`
   links do the same under a Functionality. A scenario linking both appears in both groups, and several links to one
   entity place it there once.
