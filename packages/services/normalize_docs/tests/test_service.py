@@ -9,7 +9,7 @@ import json
 from pathlib import Path
 
 import pytest
-from living_doc_core.input_validation import InputValidationError
+from living_doc_core.input_validation import InputValidationError, ValidatedInputs
 from living_doc_utilities.contracts.codes import Code, ContractError
 from living_doc_utilities.contracts.envelope import ContractWarning, Run
 from living_doc_utilities.contracts.generator_ready import SelectionSummary
@@ -190,6 +190,20 @@ def test_a_tests_file_as_the_input_fails_with_contract_mismatch(monkeypatch, doc
 
     # Assert
     assert [problem.code for problem in error.value.problems] == [Code.CONTRACT_MISMATCH]
+
+
+def test_a_validation_that_returns_no_documentation_input_stops_before_any_transform(monkeypatch, doc_source, tmp_path):
+    # Arrange: a defect in the shared input validation, which returns an input for every role the command takes.
+    monkeypatch.setattr(service, "validate_inputs", lambda *_args: ValidatedInputs())
+    monkeypatch.setattr(service, "build_generator_ready", _no_build)
+    output = tmp_path / "generator-ready.json"
+
+    # Act
+    with pytest.raises(RuntimeError, match="^normalize-docs - the shared input validation returned no documentation"):
+        normalize_docs(doc_source, output)
+
+    # Assert
+    assert not output.exists()
 
 
 # --- Forwarded warnings (`living-doc-utilities` `docs/contracts/errors.md` § Forwarded warnings) ---

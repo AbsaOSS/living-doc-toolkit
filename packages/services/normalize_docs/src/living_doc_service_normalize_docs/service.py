@@ -56,11 +56,14 @@ def normalize_docs(
     @param document_version: `document.version`; `1.0.0` when not given.
     @return: The output as built, before `write_artifact` filled its stats.
     @raise InputValidationError: The input failed a step of the shared input validation.
+    @raise RuntimeError: The shared input validation passed but returned no documentation input, a defect in it.
     @raise ContractError: `FIELD_LOSS`, or the output failed validation on write; no file is written either way.
     @raise OSError: The output file cannot be written.
     """
     documentation = validate_inputs(COMMAND, {Role.DOCUMENTATION: [input_path]}).documentation
-    assert documentation is not None  # the command takes one documentation input
+    if documentation is None:
+        # `validate_inputs` returns an input for every role the command takes, or raises.
+        raise RuntimeError(f"{COMMAND} - the shared input validation returned no documentation input")
     result = build_generator_ready(
         documentation,
         view=view,

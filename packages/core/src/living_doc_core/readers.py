@@ -61,9 +61,12 @@ def read_documentation(path: str | Path) -> DocumentationResult:
     @param path: The documentation file.
     @return: Its contract model.
     @raise ContractError: R5's `INVALID_CONTRACT_ID`, `CONTRACT_MISMATCH` or `SCHEMA_VALIDATION_FAILED`.
+    @raise TypeError: `read_artifact` returned another model, a defect in it.
     """
     result = read_artifact(path, expected=contract_names(Role.DOCUMENTATION))
-    assert isinstance(result, DocSourceResult)  # R12 check 2: a contract model, never a dict
+    if not isinstance(result, DocSourceResult):
+        # R12 check 2: a read returns the contract's own model, never a dict.
+        raise TypeError(f"a documentation read returned {type(result).__name__}, not DocSourceResult")
     return result
 
 
@@ -74,7 +77,10 @@ def read_tests(path: str | Path) -> TestsResult:
     @param path: The tests file.
     @return: Its contract model.
     @raise ContractError: R5's `INVALID_CONTRACT_ID`, `CONTRACT_MISMATCH` or `SCHEMA_VALIDATION_FAILED`.
+    @raise TypeError: `read_artifact` returned another model, a defect in it.
     """
     result = read_artifact(path, expected=contract_names(Role.TESTS))
-    assert isinstance(result, UITestsResult)  # R12 check 2: a contract model, never a dict
+    if not isinstance(result, UITestsResult):
+        # R12 check 2: a read returns the contract's own model, never a dict.
+        raise TypeError(f"a tests read returned {type(result).__name__}, not UITestsResult")
     return result

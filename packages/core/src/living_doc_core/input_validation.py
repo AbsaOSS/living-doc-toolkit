@@ -89,7 +89,9 @@ class _Input:
     def contract_name(self) -> str:
         """The contract the file declares, its `schema_version` without the version."""
         match = _CONTRACT_ID_RE.match(self.result.schema_version)
-        assert match is not None  # R5 step 1 passed
+        if match is None:
+            # R5 step 1 passed on read, so `schema_version` is a contract id.
+            raise ValueError(f"schema_version {self.result.schema_version!r} is not a contract id")
         return match.group(1)
 
 
@@ -276,8 +278,7 @@ def validate_inputs(command: str, inputs: Mapping[Role, Sequence[str | Path]]) -
     # 6. DUPLICATE_ENTITY_ID, DUPLICATE_AC_ID
     _stop_on(_duplicate_ids(read))
 
-    documentation = next((item.result for item in read if item.role is Role.DOCUMENTATION), None)
-    tests = next((item.result for item in read if item.role is Role.TESTS), None)
-    assert documentation is None or isinstance(documentation, DocumentationResult)
-    assert tests is None or isinstance(tests, TestsResult)
+    # Each role's reader returns only its role's model, so the model says which input it is.
+    documentation = next((item.result for item in read if isinstance(item.result, DocumentationResult)), None)
+    tests = next((item.result for item in read if isinstance(item.result, TestsResult)), None)
     return ValidatedInputs(documentation, tests)

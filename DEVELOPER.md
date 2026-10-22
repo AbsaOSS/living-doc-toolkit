@@ -77,6 +77,9 @@ pip install -e "apps/cli[dev]"
     every run.
 - Dependabot covers both files from its `pip` entry on `/`, beside one entry per package
   directory, in `.github/dependabot.yml`.
+  - Each package entry ignores `living-doc-utilities`: its pin moves by hand, in every package in one change.
+    - Why: an entry updates its own directory only, so its bump would move one pin, and the three packages would
+      no longer install together. A new `living-doc-utilities` is also a contract change, made in its own issue.
 
 ## Monorepo Layout
 
@@ -86,8 +89,13 @@ pip install -e "apps/cli[dev]"
 | `packages/services/normalize_docs` | `living-doc-service-normalize-docs` | The `normalize-docs` transform and its lineage table ([README](packages/services/normalize_docs/README.md)) |
 | `apps/cli` | `living-doc-cli` | CLI entry point (`living-doc` command group); registers `normalize-docs` ([README](apps/cli/README.md)) |
 
-- A package directory `packages/<group>/<name>` is the distribution `living-doc-<group>-<name>` and the import
-  `living_doc_<group>_<name>`.
+- A package directory `packages/<group>/<name>` is named by the group's singular and its name: the distribution
+  `living-doc-<kind>-<name>`, with `-` for `_`, and the import `living_doc_<kind>_<name>`:
+  `packages/services/normalize_docs` is `living-doc-service-normalize-docs`, imported as
+  `living_doc_service_normalize_docs`.
+  - The packages ship only inside the action's release, never on PyPI. The action installs them into its own venv
+    (`action.yml`), where only the import packages land, beside `living_doc_utilities` and its dependencies; the
+    `living_doc_` prefix keeps them apart there, and `<kind>` is this repository's convention.
 - Each command's transform is a package of its own under `packages/services/`, with its lineage table in it.
 - The toolkit's packages ship no `py.typed`, so a package that imports another reads its annotations through a
   mypy `follow_untyped_imports` override in its `pyproject.toml`, as the root does for `living_doc_core`.

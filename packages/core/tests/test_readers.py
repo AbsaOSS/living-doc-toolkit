@@ -76,3 +76,21 @@ def test_a_reader_given_another_roles_file_fails_r5_naming_the_expected_set(requ
 
     # Assert
     assert (error.value.code, error.value.message) == (Code.CONTRACT_MISMATCH, message)
+
+
+@pytest.mark.parametrize(
+    ("read", "other", "message"),
+    [
+        (read_documentation, "ui_tests", "a documentation read returned UITestsResult, not DocSourceResult"),
+        (read_tests, "doc_source", "a tests read returned DocSourceResult, not UITestsResult"),
+    ],
+)
+def test_a_read_artifact_that_returns_another_model_is_a_type_error(monkeypatch, request, read, other, message):
+    # Arrange: a defect in `read_artifact`, which returns the model of a contract in `expected`.
+    path = request.getfixturevalue(other)
+    model = readers.read_artifact(path, expected={"doc-source", "ui-tests"})
+    monkeypatch.setattr(readers, "read_artifact", lambda *_args, **_kwargs: model)
+
+    # Act / Assert
+    with pytest.raises(TypeError, match=f"^{message}$"):
+        read(path)

@@ -13,6 +13,7 @@ from living_doc_utilities.contracts.codes import Code
 from living_doc_utilities.contracts.doc_source import DocSourceResult
 from living_doc_utilities.contracts.ui_tests import UITestsResult
 
+from living_doc_core import readers
 from living_doc_core.input_validation import (
     COMMAND_ROLES,
     InputProblem,
@@ -487,3 +488,17 @@ def test_the_error_text_lists_every_problem_in_order(ui_tests, doc_source):
 def test_a_call_no_command_can_make_is_a_value_error(command, inputs, message):
     with pytest.raises(ValueError, match=message):
         validate_inputs(command, inputs)
+
+
+# --- A defect in `read_artifact` ---
+
+
+def test_a_read_model_whose_schema_version_is_no_contract_id_is_a_value_error(monkeypatch, doc_source):
+    # Arrange: R5 step 1 lets only a contract id through, so only a defect in it gets here.
+    read = readers.read_artifact(doc_source, expected={"doc-source"})
+    broken = read.model_copy(update={"schema_version": "doc-source"})
+    monkeypatch.setattr(readers, "read_artifact", lambda *_args, **_kwargs: broken)
+
+    # Act / Assert
+    with pytest.raises(ValueError, match="^schema_version 'doc-source' is not a contract id$"):
+        validate_inputs("normalize-docs", {DOCUMENTATION: [doc_source]})
