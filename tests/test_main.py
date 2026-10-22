@@ -19,6 +19,7 @@ import sys
 from pathlib import Path
 
 import pytest
+from living_doc_utilities.contracts.envelope import Run
 from living_doc_utilities.contracts.generator_ready import GeneratorReadyResult
 from living_doc_utilities.contracts.io import read_artifact
 
@@ -31,6 +32,15 @@ UI_TESTS = REPO_ROOT / "tests" / "fixtures" / "collector-gh" / "ui-tests.json"
 CLI = [sys.executable, "-I", "-m", "living_doc_cli.main"]
 COMMANDS = ["normalize-docs", "normalize-tests", "coverage-matrix"]
 NOT_AVAILABLE = ["normalize-tests", "coverage-matrix"]
+# The CI run the entry point runs in, as GitHub Actions sets it.
+RUN_CONTEXT = {
+    "GITHUB_RUN_ID": "4242",
+    "GITHUB_RUN_ATTEMPT": "2",
+    "GITHUB_ACTOR": "octocat",
+    "GITHUB_WORKFLOW": "docs",
+    "GITHUB_REF": "refs/heads/master",
+    "GITHUB_SHA": "3f2c1ab",
+}
 
 
 def _errors(err: str) -> list[str]:
@@ -306,8 +316,24 @@ def test_an_optional_input_left_empty_is_not_passed_so_the_cli_default_applies(c
     ]
 
 
+def _assert_verbose_run(cli: _FakeCli, err: str) -> None:
+    # `--verbose` is the group's option, so it comes before the command name.
+    assert cli.runs[0][len(CLI) :] == [
+        "--verbose",
+        "normalize-docs",
+        "--input=in.json",
+        f"--output={Path.cwd() / 'out.json'}",
+    ]
+    debug = [line for line in err.splitlines() if line.startswith("[DEBUG]")]
+    assert len(debug) == 1
+    assert debug[0].startswith("[DEBUG] Living Documentation Toolkit action - command line: ")
+    assert " living_doc_cli.main --verbose normalize-docs " in debug[0]
+
+
 @pytest.mark.parametrize("value", ["true", "TRUE", " True "])
-def test_verbose_logging_true_passes_verbose_and_logs_the_command_line_at_debug(cli, monkeypatch, capsys, value):
+def test_verbose_logging_true_passes_verbose_before_the_command_and_logs_the_command_line_at_debug(
+    cli, monkeypatch, capsys, value
+):
     # Arrange
     _set_inputs(monkeypatch, command="normalize-docs", input="in.json", output="out.json", verbose_logging=value)
 
@@ -315,11 +341,20 @@ def test_verbose_logging_true_passes_verbose_and_logs_the_command_line_at_debug(
     run()
 
     # Assert
-    assert cli.runs[0][-1] == "--verbose"
-    debug = [line for line in capsys.readouterr().err.splitlines() if line.startswith("[DEBUG]")]
-    assert len(debug) == 1
-    assert debug[0].startswith("[DEBUG] Living Documentation Toolkit action - command line: ")
-    assert debug[0].endswith(" --verbose")
+    _assert_verbose_run(cli, capsys.readouterr().err)
+
+
+@pytest.mark.parametrize("value", ["false", ""])
+def test_a_rerun_with_debug_logging_turns_verbose_on_without_verbose_logging(cli, monkeypatch, capsys, value):
+    # Arrange
+    _set_inputs(monkeypatch, command="normalize-docs", input="in.json", output="out.json", verbose_logging=value)
+    monkeypatch.setenv("RUNNER_DEBUG", "1")
+
+    # Act
+    run()
+
+    # Assert
+    _assert_verbose_run(cli, capsys.readouterr().err)
 
 
 @pytest.mark.parametrize("value", ["false", "", "yes"])
@@ -333,6 +368,19 @@ def test_verbose_logging_off_passes_no_verbose_and_logs_no_debug_line(cli, monke
     # Assert
     assert "--verbose" not in cli.runs[0]
     assert not [line for line in capsys.readouterr().err.splitlines() if line.startswith("[DEBUG]")]
+
+
+@pytest.mark.parametrize("value", ["0", "", "true"])
+def test_runner_debug_other_than_1_leaves_verbose_off(cli, monkeypatch, value):
+    # Arrange
+    _set_inputs(monkeypatch, command="normalize-docs", input="in.json", output="out.json")
+    monkeypatch.setenv("RUNNER_DEBUG", value)
+
+    # Act
+    run()
+
+    # Assert
+    assert "--verbose" not in cli.runs[0]
 
 
 def test_a_successful_run_sets_the_output_path_to_the_absolute_output(cli, monkeypatch, tmp_path):
@@ -396,6 +444,7 @@ def _run_entry_point(tmp_path: Path, inputs: dict[str, str]) -> subprocess.Compl
     # Only the run step's inputs reach the entry point: no inherited `INPUT_*` and no CI job's `GITHUB_OUTPUT`.
     env = {name: value for name, value in os.environ.items() if not name.startswith("INPUT_")}
     env.update({f"INPUT_{name.replace('-', '_').upper()}": value for name, value in inputs.items()})
+    env.update(RUN_CONTEXT)
     env["GITHUB_OUTPUT"] = os.fspath(tmp_path / "github-output")
     return subprocess.run(
         [sys.executable, "-E", os.fspath(REPO_ROOT / "main.py")],
@@ -412,7 +461,7 @@ def _run_entry_point(tmp_path: Path, inputs: dict[str, str]) -> subprocess.Compl
     [
         ({}, "inner"),
         ({"view": "release", "document-title": "Checkout tests"}, "release"),
-        # `--verbose` comes after the command's own options, so the command takes it as the group does.
+        # `--verbose` comes before the command name, as the group takes it.
         ({"verbose-logging": "true"}, "inner"),
     ],
 )
@@ -430,6 +479,10 @@ def test_the_entry_point_runs_normalize_docs_over_the_fixture_and_sets_the_outpu
     assert isinstance(written, GeneratorReadyResult)
     assert written.document.view == view
     assert written.document.title == inputs.get("document-title", "living-doc-examples")
+    # `-I` drops no `GITHUB_*` variable, so the CLI records the run.
+    assert written.metadata.run == Run(
+        run_id="4242", run_attempt="2", actor="octocat", workflow="docs", ref="refs/heads/master", sha="3f2c1ab"
+    )
     assert (tmp_path / "github-output").read_text(encoding="utf-8") == (
         f"output-path={tmp_path / 'out' / 'generator-ready.json'}\n"
     )

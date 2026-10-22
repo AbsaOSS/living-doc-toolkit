@@ -20,8 +20,10 @@ import pytest
 
 @pytest.fixture(autouse=True)
 def _clear_action_inputs(monkeypatch):
-    # No action input leaks in from the shell, so every input a test does not set reads as unset; and no run appends
-    # an output to the `GITHUB_OUTPUT` of the CI job running the tests.
+    # No action input leaks in from the shell, so every input a test does not set reads as unset; no run appends an
+    # output to the `GITHUB_OUTPUT` of the CI job running the tests; and a CI re-run with debug logging does not turn
+    # verbose logging on.
     for name in [name for name in os.environ if name.startswith("INPUT_")]:
         monkeypatch.delenv(name)
     monkeypatch.delenv("GITHUB_OUTPUT", raising=False)
+    monkeypatch.delenv("RUNNER_DEBUG", raising=False)

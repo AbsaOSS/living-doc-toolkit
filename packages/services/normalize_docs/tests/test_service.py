@@ -11,7 +11,7 @@ from pathlib import Path
 import pytest
 from living_doc_core.input_validation import InputValidationError
 from living_doc_utilities.contracts.codes import Code, ContractError
-from living_doc_utilities.contracts.envelope import ContractWarning
+from living_doc_utilities.contracts.envelope import ContractWarning, Run
 from living_doc_utilities.contracts.generator_ready import SelectionSummary
 
 from living_doc_service_normalize_docs import service
@@ -22,8 +22,8 @@ EXPECTED = Path(__file__).resolve().parent / "expected"
 
 # What the fixture's two warnings are forwarded as.
 FIXTURE_CONTEXTS = [
-    "input='doc-source-v1.0.0' entity_id='FEAT-003'",
-    "input='doc-source-v1.0.0' entity_id='FEAT-003' target='FEAT-002'",
+    "source_input='doc-source-v1.0.0' entity_id='FEAT-003'",
+    "source_input='doc-source-v1.0.0' entity_id='FEAT-003' target='FEAT-002'",
 ]
 
 
@@ -102,6 +102,47 @@ def test_without_the_options_the_title_is_the_project_id_and_the_version_1_0_0(d
     assert (document.view, document.title, document.version) == ("inner", "living-doc-examples", "1.0.0")
 
 
+# --- The CI run (`living-doc-utilities` `docs/contracts/artifact-rules.md` § The metadata envelope) ---
+
+RUN = {
+    "GITHUB_RUN_ID": "4242",
+    "GITHUB_RUN_ATTEMPT": "2",
+    "GITHUB_ACTOR": "octocat",
+    "GITHUB_WORKFLOW": "docs",
+    "GITHUB_REF": "refs/heads/master",
+    "GITHUB_SHA": "3f2c1ab",
+}
+INPUT_RUN = {"run_id": "101", "run_attempt": "1", "actor": "collector", "workflow": "collect", "ref": "refs/tags/v1"}
+
+
+def test_the_ci_run_is_recorded_in_metadata_run_and_the_inputs_run_stays_its_own(
+    doc_source, changed_copy, run_command, monkeypatch
+):
+    # Arrange: the input carries a run of its own, written by its collector's run.
+    collected = changed_copy(doc_source, lambda payload: payload["metadata"].update(run=INPUT_RUN))
+    for variable, value in RUN.items():
+        monkeypatch.setenv(variable, value)
+
+    # Act
+    metadata = run_command(collected).metadata
+
+    # Assert
+    assert metadata.run == Run(
+        run_id="4242", run_attempt="2", actor="octocat", workflow="docs", ref="refs/heads/master", sha="3f2c1ab"
+    )
+    assert metadata.source_inputs[0].run == Run(**INPUT_RUN)
+    assert metadata.producer.build is None
+
+
+def test_outside_a_ci_run_metadata_run_is_empty(doc_source, run_command):
+    # Act
+    metadata = run_command(doc_source).metadata
+
+    # Assert
+    assert metadata.run == Run()
+    assert metadata.producer.build is None
+
+
 # --- The shared input validation comes first ---
 
 
@@ -157,7 +198,8 @@ BUILT_WARNINGS = [
     ContractWarning(
         code="SOURCE_UNAVAILABLE",
         message="Repository could not be fetched after retries; collected in partial mode.",
-        context="repository='AbsaOSS/living-doc-examples'",
+        # As `collector-gh` names a failed source: its own `input=` is its configuration input.
+        context="input='doc-source-repositories' entry=1 repository='AbsaOSS/living-doc-examples'",
     ),
     ContractWarning(code="MISSING_STATUS", message="The header has no status.", entity_id="US-001"),
     ContractWarning(code="NO_SOURCE_URL", message="The source has no URL to link."),
@@ -193,10 +235,11 @@ def test_every_input_warning_is_forwarded_unchanged_but_for_its_context(doc_sour
         warning.model_dump(exclude={"context"}) for warning in BUILT_WARNINGS
     ]
     assert [warning.context for warning in result.warnings] == [
-        "input='doc-source-v1.0.0' repository='AbsaOSS/living-doc-examples'",
-        "input='doc-source-v1.0.0'",
-        "input='doc-source-v1.0.0'",
-        "input='doc-source-v1.0.0' entity='US-001' line_no=31 header='#   AC:US-001-05 (v1.0.0 - active)'",
+        "source_input='doc-source-v1.0.0' input='doc-source-repositories' entry=1 "
+        "repository='AbsaOSS/living-doc-examples'",
+        "source_input='doc-source-v1.0.0'",
+        "source_input='doc-source-v1.0.0'",
+        "source_input='doc-source-v1.0.0' entity='US-001' line_no=31 header='#   AC:US-001-05 (v1.0.0 - active)'",
     ]
 
 

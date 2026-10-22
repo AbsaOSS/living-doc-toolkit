@@ -54,7 +54,7 @@ pip install -e "apps/cli[dev]"
 
 - Each package declares its own runtime dependencies in its `pyproject.toml`; `requirements.txt`
   names the packages, not their dependencies.
-  - Every package declares `living-doc-utilities==0.7.0`, from PyPI, as each imports it; one pin, the same in each.
+  - Every package declares `living-doc-utilities==0.8.0`, from PyPI, as each imports it; one pin, the same in each.
 - Every package declares the toolkit's one version, `0.1.0`, the version the action's release tag carries.
   - `metadata.producer.version` of a file the toolkit writes is read from the installed `living-doc-core`, so a
     release changes every package's version together.
@@ -400,11 +400,14 @@ on the venv's interpreter. The CLI's exit code is the step's.
 - Only once the inputs pass is a command in `NOT_AVAILABLE_YET` refused, with one line:
   ``Command `<command>` is not available yet.`` `normalize-tests` and `coverage-matrix` are in it today.
   - Why last: an input the command does not take is rejected the same way for a command not available yet.
-- `verbose-logging: 'true'`, in any case, adds `--verbose` after the command's options, which every
-  command takes as the group does, and logs the command line at DEBUG. `INPUT_VERBOSE_LOGGING` stays
-  in the run step's `env:`.
-  - Why: the CLI reads no environment variable, so `--verbose` is the way in. The variable is there
-    for when the toolkit reads it, as `living-doc-utilities`' logging does.
+- Verbose logging comes from `verbose-logging: 'true'`, in any case, or from `RUNNER_DEBUG=1`, which a
+  re-run with debug logging sets. Either adds the group's `--verbose` before the command name, so no
+  command takes it, and logs the command line at DEBUG. `INPUT_VERBOSE_LOGGING` stays in the run
+  step's `env:`.
+  - Why `--verbose`: the CLI reads no `INPUT_*` variable, so an option is the way in. The variable is
+    there for when the toolkit reads it, as `living-doc-utilities`' logging does.
+  - The only variables the CLI reads are the `GITHUB_*` run context, recorded in an output's
+    `metadata.run` for audit only ([core README](packages/core/README.md#the-ci-run-context)).
 - Once the command succeeds, `output-path` is set to the absolute path of `output`.
 - `tests/test_main.py` replaces the CLI to test the run itself: the command line, the exit code passed
   through, and `output-path`; it empties `NOT_AVAILABLE_YET` to test it for the two commands not
@@ -416,7 +419,7 @@ A debug run, from the repository root after `make install`:
 export INPUT_COMMAND=normalize-docs
 export INPUT_INPUT=tests/fixtures/collector-gh/doc-source.json
 export INPUT_OUTPUT=output/generator-ready.json
-export INPUT_VERBOSE_LOGGING=true      # optional: --verbose and DEBUG lines; default false
+export INPUT_VERBOSE_LOGGING=true      # optional: --verbose and DEBUG lines; default false; RUNNER_DEBUG=1 too
 python3 main.py                        # writes output/generator-ready.json
 ```
 
@@ -453,8 +456,9 @@ the Markdown links.
 - `integration.yml`'s jobs run the action through `uses: ./` over the committed fixtures.
 - `action-run` runs each command the action runs and checks what it wrote: `normalize-docs` over
   `doc-source.json` in the release view.
-  - It reads the file with `read_artifact` on the action's venv, checks `document.view` and the
-    `selection_summary`, and checks that `output-path` is the file's absolute path.
+  - It reads the file with `read_artifact` on the action's venv, checks `document.view`, the
+    `selection_summary` and that `metadata.run.run_id` is the job's `GITHUB_RUN_ID`, and checks that
+    `output-path` is the file's absolute path.
   - `normalize-tests` and `coverage-matrix` each add their step when they land.
 - The venv jobs run `normalize-docs`, which writes its file, and the isolation job also runs
   `coverage-matrix`, which fails on the "not available yet" line.

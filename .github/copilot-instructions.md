@@ -36,7 +36,7 @@ Module map — three packages under `packages/` and `apps/`, each with its own `
 
 | Path | Package (`pip` name) | Responsibility |
 |---|---|---|
-| `packages/core` | `living-doc-core` | `logging_config.py` (`setup_logging`), `readers.py` (the reader table, `read_documentation`, `read_tests`), `input_validation.py` (`validate_inputs`, the shared input validation), `views.py` (`select_records`, the view filter). Depends on `living-doc-utilities==0.7.0`. |
+| `packages/core` | `living-doc-core` | `logging_config.py` (`setup_logging`), `readers.py` (the reader table, `read_documentation`, `read_tests`), `input_validation.py` (`validate_inputs`, the shared input validation), `views.py` (`select_records`, the view filter), `run_context.py` (`run_context`, the CI run for `metadata.run`). Depends on `living-doc-utilities==0.8.0`. |
 | `packages/services/normalize_docs` | `living-doc-service-normalize-docs` | `builder.py` (`build_generator_ready`), `lineage.py` (`LINEAGE_TABLE`), `service.py` (`normalize_docs`, the command, and `check_no_field_loss`). |
 | `apps/cli` | `living-doc-cli` | CLI entry point — `main.py` (`cli()` click group), one module per command under `commands/`. Registers `normalize-docs`. |
 
@@ -144,5 +144,5 @@ QA commands — the per-package `Makefile` targets (`.github/workflows/test.yml`
 
 - Must keep `main.py`'s check order — a known command, then its inputs, then the "not available yet" refusal — so an input the command does not take is rejected the same way for a command not available yet.
 - Prefer the inline `# pylint: disable=too-many-arguments,too-many-positional-arguments` on a click command function only — click passes each of its options as one parameter.
-- Must let every command take `--verbose` as the group does — `main.py` passes it after the command's options.
+- Must keep `--verbose` the group's option only — `main.py` passes it before the command name, so no command declares its own.
 - Must treat `metadata.producer.version` as audit information — never compare it, and never warn on an unfamiliar one.

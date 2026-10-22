@@ -1,8 +1,8 @@
 # Copyright 2026 ABSA Group Limited. Apache License, Version 2.0.
 
 """
-Shared fixtures: the repository's one copy of `living-doc`'s example `doc-source.json`, changed copies of it, and a
-run of `normalize-docs` that reads back what it wrote.
+Shared fixtures: the repository's one copy of `living-doc`'s example `doc-source.json`, changed copies of it, a
+run of `normalize-docs` that reads back what it wrote, and no CI run context.
 """
 
 import json
@@ -11,12 +11,21 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+from living_doc_core.run_context import RUN_VARIABLES
 from living_doc_utilities.contracts.generator_ready import GeneratorReadyResult
 from living_doc_utilities.contracts.io import read_artifact
 
 from living_doc_service_normalize_docs.service import normalize_docs
 
 FIXTURES = Path(__file__).resolve().parents[4] / "tests" / "fixtures"
+
+
+@pytest.fixture(autouse=True)
+def _no_run_context(monkeypatch):
+    # The CI job running the tests sets the run context, which the command records in `metadata.run`; without it the
+    # output's `run` is empty, as the goldens hold it.
+    for variable in RUN_VARIABLES.values():
+        monkeypatch.delenv(variable, raising=False)
 
 
 @pytest.fixture(name="doc_source")

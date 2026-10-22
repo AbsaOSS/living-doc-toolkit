@@ -1,6 +1,7 @@
 # Living Documentation Core
 
-The package every toolkit command shares: logging, the reader table, the shared input validation and the view filter.
+The package every toolkit command shares: logging, the reader table, the shared input validation, the view filter
+and the CI run context.
 
 ## Overview
 
@@ -10,10 +11,11 @@ The package every toolkit command shares: logging, the reader table, the shared 
 | `living_doc_core.readers` | The reader table, `READERS`, and the readers `read_documentation` and `read_tests` |
 | `living_doc_core.input_validation` | `validate_inputs(command, inputs)`, which runs the shared input validation over one command's inputs |
 | `living_doc_core.views` | `select_records(entities, view)`, the view filter |
+| `living_doc_core.run_context` | `run_context()`, the CI run a file is written in, for `metadata.run` |
 
-- It depends on `living-doc-utilities==0.7.0` and nothing else; the contract models and schemas are that package's.
-- `living_doc_core` itself exports only `setup_logging` and `__version__`; `readers`, `input_validation` and `views`
-  load the contract models, so they are imported by name.
+- It depends on `living-doc-utilities==0.8.0` and nothing else; the contract models and schemas are that package's.
+- `living_doc_core` itself exports only `setup_logging` and `__version__`; `readers`, `input_validation`, `views` and
+  `run_context` load the contract models, so they are imported by name.
 - Its version is the toolkit's one version, which every package declares. `metadata.producer.version` of a file the
   toolkit writes reads it from the installed `living-doc-core`.
 
@@ -85,6 +87,26 @@ returns the kept entities and the contract's own `SelectionSummary`.
 The rule is `living-doc-utilities`' [rendering](https://github.com/AbsaOSS/living-doc-utilities/blob/master/docs/contracts/rendering.md)
 page, § Records and presentation; how a generator shows each view is `living-doc`'s
 [document types](https://github.com/AbsaOSS/living-doc/blob/master/docs/guides/living-doc-document-types.md) guide.
+
+## The CI run context
+
+`run_context()` returns the contract's `Run`, read from the GitHub Actions variables of the run the command runs in:
+
+| Field | Variable |
+|---|---|
+| `run_id` | `GITHUB_RUN_ID` |
+| `run_attempt` | `GITHUB_RUN_ATTEMPT` |
+| `actor` | `GITHUB_ACTOR` |
+| `workflow` | `GITHUB_WORKFLOW` |
+| `ref` | `GITHUB_REF` |
+| `sha` | `GITHUB_SHA` |
+
+- An unset or empty variable is `None`, so outside GitHub Actions every field is.
+- A command sets it as its output's `metadata.run`. It is audit information: nothing reads it to decide anything.
+- An input's own `run` stays in its `metadata.source_inputs[]` entry.
+
+`run` is defined on `living-doc-utilities`' [artifact rules](https://github.com/AbsaOSS/living-doc-utilities/blob/master/docs/contracts/artifact-rules.md)
+page, § The metadata envelope.
 
 ## Installation
 

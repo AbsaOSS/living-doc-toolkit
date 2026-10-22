@@ -18,7 +18,7 @@ the action runs it as `command: normalize-docs` ([README](../../../README.md#git
 1. The input goes through the shared input validation, `validate_inputs("normalize-docs", …)`, and nothing else
    reads it ([core README](../../core/README.md#shared-input-validation)). A failing step stops the run before
    anything is built.
-2. The builder builds the output from the validated model.
+2. The builder builds the output from the validated model, and the command sets its `metadata.run` to the CI run.
 3. `check_no_field_loss` compares the lineage table's paths ([Lineage](#lineage)); a lost field stops the run.
 4. `write_artifact` writes the file. It fills `metadata.stats` and `producer.utilities_version`, and validates first.
 
@@ -62,8 +62,8 @@ Nothing is written when a step fails.
 
 | Field | Value |
 |---|---|
-| `metadata.producer` | `name` `AbsaOSS/living-doc-toolkit`; `version` the toolkit's one version, read from the installed `living-doc-core`; `utilities_version` filled by `write_artifact` |
-| `metadata.run` | empty |
+| `metadata.producer` | `name` `AbsaOSS/living-doc-toolkit`; `version` the toolkit's one version, read from the installed `living-doc-core`; `build` `null`; `utilities_version` filled by `write_artifact` |
+| `metadata.run` | the CI run the file is written in, from `living_doc_core.run_context` ([core README](../../core/README.md#the-ci-run-context)); empty outside GitHub Actions |
 | `metadata.source` | the input's, copied |
 | `metadata.generated_at` | the write time, in UTC, to the second |
 | `metadata.stats` | computed by `write_artifact` from the output |
@@ -71,6 +71,8 @@ Nothing is written when a step fails.
 
 - The four counts a caller reports, `sources_configured`, `sources_failed`, `unresolved_refs` and `entities_skipped`,
   are the input's in `source_inputs[0].stats`. The output's own are `0`: a transform configures no source.
+- `metadata.producer.build` stays `null`: the canon defines it as the writing tool's own build. The CI run is
+  `metadata.run`, and the input's own run stays in `source_inputs[0].run`.
 - The canon's rules are the [artifact rules](https://github.com/AbsaOSS/living-doc-utilities/blob/master/docs/contracts/artifact-rules.md)
   page: § The metadata envelope, R6 and R7.
 
@@ -82,11 +84,14 @@ release view and also when it names an entity the view dropped
 warnings):
 
 - `context` names the input first, by its contract id, then keeps the warning's own context after a space:
-  `input='doc-source-v1.0.0' entity_id='FEAT-003' target='FEAT-002'`.
+  `source_input='doc-source-v1.0.0' entity_id='FEAT-003' target='FEAT-002'`.
   - Why the contract id: it is the `schema_version` of the input's own `metadata.source_inputs[]` entry, so the name
     points into the same file, and a run reads one input per contract. A file name or path would depend on where
     the run happened.
-- A warning without a context gets `input='doc-source-v1.0.0'`.
+  - Why `source_input=`: the key follows `metadata.source_inputs[]`. A collector's own context can already hold
+    `input=`, naming its configuration input, e.g. `input='doc-source-repositories' entry=1 repository='org/repo'`,
+    and it stays as it is after the forwarded name.
+- A warning without a context gets `source_input='doc-source-v1.0.0'`.
 - `code`, `message`, `entity_id`, `ac_id`, `line_no`, `path` and `source_url` are not touched.
 
 ## Lineage
@@ -117,9 +122,9 @@ warnings):
 
 ## Tests
 
-- `test_full_sample.py`: R12 check 3, over `full_sample("doc-source-v1.0.0")` unfiltered, in both views.
-  - The sample repeats its four entities in each list, which the shared input validation stops with
-    `DUPLICATE_ENTITY_ID`, so the test hands the model to the builder and runs the rest as the command does.
+- `test_full_sample.py`: R12 check 3. `full_sample("doc-source-v1.0.0")`, unfiltered, is written with
+  `write_artifact` and run through the command, the shared input validation included, in both views. The release
+  view's expected counts are derived from the sample.
 - `test_service.py`: the command over the repository's fixture, against the goldens in [`tests/expected/`](tests/expected/README.md).
 - `test_authored_fields.py`: each named authored field, and `living-doc-utilities`' six golden entities
   ([`tests/fixtures/utilities-golden/`](../../../tests/fixtures/utilities-golden/README.md)) compared field by field.

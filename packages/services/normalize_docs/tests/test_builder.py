@@ -13,7 +13,7 @@ import pytest
 from living_doc_core.readers import read_documentation
 from living_doc_utilities.contracts.compat import installed_utilities_version
 from living_doc_utilities.contracts.doc_source import DocSourceResult
-from living_doc_utilities.contracts.envelope import AuditStats, ContractWarning
+from living_doc_utilities.contracts.envelope import AuditStats, ContractWarning, Run
 from living_doc_utilities.contracts.generator_ready import GeneratorReadyResult
 
 from living_doc_service_normalize_docs.builder import build_generator_ready, forwarded
@@ -124,7 +124,16 @@ def test_the_producer_is_the_toolkit_at_the_version_of_living_doc_core(documenta
     # Assert
     assert producer.name == "AbsaOSS/living-doc-toolkit"
     assert producer.version == version("living-doc-core") == "0.1.0"
+    assert producer.build is None
     assert producer.utilities_version == installed_utilities_version()
+
+
+def test_the_builder_leaves_the_run_empty_for_the_caller_to_set(documentation):
+    # Act
+    metadata = _build(documentation).metadata
+
+    # Assert
+    assert metadata.run == Run()
 
 
 def test_the_source_is_the_inputs_and_generated_at_is_the_given_time(documentation):
@@ -200,7 +209,7 @@ def test_a_forwarded_warning_names_the_input_before_its_own_context():
     result = forwarded(warning, "doc-source-v1.0.0")
 
     # Assert
-    assert result.context == "input='doc-source-v1.0.0' entity_id='FEAT-003' target='FEAT-002'"
+    assert result.context == "source_input='doc-source-v1.0.0' entity_id='FEAT-003' target='FEAT-002'"
     assert result.model_dump(exclude={"context"}) == warning.model_dump(exclude={"context"})
 
 
@@ -210,7 +219,7 @@ def test_a_forwarded_warning_without_a_context_gets_the_input_as_its_context(con
     result = forwarded(ContractWarning(code="EMPTY_SOURCE", message="m", context=context), "doc-source-v1.0.0")
 
     # Assert
-    assert result.context == "input='doc-source-v1.0.0'"
+    assert result.context == "source_input='doc-source-v1.0.0'"
 
 
 def test_every_input_warning_is_forwarded_in_order_naming_the_inputs_source_inputs_entry(documentation):

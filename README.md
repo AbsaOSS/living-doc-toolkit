@@ -29,7 +29,7 @@ A monorepo of Python packages that transform and enrich machine-readable artifac
 The Living Documentation Toolkit is a **generic builder** designed to:
 - Run one command per GitHub Actions step, through the composite action at the repository root
 - Read only contract artifacts, through [`living-doc-utilities`](https://github.com/AbsaOSS/living-doc-utilities)' `read_artifact`, and validate a command's inputs together before it transforms them
-- Keep no copy of a contract: the models and schemas come from the installed `living-doc-utilities` (`==0.7.0`)
+- Keep no copy of a contract: the models and schemas come from the installed `living-doc-utilities` (`==0.8.0`)
 - Offer core utilities shared across commands
 
 ## Quickstart
@@ -112,7 +112,7 @@ and writes the file the command produces.
 | `document-title` | no | `''` | `normalize-docs` | The document title; the input's `metadata.source.project_id` when empty. |
 | `tests-input` | for `coverage-matrix` | `''` | `coverage-matrix` | Path to the tests JSON file (`--tests-input`). |
 | `fail-under` | no | `''` | `coverage-matrix` | Fail the step when the coverage percentage is below this number (`--fail-under`). |
-| `verbose-logging` | no | `'false'` | every command | `'true'` adds `--verbose` and logs the command line at DEBUG. |
+| `verbose-logging` | no | `'false'` | every command | `'true'` logs at DEBUG, the command line included. A re-run with debug logging (`RUNNER_DEBUG=1`) does the same without it. |
 
 - An input left empty is not passed, so the CLI's default applies.
 - A non-empty input the command does not take fails the step with one line naming the input
@@ -134,7 +134,7 @@ generator's input file.
 ## Documentation
 
 ### Understand
-- **[Core package](packages/core/README.md)** — The reader table, the shared input validation and the view filter every command runs
+- **[Core package](packages/core/README.md)** — The reader table, the shared input validation, the view filter and the CI run context every command uses
 - **[normalize-docs package](packages/services/normalize_docs/README.md)** — How `normalize-docs` builds `generator-ready.json`, and its lineage table
 - **[CLI package](apps/cli/README.md)** — The `living-doc` command group and its commands
 - **[SPEC.md](SPEC.md)** — How a new command or package is specced before it is built (the prospective-spec process for this monorepo)

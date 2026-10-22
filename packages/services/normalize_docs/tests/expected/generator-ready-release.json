@@ -5,7 +5,7 @@
       "name": "AbsaOSS/living-doc-toolkit",
       "version": "0.1.0",
       "build": null,
-      "utilities_version": "0.7.0"
+      "utilities_version": "0.8.0"
     },
     "run": {
       "run_id": null,
@@ -510,7 +510,7 @@
     {
       "code": "FEATURE_WITHOUT_FUNCTIONALITY",
       "message": "Feature has no linked Functionality in this run \u2014 either it is not yet populated, or it has been fully retired. Author its Functionalities, or remove the Feature.",
-      "context": "input='doc-source-v1.0.0' entity_id='FEAT-003'",
+      "context": "source_input='doc-source-v1.0.0' entity_id='FEAT-003'",
       "entity_id": "FEAT-003",
       "ac_id": null,
       "line_no": null,
@@ -520,7 +520,7 @@
     {
       "code": "UNRESOLVED_RELATION",
       "message": "'feature_dependencies' points outside the collected entity set.",
-      "context": "input='doc-source-v1.0.0' entity_id='FEAT-003' target='FEAT-002'",
+      "context": "source_input='doc-source-v1.0.0' entity_id='FEAT-003' target='FEAT-002'",
       "entity_id": "FEAT-003",
       "ac_id": null,
       "line_no": null,

@@ -32,7 +32,6 @@ logger = logging.getLogger("living_doc.normalize_docs")
 )
 @click.option("--document-title", help="The document title; the input's project id when not given.")
 @click.option("--document-version", help="The document version; 1.0.0 when not given.")
-@click.option("--verbose", is_flag=True, help="Enable verbose logging, as the group's --verbose does.")
 @click.pass_context
 def normalize_docs(  # pylint: disable=too-many-arguments,too-many-positional-arguments
     ctx: click.Context,
@@ -41,12 +40,11 @@ def normalize_docs(  # pylint: disable=too-many-arguments,too-many-positional-ar
     view: str,
     document_title: str | None,
     document_version: str | None,
-    verbose: bool,
 ) -> None:
     """
     Normalize one doc-source.json into generator-ready.json.
     """
-    setup_logging(verbose=verbose or bool((ctx.obj or {}).get("verbose")))
+    setup_logging(verbose=bool((ctx.obj or {}).get("verbose")))
     try:
         result = service.normalize_docs(
             input_path,

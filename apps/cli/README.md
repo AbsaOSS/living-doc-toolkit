@@ -27,9 +27,8 @@ living-doc normalize-docs --input doc-source.json --output generator-ready.json 
   --view release --document-title "Payments service" --document-version 2.3.0
 ```
 
-- `--verbose` is a group option, and every command takes it too: `living-doc --verbose normalize-docs …` and
-  `living-doc normalize-docs … --verbose` both log at DEBUG.
-  - Why both: the action passes `--verbose` after the command's own options.
+- `--verbose` is the group's option, so it goes before the command name: `living-doc --verbose normalize-docs …` logs
+  at DEBUG. No command takes it, and the action passes it there.
 - A command name the group does not register yet, such as `living-doc normalize-tests`, fails with click's
   "No such command" and exit code 2.
 
@@ -45,7 +44,6 @@ Reads one documentation file and writes `generator-ready.json`. What it builds, 
 | `--view` | no | `inner` | `inner` or `release`: the records the output holds. |
 | `--document-title` | no | the input's `metadata.source.project_id` | `document.title`. |
 | `--document-version` | no | `1.0.0` | `document.version`. |
-| `--verbose` | no | off | Log at DEBUG. |
 
 A run that succeeds exits 0 and logs one line:
 ``[INFO] normalize-docs - written: `<output>` (<view> view; <kept> of <total> entities, <kept> of <total> acceptance criteria).``

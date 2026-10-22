@@ -54,14 +54,14 @@ def _summed(summaries: Iterable[SelectionSummary]) -> SelectionSummary:
 def forwarded(warning: ContractWarning, source: str) -> ContractWarning:
     """
     An input warning as the output carries it: unchanged but for `context`, which names the input first and keeps the
-    warning's own context after it, as `input='<contract id>' <context>`.
+    warning's own context after it, as `source_input='<contract id>' <context>`.
 
     @param warning: The input's warning.
     @param source: The input's contract id, its `schema_version`. A run reads one input per contract, and its
         `metadata.source_inputs[]` entry carries the same id, so the name points into the output itself.
     @return: A copy of the warning.
     """
-    named = f"input={source!r}"
+    named = f"source_input={source!r}"
     return warning.model_copy(update={"context": f"{named} {warning.context}" if warning.context else named})
 
 
@@ -82,8 +82,8 @@ def build_generator_ready(
     @param generated_at: The write time.
     @param title: `document.title`; the input's `metadata.source.project_id` when not given.
     @param version: `document.version`; `DEFAULT_DOCUMENT_VERSION` when not given.
-    @return: The output model. Its `metadata.stats` holds only the counts a caller reports, all 0 for a transform, and
-        `write_artifact` computes the rest.
+    @return: The output model. Its `metadata.run` is empty, for the caller to set to the CI run. Its `metadata.stats`
+        holds only the counts a caller reports, all 0 for a transform, and `write_artifact` computes the rest.
     """
     selections = {name: select_records(entities, view) for name, entities in _entity_lists(documentation).items()}
     kept_input = documentation.model_copy(update={name: kept for name, (kept, _) in selections.items()})

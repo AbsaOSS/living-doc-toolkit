@@ -41,8 +41,9 @@ def test_the_help_lists_the_options_and_the_view_default(runner):
 
     # Assert
     assert result.exit_code == 0
-    for option in ("--input", "--output", "--view", "--document-title", "--document-version", "--verbose"):
+    for option in ("--input", "--output", "--view", "--document-title", "--document-version"):
         assert option in result.output
+    assert "--verbose" not in result.output
     assert "[default: inner]" in result.output
 
 
@@ -112,21 +113,27 @@ def test_a_view_that_is_not_inner_or_release_is_a_usage_error(runner, doc_source
     assert "'Release' is not one of 'inner', 'release'" in result.output
 
 
-@pytest.mark.parametrize(
-    "arguments",
-    [
-        ["--verbose", "normalize-docs"],
-        # As the action passes it: after the command's own options.
-        ["normalize-docs", "--verbose"],
-    ],
-)
-def test_verbose_is_taken_by_the_group_and_by_the_command(runner, doc_source, tmp_path, arguments):
-    # Act
-    result = runner.invoke(cli, [*arguments, f"--input={doc_source}", f"--output={tmp_path / 'out.json'}"])
+def test_verbose_before_the_command_name_turns_on_debug_logging(runner, doc_source, tmp_path):
+    # Act: as the action passes it.
+    result = runner.invoke(
+        cli, ["--verbose", "normalize-docs", f"--input={doc_source}", f"--output={tmp_path / 'out.json'}"]
+    )
 
     # Assert
     assert result.exit_code == 0, result.output
     assert logging.getLogger("living_doc").level == logging.DEBUG
+
+
+def test_verbose_after_the_command_name_is_a_usage_error(runner, doc_source, tmp_path):
+    # Act: only the group takes `--verbose`, so no later command repeats it.
+    result = runner.invoke(
+        cli, ["normalize-docs", f"--input={doc_source}", f"--output={tmp_path / 'out.json'}", "--verbose"]
+    )
+
+    # Assert
+    assert result.exit_code == 2
+    assert "No such option" in result.output
+    assert "--verbose" in result.output
 
 
 def test_a_missing_input_fails_with_one_missing_input_line_before_any_transform(runner, monkeypatch, tmp_path):

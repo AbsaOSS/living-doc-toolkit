@@ -2,7 +2,7 @@
 
 """
 The `normalize-docs` command: read one documentation input through the shared input validation, build
-`generator-ready` from it, check that no field was lost, and write the file.
+`generator-ready` from it, record the CI run, check that no field was lost, and write the file.
 """
 
 from datetime import datetime, timezone
@@ -10,6 +10,7 @@ from pathlib import Path
 
 from living_doc_core.input_validation import validate_inputs
 from living_doc_core.readers import Role
+from living_doc_core.run_context import run_context
 from living_doc_utilities.contracts import generator_ready
 from living_doc_utilities.contracts.common import View
 from living_doc_utilities.contracts.generator_ready import GeneratorReadyResult
@@ -67,6 +68,8 @@ def normalize_docs(
         title=document_title,
         version=document_version,
     )
+    # The CI run this file is written in; `source_inputs[0].run` stays the input's own.
+    result.metadata.run = run_context()
     check_no_field_loss(result)
     write_artifact(result, output_path)
     return result
