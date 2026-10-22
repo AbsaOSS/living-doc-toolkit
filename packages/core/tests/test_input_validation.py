@@ -6,12 +6,14 @@ Unit tests for the shared input validation.
 
 import json
 import logging
+from importlib.metadata import version
 
 import pytest
 from living_doc_utilities.contracts.codes import Code
 from living_doc_utilities.contracts.doc_source import DocSourceResult
 from living_doc_utilities.contracts.ui_tests import UITestsResult
 
+from living_doc_core import readers
 from living_doc_core.input_validation import (
     COMMAND_ROLES,
     InputProblem,
@@ -24,6 +26,9 @@ from living_doc_core.readers import Role
 DOCUMENTATION = Role.DOCUMENTATION
 TESTS = Role.TESTS
 PIN_HINT = "the components run different utilities versions — align the pins"
+RUNNING_UTILITIES = version("living-doc-utilities")
+_MAJOR, _MINOR, _ = RUNNING_UTILITIES.split(".", 2)
+NEWER_UTILITIES = f"{_MAJOR}.{int(_MINOR) + 1}.0"
 
 
 def _fails(command, inputs) -> list[InputProblem]:
@@ -178,7 +183,12 @@ def test_a_file_of_another_contract_fails_with_contract_mismatch_naming_the_expe
 
 @pytest.mark.parametrize(
     ("utilities_version", "hint"),
-    [("0.8.0", f"; {PIN_HINT}"), ("0.7.0", f"; the file was edited by hand, or {PIN_HINT}")],
+    [
+        # A newer utilities wrote the file.
+        (NEWER_UTILITIES, f"; {PIN_HINT}"),
+        # The running utilities wrote it, so it was edited by hand.
+        (RUNNING_UTILITIES, f"; the file was edited by hand, or {PIN_HINT}"),
+    ],
 )
 def test_an_unshipped_contract_version_fails_with_invalid_contract_id_and_the_pin_hint(
     changed_copy, doc_source, utilities_version, hint
@@ -197,13 +207,14 @@ def test_an_unshipped_contract_version_fails_with_invalid_contract_id_and_the_pi
     assert _codes(problems) == [Code.INVALID_CONTRACT_ID]
     assert problems[0].message.startswith(
         "schema_version 'doc-source-v1.1.0' is not a contract version this utilities ships "
-        f"(file written by utilities {utilities_version!r}, this is utilities '0.7.0')"
+        f"(file written by utilities {utilities_version!r}, this is utilities {RUNNING_UTILITIES!r})"
     )
     assert problems[0].message.endswith(hint)
 
 
 def test_a_file_that_fails_its_schema_fails_with_schema_validation_failed_naming_the_path(changed_copy, ui_tests):
-    # Arrange
+    # Arrange: the fixture was written by an older utilities than the running one, so the message ends with the hint.
+    written = json.loads(ui_tests.read_text(encoding="utf-8"))["metadata"]["producer"]["utilities_version"]
     path = changed_copy(ui_tests, lambda payload: payload["metadata"]["source"].pop("project_id"))
 
     # Act
@@ -214,7 +225,7 @@ def test_a_file_that_fails_its_schema_fails_with_schema_validation_failed_naming
     assert problems[0].location == f"tests input {str(path)!r}"
     assert problems[0].message == (
         "$.metadata.source: 'project_id' is a required property "
-        "(file written by utilities '0.7.0', this is utilities '0.7.0')"
+        f"(file written by utilities {written!r}, this is utilities {RUNNING_UTILITIES!r}); {PIN_HINT}"
     )
 
 
@@ -477,3 +488,17 @@ def test_the_error_text_lists_every_problem_in_order(ui_tests, doc_source):
 def test_a_call_no_command_can_make_is_a_value_error(command, inputs, message):
     with pytest.raises(ValueError, match=message):
         validate_inputs(command, inputs)
+
+
+# --- A defect in `read_artifact` ---
+
+
+def test_a_read_model_whose_schema_version_is_no_contract_id_is_a_value_error(monkeypatch, doc_source):
+    # Arrange: R5 step 1 lets only a contract id through, so only a defect in it gets here.
+    read = readers.read_artifact(doc_source, expected={"doc-source"})
+    broken = read.model_copy(update={"schema_version": "doc-source"})
+    monkeypatch.setattr(readers, "read_artifact", lambda *_args, **_kwargs: broken)
+
+    # Act / Assert
+    with pytest.raises(ValueError, match="^schema_version 'doc-source' is not a contract id$"):
+        validate_inputs("normalize-docs", {DOCUMENTATION: [doc_source]})

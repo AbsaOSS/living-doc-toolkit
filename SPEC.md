@@ -126,6 +126,6 @@ criterion against code at PR time.
 
 ## 6. Pending specifications
 
-*None.* Both packages — `core` and `apps/cli` — and the action are implemented; their
-behaviour lives in the live docs listed in [§0](#0-document-lifecycle). Add the next
-prospective spec section below this line.
+*None.* Every package — `core`, `services/normalize_docs` and `apps/cli` — and the action
+are implemented; their behaviour lives in the live docs listed in [§0](#0-document-lifecycle).
+Add the next prospective spec section below this line.

@@ -31,12 +31,12 @@ def test_cli_version(runner):
     assert "0.1.0" in result.output
 
 
-def test_cli_registers_no_command_yet(runner):
-    """No command runs yet: the group lists none, and a command name is an unknown command."""
-    assert cli.commands == {}
-    result = runner.invoke(cli, ["normalize-docs"])
+def test_cli_registers_normalize_docs_only(runner):
+    """`normalize-docs` is the one command so far; a command not registered yet is an unknown command."""
+    assert list(cli.commands) == ["normalize-docs"]
+    result = runner.invoke(cli, ["normalize-tests"])
     assert result.exit_code == 2
-    assert "No such command 'normalize-docs'" in result.output
+    assert "No such command 'normalize-tests'" in result.output
 
 
 @pytest.mark.parametrize("verbose", [True, False])

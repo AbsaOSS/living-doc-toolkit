@@ -1,6 +1,7 @@
 # Living Documentation Core
 
-The package every toolkit command shares: logging, the reader table and the shared input validation.
+The package every toolkit command shares: logging, the reader table, the shared input validation, the view filter
+and the CI run context.
 
 ## Overview
 
@@ -9,10 +10,14 @@ The package every toolkit command shares: logging, the reader table and the shar
 | `living_doc_core.logging_config` | `setup_logging(verbose)`: the `living_doc` logger, `[LEVEL] message` on stderr |
 | `living_doc_core.readers` | The reader table, `READERS`, and the readers `read_documentation` and `read_tests` |
 | `living_doc_core.input_validation` | `validate_inputs(command, inputs)`, which runs the shared input validation over one command's inputs |
+| `living_doc_core.views` | `select_records(entities, view)`, the view filter |
+| `living_doc_core.run_context` | `run_context()`, the CI run a file is written in, for `metadata.run` |
 
-- It depends on `living-doc-utilities==0.7.0` and nothing else; the contract models and schemas are that package's.
-- `living_doc_core` itself exports only `setup_logging`; `readers` and `input_validation` load the contract models, so
-  they are imported by name.
+- It depends on `living-doc-utilities==0.8.0` and nothing else; the contract models and schemas are that package's.
+- `living_doc_core` itself exports only `setup_logging` and `__version__`; `readers`, `input_validation`, `views` and
+  `run_context` load the contract models, so they are imported by name.
+- Its version is the toolkit's one version, which every package declares. `metadata.producer.version` of a file the
+  toolkit writes reads it from the installed `living-doc-core`.
 
 ## The reader table
 
@@ -65,6 +70,43 @@ The steps and codes are `living-doc-utilities`' [errors](https://github.com/Absa
 page, § Shared input validation order; the one-documentation-file rule is its
 [pipeline rules](https://github.com/AbsaOSS/living-doc-utilities/blob/master/docs/contracts/pipeline-rules.md) page,
 § One project, one pipeline, one documentation source.
+
+## The view filter
+
+`select_records(entities, view)` is the one view filter: a transform runs it to pick the records a view holds. It
+returns the kept entities and the contract's own `SelectionSummary`.
+
+- `inner` keeps every record.
+- `release` drops `planned` and `in_review` entities and, of the entities it keeps, `planned` and `in_review`
+  acceptance criteria; it keeps `deprecated` ones. A Feature is dropped by its derived state.
+- It selects records only and never edits a field: a kept entity is the input's own, or a copy without its dropped
+  criteria.
+- The acceptance-criteria counts cover kept entities only; a dropped entity's criteria are not counted.
+- A view other than `inner` or `release` is a `ValueError`.
+
+The rule is `living-doc-utilities`' [rendering](https://github.com/AbsaOSS/living-doc-utilities/blob/master/docs/contracts/rendering.md)
+page, § Records and presentation; how a generator shows each view is `living-doc`'s
+[document types](https://github.com/AbsaOSS/living-doc/blob/master/docs/guides/living-doc-document-types.md) guide.
+
+## The CI run context
+
+`run_context()` returns the contract's `Run`, read from the GitHub Actions variables of the run the command runs in:
+
+| Field | Variable |
+|---|---|
+| `run_id` | `GITHUB_RUN_ID` |
+| `run_attempt` | `GITHUB_RUN_ATTEMPT` |
+| `actor` | `GITHUB_ACTOR` |
+| `workflow` | `GITHUB_WORKFLOW` |
+| `ref` | `GITHUB_REF` |
+| `sha` | `GITHUB_SHA` |
+
+- An unset or empty variable is `None`, so outside GitHub Actions every field is.
+- A command sets it as its output's `metadata.run`. It is audit information: nothing reads it to decide anything.
+- An input's own `run` stays in its `metadata.source_inputs[]` entry.
+
+`run` is defined on `living-doc-utilities`' [artifact rules](https://github.com/AbsaOSS/living-doc-utilities/blob/master/docs/contracts/artifact-rules.md)
+page, § The metadata envelope.
 
 ## Installation
 

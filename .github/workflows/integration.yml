@@ -27,10 +27,65 @@ concurrency:
 permissions:
   contents: read
 
-# No command runs yet: every run of the action builds or reuses its venv, checks its inputs and fails on the
-# "not available yet" line, so each run step continues on error and the job asserts the failure. A step cannot read
-# another step's log, so each job replays the run's inputs on the action's venv and asserts that line there.
+# `action-run` runs each command the action runs over the fixtures and checks the file it wrote. The venv jobs run the
+# action several times on one runner: `normalize-docs` writes its file, and `coverage-matrix`, not available yet, fails
+# on the "not available yet" line. Each run step continues on error and the job asserts its outcome. A step cannot read
+# another step's log, so each venv job replays the run's inputs on the action's venv and asserts the exit code and the
+# file written, or the refusal line.
 jobs:
+  action-run:
+    runs-on: ubuntu-latest
+    name: Action Run - Each Command Over the Fixtures
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.14'
+
+      - name: Run normalize-docs
+        id: normalize-docs
+        uses: ./
+        with:
+          command: normalize-docs
+          input: tests/fixtures/collector-gh/doc-source.json
+          output: output/generator-ready.json
+          view: release
+
+      - name: normalize-docs wrote a valid generator-ready file in the release view with this run, and output-path names it
+        env:
+          VENV: ${{ runner.temp }}/living-doc-toolkit-venv
+          OUTPUT_PATH: ${{ steps.normalize-docs.outputs.output-path }}
+        run: |
+          set -euo pipefail
+          if [[ "$OUTPUT_PATH" != "$GITHUB_WORKSPACE/output/generator-ready.json" ]]; then
+            echo "::error::output-path must be the absolute path of the file written; it is '$OUTPUT_PATH'."; exit 1
+          fi
+          "$VENV/bin/python" -I -c '
+          import sys
+          from living_doc_utilities.contracts.generator_ready import GeneratorReadyResult
+          from living_doc_utilities.contracts.io import read_artifact
+          result = read_artifact(sys.argv[1], expected="generator-ready")
+          assert isinstance(result, GeneratorReadyResult), type(result)
+          summary = result.document.selection_summary
+          assert result.document.view == "release", result.document.view
+          assert (summary.total_entities, summary.included_entities, summary.excluded_entities) == (5, 3, 2), summary
+          assert (
+              summary.total_acceptance_criteria,
+              summary.included_acceptance_criteria,
+              summary.excluded_acceptance_criteria,
+          ) == (7, 6, 1), summary
+          assert result.metadata.run.run_id == sys.argv[2], (result.metadata.run, sys.argv[2])
+          assert result.metadata.producer.build is None, result.metadata.producer
+          print(summary)
+          print(result.metadata.run)
+          ' "$OUTPUT_PATH" "$GITHUB_RUN_ID"
+          echo '::notice::normalize-docs wrote a valid generator-ready file in the release view, with this run, at the output-path.'
+
   action-venv-isolation:
     runs-on: ubuntu-latest
     name: Action Venv - Isolation and Reuse
@@ -88,40 +143,58 @@ jobs:
           view: release
           document-title: Checkout tests
 
-      - name: Every step stopped on "not available yet", the venv was reused, the caller's environment is unchanged
+      - name: normalize-docs wrote its files, coverage-matrix stopped, the venv was reused, the caller's environment is unchanged
         env:
           VENV: ${{ runner.temp }}/living-doc-toolkit-venv
           OUTCOMES: ${{ steps.first.outcome }} ${{ steps.second.outcome }} ${{ steps.third.outcome }}
         run: |
           set -euo pipefail
-          if [[ "$OUTCOMES" != "failure failure failure" ]]; then
-            echo "::error::every run of the action must fail while no command runs; the outcomes: $OUTCOMES."; exit 1
+          if [[ "$OUTCOMES" != "success failure success" ]]; then
+            echo "::error::normalize-docs must succeed and coverage-matrix fail while it is not available yet; the outcomes: $OUTCOMES."; exit 1
           fi
           test "$(stat -c %Y "$VENV/pyvenv.cfg")" = "$(cat "${RUNNER_TEMP}/venv-cfg-mtime.txt")"
+          # A valid generator-ready file, with the view and title given.
+          written() {
+            "$VENV/bin/python" -I -c '
+          import sys
+          from living_doc_utilities.contracts.io import read_artifact
+          path, view, title = sys.argv[1:]
+          document = read_artifact(path, expected="generator-ready").document
+          assert (document.view, document.title) == (view, title), document
+          ' "$@"
+          }
+          written output/first/generator-ready.json inner living-doc-examples
+          written output/third/generator-ready.json release 'Checkout tests'
           out="${RUNNER_TEMP}/replay"
           replay() {
-            local command="$1" status=0
-            shift
+            local expected="$1" command="$2" status=0
+            shift 2
+            rm -f "$out.output"
             env "$@" INPUT_COMMAND="$command" GITHUB_OUTPUT="$out.output" \
               "$VENV/bin/python" -E main.py > "$out.log" 2>&1 || status=$?
             cat "$out.log"
-            test "$status" = 1
-            grep -Fx "[ERROR] Command \`$command\` is not available yet; no command runs yet." "$out.log"
-            test ! -e "$out.output"
+            test "$status" = "$expected"
           }
-          replay normalize-docs INPUT_INPUT=tests/fixtures/collector-gh/doc-source.json \
+          replay 0 normalize-docs INPUT_INPUT=tests/fixtures/collector-gh/doc-source.json \
             INPUT_OUTPUT="$out/first/generator-ready.json"
-          replay coverage-matrix INPUT_INPUT=tests/fixtures/collector-gh/doc-source.json \
+          grep -Fx "output-path=$out/first/generator-ready.json" "$out.output"
+          written "$out/first/generator-ready.json" inner living-doc-examples
+          replay 1 coverage-matrix INPUT_INPUT=tests/fixtures/collector-gh/doc-source.json \
             INPUT_TESTS_INPUT=tests/fixtures/collector-gh/ui-tests.json INPUT_OUTPUT="$out/second/coverage-matrix.json"
-          replay normalize-docs INPUT_INPUT=tests/fixtures/collector-gh/doc-source.json \
+          grep -Fx '[ERROR] Command `coverage-matrix` is not available yet.' "$out.log"
+          test ! -e "$out.output"
+          test ! -e "$out/second/coverage-matrix.json"
+          replay 0 normalize-docs INPUT_INPUT=tests/fixtures/collector-gh/doc-source.json \
             INPUT_OUTPUT="$out/third/generator-ready.json" INPUT_VIEW=release INPUT_DOCUMENT_TITLE='Checkout tests'
+          grep -Fx "output-path=$out/third/generator-ready.json" "$out.output"
+          written "$out/third/generator-ready.json" release 'Checkout tests'
           {
             which python
             python --version
             python -c 'import pydantic; print(pydantic.VERSION)'
           } | tee "${RUNNER_TEMP}/after.txt"
           diff "${RUNNER_TEMP}/before.txt" "${RUNNER_TEMP}/after.txt"
-          echo '::notice::every step stopped on "not available yet", as the replays on the venv did, the venv was reused, and the runner interpreter is unchanged.'
+          echo '::notice::normalize-docs wrote its files and coverage-matrix stopped on "not available yet", as the replays on the venv did, the venv was reused, and the runner interpreter is unchanged.'
 
   action-venv-rebuilt-when-python-changes:
     runs-on: ubuntu-latest
@@ -146,21 +219,20 @@ jobs:
           input: tests/fixtures/collector-gh/doc-source.json
           output: output/on-312/generator-ready.json
 
-      - name: The venv was built from 3.12, and the run stopped on "not available yet"
+      - name: The venv was built from 3.12, and normalize-docs wrote its file
         env:
           VENV: ${{ runner.temp }}/living-doc-toolkit-venv
           OUTCOME: ${{ steps.on-312.outcome }}
         run: |
           set -euo pipefail
-          test "$OUTCOME" = failure
+          test "$OUTCOME" = success
           "$VENV/bin/python" -c 'import sys, living_doc_cli.main; assert sys.version_info[:2] == (3, 12), sys.version'
-          status=0
           INPUT_COMMAND=normalize-docs INPUT_INPUT=tests/fixtures/collector-gh/doc-source.json \
-            INPUT_OUTPUT=output/on-312/generator-ready.json \
-            "$VENV/bin/python" -E main.py > "${RUNNER_TEMP}/replay.log" 2>&1 || status=$?
-          cat "${RUNNER_TEMP}/replay.log"
-          test "$status" = 1
-          grep -Fx '[ERROR] Command `normalize-docs` is not available yet; no command runs yet.' "${RUNNER_TEMP}/replay.log"
+            INPUT_OUTPUT="${RUNNER_TEMP}/replay/generator-ready.json" GITHUB_OUTPUT="${RUNNER_TEMP}/replay.output" \
+            "$VENV/bin/python" -E main.py
+          # The step's file and the replay's: each a valid generator-ready file.
+          "$VENV/bin/python" -I -c 'import sys; from living_doc_utilities.contracts.io import read_artifact; [read_artifact(path, expected="generator-ready") for path in sys.argv[1:]]' \
+            output/on-312/generator-ready.json "${RUNNER_TEMP}/replay/generator-ready.json"
 
       - name: Switch the interpreter on PATH to 3.11
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
@@ -176,21 +248,20 @@ jobs:
           input: tests/fixtures/collector-gh/doc-source.json
           output: output/on-311/generator-ready.json
 
-      - name: The venv was rebuilt from the interpreter now on PATH, and the run stopped on "not available yet"
+      - name: The venv was rebuilt from the interpreter now on PATH, and normalize-docs wrote its file
         env:
           VENV: ${{ runner.temp }}/living-doc-toolkit-venv
           OUTCOME: ${{ steps.on-311.outcome }}
         run: |
           set -euo pipefail
-          test "$OUTCOME" = failure
+          test "$OUTCOME" = success
           "$VENV/bin/python" -c 'import sys, living_doc_cli.main; assert sys.version_info[:2] == (3, 11), sys.version'
-          status=0
+          rm -f "${RUNNER_TEMP}/replay/generator-ready.json"
           INPUT_COMMAND=normalize-docs INPUT_INPUT=tests/fixtures/collector-gh/doc-source.json \
-            INPUT_OUTPUT=output/on-311/generator-ready.json \
-            "$VENV/bin/python" -E main.py > "${RUNNER_TEMP}/replay.log" 2>&1 || status=$?
-          cat "${RUNNER_TEMP}/replay.log"
-          test "$status" = 1
-          grep -Fx '[ERROR] Command `normalize-docs` is not available yet; no command runs yet.' "${RUNNER_TEMP}/replay.log"
+            INPUT_OUTPUT="${RUNNER_TEMP}/replay/generator-ready.json" GITHUB_OUTPUT="${RUNNER_TEMP}/replay.output" \
+            "$VENV/bin/python" -E main.py
+          "$VENV/bin/python" -I -c 'import sys; from living_doc_utilities.contracts.io import read_artifact; [read_artifact(path, expected="generator-ready") for path in sys.argv[1:]]' \
+            output/on-311/generator-ready.json "${RUNNER_TEMP}/replay/generator-ready.json"
           echo '::notice::switching the interpreter rebuilt the venv instead of reusing the 3.12 one.'
 
   action-rejects-python-39:

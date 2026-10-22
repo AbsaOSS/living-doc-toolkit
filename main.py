@@ -35,9 +35,11 @@ OUTPUT = "output"
 FAIL_UNDER = "fail-under"
 VERBOSE_LOGGING = "verbose-logging"
 OUTPUT_PATH = "output-path"
+# Set to `1` by a re-run with debug logging.
+RUNNER_DEBUG = "RUNNER_DEBUG"
 
 # Per command, the inputs it takes, in `action.yml` order, each with the CLI option it becomes and whether the
-# command requires it. `verbose-logging` is taken by every command and becomes `--verbose`.
+# command requires it. `verbose-logging` is taken by every command and becomes the group's `--verbose`.
 COMMAND_INPUTS: dict[str, dict[str, tuple[str, bool]]] = {
     "normalize-docs": {
         "input": ("--input", True),
@@ -57,8 +59,8 @@ COMMAND_INPUTS: dict[str, dict[str, tuple[str, bool]]] = {
         FAIL_UNDER: ("--fail-under", False),
     },
 }
-# Declared by `action.yml`, run by no CLI yet: checked like the others, then refused.
-NOT_AVAILABLE_YET = ("normalize-docs", "normalize-tests", "coverage-matrix")
+# Declared by `action.yml`, not registered by the CLI yet: checked like the others, then refused.
+NOT_AVAILABLE_YET = ("normalize-tests", "coverage-matrix")
 
 VALID_COMMANDS = ", ".join(COMMAND_INPUTS)
 # Every input a command can take, in `action.yml` order.
@@ -117,7 +119,7 @@ def build_command_line(verbose: bool) -> tuple[list[str], str]:
     """
     Validate the inputs, stopping at the first invalid one, and build the CLI's arguments from them.
 
-    @param verbose: Whether `verbose-logging` is on, which adds `--verbose`.
+    @param verbose: Whether verbose logging is on, which adds the group's `--verbose` before the command name.
     @return: The arguments after `python -I -m living_doc_cli.main`, and the absolute path of the file the command
         writes.
     @raise ActionInputError: `command` is empty or unknown; an input the command does not take is set; an input the
@@ -146,18 +148,17 @@ def build_command_line(verbose: bool) -> tuple[list[str], str]:
     if fail_under and not _is_number(fail_under):
         raise ActionInputError(f"Input `{FAIL_UNDER}` is {fail_under!r}, not a number.")
 
-    # Last, so a wrong input is reported while no command runs.
+    # Last, so a wrong input is reported for a command not available yet too.
     if command in NOT_AVAILABLE_YET:
-        raise ActionInputError(f"Command `{command}` is not available yet; no command runs yet.")
+        raise ActionInputError(f"Command `{command}` is not available yet.")
 
-    arguments = [command]
+    # `--verbose` is the group's option, so no command repeats it.
+    arguments = ["--verbose", command] if verbose else [command]
     for name, (option, _) in taken.items():
         value = output_path if name == OUTPUT else get_input(name)
         if value:
             # `--option=value`: a value that starts with `-` stays the option's value.
             arguments.append(f"{option}={value}")
-    if verbose:
-        arguments.append("--verbose")
     return arguments, output_path
 
 
@@ -181,7 +182,7 @@ def run() -> None:
     @return: None; the run ends with exit code 1 on an invalid input or an output it cannot set, with the command's
         own exit code when the command fails, and with exit code 0 once the file is written and the output set.
     """
-    verbose = get_input(VERBOSE_LOGGING).lower() == "true"
+    verbose = get_input(VERBOSE_LOGGING).lower() == "true" or os.environ.get(RUNNER_DEBUG, "0") == "1"
     setup_logging(verbose=verbose)
 
     try:
@@ -193,7 +194,7 @@ def run() -> None:
     # `-I` is `-E` that also keeps the working directory, the caller's checkout, off `sys.path`: with `-m` alone a
     # `click.py` or `json.py` there would shadow the venv's module.
     command_line = [sys.executable, "-I", "-m", "living_doc_cli.main", *arguments]
-    logger.info("Living Documentation Toolkit action - running `%s`.", arguments[0])
+    logger.info("Living Documentation Toolkit action - running `%s`.", get_input(COMMAND))
     logger.debug("Living Documentation Toolkit action - command line: %s", shlex.join(command_line))
     completed = subprocess.run(command_line, check=False)
     if completed.returncode != 0:

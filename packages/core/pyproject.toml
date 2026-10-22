@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "living-doc-core"
-version = "1.0.0"
+version = "0.1.0"
 description = "Core utilities for the Living Documentation Toolkit"
 readme = "README.md"
 license = {text = "Apache-2.0"}
@@ -13,7 +13,7 @@ authors = [
 ]
 requires-python = ">=3.10"
 dependencies = [
-    "living-doc-utilities==0.7.0"
+    "living-doc-utilities==0.8.0"
 ]
 
 [project.optional-dependencies]

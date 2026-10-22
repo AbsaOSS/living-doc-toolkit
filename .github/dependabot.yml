@@ -42,7 +42,9 @@ updates:
           - "*"
 
   # Monorepo adaptation (repo-conventions.md §10.1): one `pip` block per package
-  # directory, each grouped into a single PR.
+  # directory, each grouped into a single PR. Each ignores `living-doc-utilities`:
+  # a block bumps its own directory only, and every package pins the one version,
+  # so the pin moves by hand, in all of them in one change.
   - package-ecosystem: "pip"
     directory: "/packages/core"
     target-branch: "master"
@@ -59,8 +61,33 @@ updates:
       include: "scope"
     allow:
       - dependency-type: "direct"
+    ignore:
+      - dependency-name: "living-doc-utilities"
     groups:
       pip-core:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "pip"
+    directory: "/packages/services/normalize_docs"
+    target-branch: "master"
+    schedule:
+      interval: "weekly"
+      day: "sunday"
+    labels:
+      - "auto update"
+      - "infrastructure"
+      - "no RN"
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    allow:
+      - dependency-type: "direct"
+    ignore:
+      - dependency-name: "living-doc-utilities"
+    groups:
+      pip-normalize-docs:
         patterns:
           - "*"
 
@@ -80,6 +107,8 @@ updates:
       include: "scope"
     allow:
       - dependency-type: "direct"
+    ignore:
+      - dependency-name: "living-doc-utilities"
     groups:
       pip-cli:
         patterns:
