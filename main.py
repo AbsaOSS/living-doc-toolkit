@@ -60,7 +60,7 @@ COMMAND_INPUTS: dict[str, dict[str, tuple[str, bool]]] = {
     },
 }
 # Declared by `action.yml`, not registered by the CLI yet: checked like the others, then refused.
-NOT_AVAILABLE_YET = ("normalize-tests", "coverage-matrix")
+NOT_AVAILABLE_YET = ("coverage-matrix",)
 
 VALID_COMMANDS = ", ".join(COMMAND_INPUTS)
 # Every input a command can take, in `action.yml` order.

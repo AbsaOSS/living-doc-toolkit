@@ -8,6 +8,7 @@ and the CI run context.
 | Module | What it holds |
 |---|---|
 | `living_doc_core.logging_config` | `setup_logging(verbose)`: the `living_doc` logger, `[LEVEL] message` on stderr |
+| `living_doc_core.envelope` | The toolkit producer identity and `forwarded(warning, source)`, shared by every transform |
 | `living_doc_core.readers` | The reader table, `READERS`, and the readers `read_documentation` and `read_tests` |
 | `living_doc_core.input_validation` | `validate_inputs(command, inputs)`, which runs the shared input validation over one command's inputs |
 | `living_doc_core.views` | `select_records(entities, view)`, the view filter |
@@ -18,6 +19,8 @@ and the CI run context.
   `run_context` load the contract models, so they are imported by name.
 - Its version is the toolkit's one version, which every package declares. `metadata.producer.version` of a file the
   toolkit writes reads it from the installed `living-doc-core`.
+- `living_doc_core.envelope` is imported by name. It is not loaded by `living_doc_core.__init__`, which keeps the
+  contract-model imports behind the module boundary that needs them.
 
 ## The reader table
 
@@ -107,6 +110,16 @@ page, § Records and presentation; how a generator shows each view is `living-do
 
 `run` is defined on `living-doc-utilities`' [artifact rules](https://github.com/AbsaOSS/living-doc-utilities/blob/master/docs/contracts/artifact-rules.md)
 page, § The metadata envelope.
+
+## Shared envelope
+
+`living_doc_core.envelope` provides `PRODUCER_NAME` (`AbsaOSS/living-doc-toolkit`), `TOOLKIT_VERSION` (the installed
+`living-doc-core` version), and `forwarded(warning, source)`. The forwarding helper copies a warning unchanged except
+that its context starts with `source_input='<schema_version>'`, retaining the warning's context after it when present.
+The source is the input contract id recorded in `metadata.source_inputs[]`, as required by the
+[errors](https://github.com/AbsaOSS/living-doc-utilities/blob/master/docs/contracts/errors.md) page, § Forwarded
+warnings. Producer identity is part of the [artifact rules](https://github.com/AbsaOSS/living-doc-utilities/blob/master/docs/contracts/artifact-rules.md),
+§ The metadata envelope.
 
 ## Installation
 

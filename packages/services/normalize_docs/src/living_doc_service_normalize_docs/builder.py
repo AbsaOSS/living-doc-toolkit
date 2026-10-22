@@ -8,8 +8,8 @@ reads and writes no file; `service` does.
 from collections import Counter
 from collections.abc import Iterable
 from datetime import datetime
-from importlib.metadata import version as installed_version
 
+from living_doc_core.envelope import PRODUCER_NAME, TOOLKIT_VERSION, forwarded
 from living_doc_core.views import select_records
 from living_doc_utilities.contracts import doc_source
 from living_doc_utilities.contracts.common import View
@@ -19,7 +19,6 @@ from living_doc_utilities.contracts.doc_source import DocSourceResult
 from living_doc_utilities.contracts.envelope import (
     AuditStats,
     Cardinality,
-    ContractWarning,
     Metadata,
     Producer,
     SourceInputEntry,
@@ -28,9 +27,6 @@ from living_doc_utilities.contracts.envelope import (
 from living_doc_utilities.contracts.generator_ready import Content, Document, GeneratorReadyResult, SelectionSummary
 from living_doc_utilities.contracts.stats import compute_stats
 
-PRODUCER_NAME = "AbsaOSS/living-doc-toolkit"
-# The toolkit has one version, the action's release: every package declares it, and `living-doc-core`'s is read.
-TOOLKIT_VERSION = installed_version("living-doc-core")
 DEFAULT_DOCUMENT_VERSION = "1.0.0"
 
 
@@ -49,20 +45,6 @@ def _summed(summaries: Iterable[SelectionSummary]) -> SelectionSummary:
     for summary in summaries:
         total.update(summary.model_dump())
     return SelectionSummary.model_validate(total)
-
-
-def forwarded(warning: ContractWarning, source: str) -> ContractWarning:
-    """
-    An input warning as the output carries it: unchanged but for `context`, which names the input first and keeps the
-    warning's own context after it, as `source_input='<contract id>' <context>`.
-
-    @param warning: The input's warning.
-    @param source: The input's contract id, its `schema_version`. A run reads one input per contract, and its
-        `metadata.source_inputs[]` entry carries the same id, so the name points into the output itself.
-    @return: A copy of the warning.
-    """
-    named = f"source_input={source!r}"
-    return warning.model_copy(update={"context": f"{named} {warning.context}" if warning.context else named})
 
 
 def build_generator_ready(
