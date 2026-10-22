@@ -15,3 +15,9 @@ FIXTURES = Path(__file__).resolve().parents[3] / "tests" / "fixtures" / "collect
 def _doc_source() -> Path:
     """`living-doc`'s example `doc-source.json`."""
     return FIXTURES / "doc-source.json"
+
+
+@pytest.fixture(name="ui_tests")
+def _ui_tests() -> Path:
+    """`living-doc`'s example `ui-tests.json`."""
+    return FIXTURES / "ui-tests.json"

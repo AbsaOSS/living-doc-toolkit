@@ -6,17 +6,16 @@ warnings.
 """
 
 from datetime import datetime, timezone
-from importlib.metadata import version
 from typing import get_type_hints
 
 import pytest
+from living_doc_core.envelope import forwarded
 from living_doc_core.readers import read_documentation
-from living_doc_utilities.contracts.compat import installed_utilities_version
 from living_doc_utilities.contracts.doc_source import DocSourceResult
-from living_doc_utilities.contracts.envelope import AuditStats, ContractWarning, Run
+from living_doc_utilities.contracts.envelope import AuditStats, Run
 from living_doc_utilities.contracts.generator_ready import GeneratorReadyResult
 
-from living_doc_service_normalize_docs.builder import build_generator_ready, forwarded
+from living_doc_service_normalize_docs.builder import build_generator_ready
 
 GENERATED_AT = datetime(2026, 10, 21, 12, 0, tzinfo=timezone.utc)
 
@@ -117,17 +116,6 @@ def test_a_given_title_and_version_are_the_documents(documentation):
 # --- The envelope ---
 
 
-def test_the_producer_is_the_toolkit_at_the_version_of_living_doc_core(documentation):
-    # Act
-    producer = _build(documentation).metadata.producer
-
-    # Assert
-    assert producer.name == "AbsaOSS/living-doc-toolkit"
-    assert producer.version == version("living-doc-core") == "0.1.0"
-    assert producer.build is None
-    assert producer.utilities_version == installed_utilities_version()
-
-
 def test_the_builder_leaves_the_run_empty_for_the_caller_to_set(documentation):
     # Act
     metadata = _build(documentation).metadata
@@ -196,30 +184,6 @@ def test_the_outputs_own_reported_counts_are_left_at_0(documentation):
         cardinality.unresolved_refs,
         cardinality.entities_skipped,
     ) == (0, 0, 0, 0)
-
-
-# --- Forwarded warnings ---
-
-
-def test_a_forwarded_warning_names_the_input_before_its_own_context():
-    # Arrange
-    warning = ContractWarning(code="UNRESOLVED_RELATION", message="m", context="entity_id='FEAT-003' target='FEAT-002'")
-
-    # Act
-    result = forwarded(warning, "doc-source-v1.0.0")
-
-    # Assert
-    assert result.context == "source_input='doc-source-v1.0.0' entity_id='FEAT-003' target='FEAT-002'"
-    assert result.model_dump(exclude={"context"}) == warning.model_dump(exclude={"context"})
-
-
-@pytest.mark.parametrize("context", [None, ""])
-def test_a_forwarded_warning_without_a_context_gets_the_input_as_its_context(context):
-    # Act
-    result = forwarded(ContractWarning(code="EMPTY_SOURCE", message="m", context=context), "doc-source-v1.0.0")
-
-    # Assert
-    assert result.context == "source_input='doc-source-v1.0.0'"
 
 
 def test_every_input_warning_is_forwarded_in_order_naming_the_inputs_source_inputs_entry(documentation):
