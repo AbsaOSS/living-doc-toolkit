@@ -19,7 +19,8 @@ updates:
         patterns:
           - "*"
 
-  # The root: `requirements.txt` and `requirements-dev.txt`.
+  # The root: `requirements.txt` and `requirements-dev.txt`. It ignores `living-doc-utilities`, as the package
+  # entries below do: `requirements.txt` pins the version every package pins, so it moves with theirs, by hand.
   - package-ecosystem: "pip"
     directory: "/"
     target-branch: "master"
@@ -36,6 +37,8 @@ updates:
       include: "scope"
     allow:
       - dependency-type: "direct"
+    ignore:
+      - dependency-name: "living-doc-utilities"
     groups:
       pip-root:
         patterns:
@@ -111,6 +114,29 @@ updates:
       - dependency-name: "living-doc-utilities"
     groups:
       pip-normalize-tests:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "pip"
+    directory: "/packages/services/coverage_matrix"
+    target-branch: "master"
+    schedule:
+      interval: "weekly"
+      day: "sunday"
+    labels:
+      - "auto update"
+      - "infrastructure"
+      - "no RN"
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    allow:
+      - dependency-type: "direct"
+    ignore:
+      - dependency-name: "living-doc-utilities"
+    groups:
+      pip-coverage-matrix:
         patterns:
           - "*"
 

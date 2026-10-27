@@ -87,7 +87,7 @@ Repo specifics
   - Python 3.10+ (supported floor); the CI matrix runs `3.10` through `3.14`.
 - Quality gates (use the `Makefile` targets — `.github/workflows/test.yml` and `integration.yml` run the same)
   - Full gate, all packages: `make qa`
-  - Per package: `make qa-<alias>` (`<alias>` ∈ `core`, `normalize-docs`, `normalize-tests`, `cli`)
+  - Per package: `make qa-<alias>` (`<alias>` ∈ `core`, `normalize-docs`, `normalize-tests`, `coverage-matrix`, `cli`)
   - Individual: `make lint-<alias>` (Pylint ≥ 9.5), `make format-check-<alias>` (Black, line length 120), `make types-<alias>` (mypy), `make deptry-<alias>` (deptry), `make test-<alias>`, `make coverage-<alias>` (`--cov-fail-under=80`)
   - Whole repository: `make no-vendored-schemas` (R12 check 1, in `make qa`)
   - Must keep the per-package invocation (each gate runs from inside the package directory) — do not flatten it to a repo-root command.

@@ -7,6 +7,7 @@ Main CLI entrypoint for the Living Documentation Toolkit. Each command is regist
 import click
 
 from living_doc_cli import __version__
+from living_doc_cli.commands.coverage_matrix import coverage_matrix
 from living_doc_cli.commands.normalize_docs import normalize_docs
 from living_doc_cli.commands.normalize_tests import normalize_tests
 
@@ -29,6 +30,7 @@ def cli(ctx: click.Context, verbose: bool) -> None:
 
 cli.add_command(normalize_docs)
 cli.add_command(normalize_tests)
+cli.add_command(coverage_matrix)
 
 
 if __name__ == "__main__":

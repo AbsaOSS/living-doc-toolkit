@@ -12,7 +12,7 @@
 #   make <gate>             One gate, every package and the root (deptry: every package)
 #   make no-vendored-schemas  R12 check 1 over the whole repository
 #
-# Package aliases:  core · normalize-docs · normalize-tests · cli
+# Package aliases:  core · normalize-docs · normalize-tests · coverage-matrix · cli
 #
 # The pre-Phase-0 names (py-qa, black, pylint, mypy, pytest-unit and their
 # per-package forms) still work as deprecated aliases for one release — each
@@ -20,11 +20,12 @@
 # ============================================================================
 
 # --- Package map -----------------------------------------------------------
-ALIASES := core normalize-docs normalize-tests cli
+ALIASES := core normalize-docs normalize-tests coverage-matrix cli
 
 dir-core           := packages/core
 dir-normalize-docs := packages/services/normalize_docs
 dir-normalize-tests := packages/services/normalize_tests
+dir-coverage-matrix := packages/services/coverage_matrix
 dir-cli            := apps/cli
 
 # --- Root: the action's entry point and its tests ----------------------------
@@ -74,7 +75,7 @@ help: ## Show this help message
 	@echo "$(YELLOW)Whole repository:$(NC)"
 	@echo "  make no-vendored-schemas     Fail on a committed contract schema file (R12 check 1)"
 	@echo ""
-	@echo "$(YELLOW)One package (alias: core normalize-docs normalize-tests cli):$(NC)"
+	@echo "$(YELLOW)One package (alias: core normalize-docs normalize-tests coverage-matrix cli):$(NC)"
 	@echo "  make qa-<alias>              All gates for one package"
 	@echo "  make lint-<alias> | format-<alias> | format-check-<alias> | types-<alias> | deptry-<alias> | test-<alias>"
 	@echo "  make coverage-<alias>"
@@ -87,6 +88,7 @@ install: ## Install requirements-dev.txt, then every package editable with [dev]
 	$(PYTHON) -m pip install -e packages/core[dev]
 	$(PYTHON) -m pip install -e "packages/services/normalize_docs[dev]"
 	$(PYTHON) -m pip install -e "packages/services/normalize_tests[dev]"
+	$(PYTHON) -m pip install -e "packages/services/coverage_matrix[dev]"
 	$(PYTHON) -m pip install -e "apps/cli[dev]"
 	@echo "$(GREEN)✓ All packages installed$(NC)"
 

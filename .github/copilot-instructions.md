@@ -21,8 +21,8 @@ Tooling and quality gates → Common pitfalls → Learned rules.
 (`living-doc`) and one composite GitHub Action. It sits between the upstream `living-doc-*`
 collector actions and the downstream generator actions: it reads collector output as
 `living-doc-utilities` contract artifacts, validates a command's inputs together, and
-transforms them into the contracts the generators read. `normalize-docs` and `normalize-tests` run;
-`coverage-matrix` lands in a later change.
+transforms them into the contracts the generators read. `normalize-docs`, `normalize-tests` and
+`coverage-matrix` run.
 
 - Must treat the `living-doc` CLI running as a step in a GitHub Actions workflow as the supported path; running `living-doc <command>` locally is a development and debugging affordance only.
 - Must keep the whole collect → normalize → generate pipeline AI-free — deterministic Python only, no LLM call and no network call anywhere in that path.
@@ -31,7 +31,7 @@ transforms them into the contracts the generators read. `normalize-docs` and `no
 
 ## Repo specifics
 
-Module map — four packages under `packages/` and `apps/`, each with its own `pyproject.toml`,
+Module map — five packages under `packages/` and `apps/`, each with its own `pyproject.toml`,
 `src/` layout, and `tests/` directory:
 
 | Path | Package (`pip` name) | Responsibility |
@@ -39,9 +39,10 @@ Module map — four packages under `packages/` and `apps/`, each with its own `p
 | `packages/core` | `living-doc-core` | `logging_config.py` (`setup_logging`), `envelope.py` (`PRODUCER_NAME`, `TOOLKIT_VERSION`, `forwarded`, the producer identity and warning forwarding every transform shares), `readers.py` (the reader table, `read_documentation`, `read_tests`), `input_validation.py` (`validate_inputs`, the shared input validation), `views.py` (`select_records`, the view filter), `run_context.py` (`run_context`, the CI run for `metadata.run`). Depends on `living-doc-utilities==0.8.0`. |
 | `packages/services/normalize_docs` | `living-doc-service-normalize-docs` | `builder.py` (`build_generator_ready`), `lineage.py` (`LINEAGE_TABLE`), `service.py` (`normalize_docs`, the command, and `check_no_field_loss`). |
 | `packages/services/normalize_tests` | `living-doc-service-normalize-tests` | `builder.py` (`build_ui_test_catalog`), `lineage.py` (`LINEAGE_TABLE`), `service.py` (`normalize_tests`, the command, and the runtime field-loss check). |
-| `apps/cli` | `living-doc-cli` | CLI entry point — `main.py` (`cli()` click group), one module per command under `commands/`. Registers `normalize-docs` and `normalize-tests`. |
+| `packages/services/coverage_matrix` | `living-doc-service-coverage-matrix` | `builder.py` (`build_coverage_matrix`), `lineage.py` (`LINEAGE_TABLE`, over both inputs), `service.py` (`coverage_matrix`, the command, and `check_no_field_loss`, against the documentation input only). |
+| `apps/cli` | `living-doc-cli` | CLI entry point — `main.py` (`cli()` click group), one module per command under `commands/`. Registers `normalize-docs`, `normalize-tests` and `coverage-matrix`; `coverage-matrix`'s `--fail-under` gate is the CLI's, after the write. |
 
-- Must treat the repository root as the action — `action.yml`, its entry point `main.py` (input checks, `COMMAND_INPUTS`, `NOT_AVAILABLE_YET`), and the root `tests/`.
+- Must treat the repository root as the action — `action.yml`, its entry point `main.py` (input checks, `COMMAND_INPUTS`), and the root `tests/`.
 - Must treat `apps/cli/src/living_doc_cli/main.py` `cli()` as the CLI entry point — each command is registered there as it lands.
 - Must read every contract artifact through `living_doc_core.readers`, which calls `living-doc-utilities`' `read_artifact`, and must write one only through `write_artifact` (R12 check 2).
 - Must run `living_doc_core.input_validation.validate_inputs` over a command's inputs before it transforms them.
@@ -66,7 +67,7 @@ Contract-sensitive outputs:
 QA commands — the per-package `Makefile` targets (`.github/workflows/test.yml` runs the same targets):
 
 - Full gate, every package: `make qa` (runs `format-check` → `lint` → `types` → `deptry` → `test` per package, then the root checks, then `no-vendored-schemas`, failing on the first).
-- Per package: `make qa-<alias>` where `<alias>` is one of `core`, `normalize-docs`, `normalize-tests`, `cli`.
+- Per package: `make qa-<alias>` where `<alias>` is one of `core`, `normalize-docs`, `normalize-tests`, `coverage-matrix`, `cli`.
 - Individual gate per package: `make lint-<alias>`, `make format-<alias>`, `make format-check-<alias>`, `make types-<alias>`, `make deptry-<alias>`, `make test-<alias>`, `make coverage-<alias>`.
 - `lint-<alias>` runs ruff (`E` / `F` / `I` / `B`, `tests` excluded per each package's `[tool.ruff]`) then Pylint; `format-<alias>` runs `ruff check --fix` then Black.
 - Must not use repo-root `pylint $(git ls-files '*.py')` / `pytest tests/` as the QA command — CI gates changes per package from inside each package directory.
@@ -143,7 +144,7 @@ QA commands — the per-package `Makefile` targets (`.github/workflows/test.yml`
 
 ## Learned rules
 
-- Must keep `main.py`'s check order — a known command, then its inputs, then the "not available yet" refusal — so an input the command does not take is rejected the same way for a command not available yet.
+- Must keep `main.py`'s check order — a known command, then an input it does not take, then an empty required input, then `output`, then `fail-under` — so each run fails on the first wrong input with one line.
 - Prefer the inline `# pylint: disable=too-many-arguments,too-many-positional-arguments` on a click command function only — click passes each of its options as one parameter.
 - Must keep `--verbose` the group's option only — `main.py` passes it before the command name, so no command declares its own.
 - Must treat `metadata.producer.version` as audit information — never compare it, and never warn on an unfamiliar one.

@@ -28,10 +28,9 @@ permissions:
   contents: read
 
 # `action-run` runs each command the action runs over the fixtures and checks the file it wrote. The venv jobs run the
-# action several times on one runner: `normalize-docs` writes its file, and `coverage-matrix`, not available yet, fails
-# on the "not available yet" line. Each run step continues on error and the job asserts its outcome. A step cannot read
-# another step's log, so each venv job replays the run's inputs on the action's venv and asserts the exit code and the
-# file written, or the refusal line.
+# action several times on one runner: `normalize-docs` and `coverage-matrix` write their files. Each run step continues
+# on error and the job asserts its outcome. A step cannot read another step's log, so each venv job replays the run's
+# inputs on the action's venv and asserts the exit code, `output-path` and the file written.
 jobs:
   action-run:
     runs-on: ubuntu-latest
@@ -125,6 +124,47 @@ jobs:
           ' "$OUTPUT_PATH" "$GITHUB_RUN_ID"
           echo '::notice::normalize-tests wrote a valid ui-test-catalog file with this run at the output-path.'
 
+      - name: Run coverage-matrix
+        id: coverage-matrix
+        uses: ./
+        with:
+          command: coverage-matrix
+          input: tests/fixtures/collector-gh/doc-source.json
+          tests-input: tests/fixtures/collector-gh/ui-tests.json
+          output: output/coverage-matrix.json
+          view: release
+
+      - name: coverage-matrix wrote a valid matrix in the release view with this run, and output-path names it
+        env:
+          VENV: ${{ runner.temp }}/living-doc-toolkit-venv
+          OUTPUT_PATH: ${{ steps.coverage-matrix.outputs.output-path }}
+        run: |
+          set -euo pipefail
+          if [[ "$OUTPUT_PATH" != "$GITHUB_WORKSPACE/output/coverage-matrix.json" ]]; then
+            echo "::error::output-path must be the absolute path of the file written; it is '$OUTPUT_PATH'."; exit 1
+          fi
+          "$VENV/bin/python" -I -c '
+          import sys
+          from living_doc_utilities.contracts.coverage_matrix import CoverageMatrixResult
+          from living_doc_utilities.contracts.io import read_artifact
+          result = read_artifact(sys.argv[1], expected="coverage-matrix")
+          assert isinstance(result, CoverageMatrixResult), type(result)
+          summary = result.summary
+          assert result.document.view == "release", result.document.view
+          assert (
+              summary.counted_acs,
+              summary.covered_acs,
+              summary.partially_covered_acs,
+              summary.not_covered_acs,
+          ) == (6, 4, 0, 2), summary
+          assert summary.coverage_pct == 66.7, summary
+          assert result.metadata.run.run_id == sys.argv[2], (result.metadata.run, sys.argv[2])
+          assert result.metadata.producer.build is None, result.metadata.producer
+          print(summary)
+          print(result.metadata.run)
+          ' "$OUTPUT_PATH" "$GITHUB_RUN_ID"
+          echo '::notice::coverage-matrix wrote a valid coverage matrix in the release view, with this run, at the output-path.'
+
   action-venv-isolation:
     runs-on: ubuntu-latest
     name: Action Venv - Isolation and Reuse
@@ -182,14 +222,14 @@ jobs:
           view: release
           document-title: Checkout tests
 
-      - name: normalize-docs wrote its files, coverage-matrix stopped, the venv was reused, the caller's environment is unchanged
+      - name: normalize-docs and coverage-matrix wrote their files, the venv was reused, the caller's environment is unchanged
         env:
           VENV: ${{ runner.temp }}/living-doc-toolkit-venv
           OUTCOMES: ${{ steps.first.outcome }} ${{ steps.second.outcome }} ${{ steps.third.outcome }}
         run: |
           set -euo pipefail
-          if [[ "$OUTCOMES" != "success failure success" ]]; then
-            echo "::error::normalize-docs must succeed and coverage-matrix fail while it is not available yet; the outcomes: $OUTCOMES."; exit 1
+          if [[ "$OUTCOMES" != "success success success" ]]; then
+            echo "::error::normalize-docs and coverage-matrix must succeed; the outcomes: $OUTCOMES."; exit 1
           fi
           test "$(stat -c %Y "$VENV/pyvenv.cfg")" = "$(cat "${RUNNER_TEMP}/venv-cfg-mtime.txt")"
           # A valid generator-ready file, with the view and title given.
@@ -202,7 +242,17 @@ jobs:
           assert (document.view, document.title) == (view, title), document
           ' "$@"
           }
+          # A valid coverage matrix, with the fixture pair's counted criteria.
+          matrix() {
+            "$VENV/bin/python" -I -c '
+          import sys
+          from living_doc_utilities.contracts.io import read_artifact
+          summary = read_artifact(sys.argv[1], expected="coverage-matrix").summary
+          assert (summary.counted_acs, summary.coverage_pct) == (6, 66.7), summary
+          ' "$@"
+          }
           written output/first/generator-ready.json inner living-doc-examples
+          matrix output/second/coverage-matrix.json
           written output/third/generator-ready.json release 'Checkout tests'
           out="${RUNNER_TEMP}/replay"
           replay() {
@@ -218,11 +268,10 @@ jobs:
             INPUT_OUTPUT="$out/first/generator-ready.json"
           grep -Fx "output-path=$out/first/generator-ready.json" "$out.output"
           written "$out/first/generator-ready.json" inner living-doc-examples
-          replay 1 coverage-matrix INPUT_INPUT=tests/fixtures/collector-gh/doc-source.json \
+          replay 0 coverage-matrix INPUT_INPUT=tests/fixtures/collector-gh/doc-source.json \
             INPUT_TESTS_INPUT=tests/fixtures/collector-gh/ui-tests.json INPUT_OUTPUT="$out/second/coverage-matrix.json"
-          grep -Fx '[ERROR] Command `coverage-matrix` is not available yet.' "$out.log"
-          test ! -e "$out.output"
-          test ! -e "$out/second/coverage-matrix.json"
+          grep -Fx "output-path=$out/second/coverage-matrix.json" "$out.output"
+          matrix "$out/second/coverage-matrix.json"
           replay 0 normalize-docs INPUT_INPUT=tests/fixtures/collector-gh/doc-source.json \
             INPUT_OUTPUT="$out/third/generator-ready.json" INPUT_VIEW=release INPUT_DOCUMENT_TITLE='Checkout tests'
           grep -Fx "output-path=$out/third/generator-ready.json" "$out.output"
@@ -233,7 +282,7 @@ jobs:
             python -c 'import pydantic; print(pydantic.VERSION)'
           } | tee "${RUNNER_TEMP}/after.txt"
           diff "${RUNNER_TEMP}/before.txt" "${RUNNER_TEMP}/after.txt"
-          echo '::notice::normalize-docs wrote its files and coverage-matrix stopped on "not available yet", as the replays on the venv did, the venv was reused, and the runner interpreter is unchanged.'
+          echo '::notice::normalize-docs and coverage-matrix wrote their files, as the replays on the venv did, the venv was reused, and the runner interpreter is unchanged.'
 
   action-venv-rebuilt-when-python-changes:
     runs-on: ubuntu-latest

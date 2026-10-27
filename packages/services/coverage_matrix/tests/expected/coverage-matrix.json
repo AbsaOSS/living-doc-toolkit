@@ -1,0 +1,697 @@
+{
+  "schema_version": "coverage-matrix-v1.0.0",
+  "metadata": {
+    "producer": {
+      "name": "AbsaOSS/living-doc-toolkit",
+      "version": "0.1.0",
+      "build": null,
+      "utilities_version": "0.8.0"
+    },
+    "run": {
+      "run_id": null,
+      "run_attempt": null,
+      "actor": null,
+      "workflow": null,
+      "ref": null,
+      "sha": null
+    },
+    "source": {
+      "project_id": "living-doc-examples",
+      "systems": [
+        "GitHub"
+      ],
+      "organizations": [
+        "AbsaOSS"
+      ],
+      "repositories": [
+        "AbsaOSS/living-doc"
+      ],
+      "extraction_mode": null
+    },
+    "generated_at": "2026-10-27T11:13:06Z",
+    "stats": {
+      "cardinality": {
+        "entities": 3,
+        "entities_by_type": {
+          "DocumentedUserStory": 1,
+          "DocumentedFunctionality": 2
+        },
+        "acceptance_criteria": 6,
+        "scenarios": 0,
+        "warnings_by_code": {
+          "FEATURE_WITHOUT_FUNCTIONALITY": 1,
+          "UNRESOLVED_RELATION": 1
+        },
+        "sources_configured": 0,
+        "sources_failed": 0,
+        "unresolved_refs": 0,
+        "entities_skipped": 0
+      },
+      "field_occupancy": {
+        "entities[].entity_id": 3,
+        "entities[].type": 3,
+        "entities[].title": 3,
+        "entities[].state": 3,
+        "entities[].acceptance_criteria[].ac_id": 6,
+        "entities[].acceptance_criteria[].state": 6,
+        "entities[].acceptance_criteria[].status": 6,
+        "entities[].acceptance_criteria[].keyword": 0,
+        "entities[].acceptance_criteria[].aspects[].aspect": 0,
+        "entities[].acceptance_criteria[].aspects[].status": 0,
+        "entities[].acceptance_criteria[].aspects[].scenario_ids[]": 0,
+        "entities[].acceptance_criteria[].scenario_ids[]": 4,
+        "entities[].summary.counted_acs": 3,
+        "entities[].summary.covered_acs": 3,
+        "entities[].summary.partially_covered_acs": 3,
+        "entities[].summary.not_covered_acs": 3,
+        "entities[].summary.coverage_pct": 2
+      }
+    },
+    "source_inputs": [
+      {
+        "schema_version": "doc-source-v1.0.0",
+        "producer": {
+          "name": "AbsaOSS/living-doc-collector-gh",
+          "version": "0.1.1",
+          "build": null,
+          "utilities_version": "0.7.0"
+        },
+        "run": {
+          "run_id": null,
+          "run_attempt": null,
+          "actor": null,
+          "workflow": null,
+          "ref": null,
+          "sha": null
+        },
+        "source": {
+          "project_id": "living-doc-examples",
+          "systems": [
+            "GitHub"
+          ],
+          "organizations": [
+            "AbsaOSS"
+          ],
+          "repositories": [
+            "AbsaOSS/living-doc"
+          ],
+          "extraction_mode": null
+        },
+        "stats": {
+          "cardinality": {
+            "entities": 5,
+            "entities_by_type": {
+              "DocumentedFeature": 2,
+              "DocumentedFunctionality": 2,
+              "DocumentedUserStory": 1
+            },
+            "acceptance_criteria": 8,
+            "scenarios": 0,
+            "warnings_by_code": {
+              "FEATURE_WITHOUT_FUNCTIONALITY": 1,
+              "UNRESOLVED_RELATION": 1
+            },
+            "sources_configured": 1,
+            "sources_failed": 0,
+            "unresolved_refs": 1,
+            "entities_skipped": 0
+          },
+          "field_occupancy": {
+            "features[].acceptance_criteria[].aspect[]": 0,
+            "features[].acceptance_criteria[].description": 0,
+            "features[].acceptance_criteria[].id": 0,
+            "features[].acceptance_criteria[].not_in_scope[]": 0,
+            "features[].acceptance_criteria[].placeholder_values": 0,
+            "features[].acceptance_criteria[].preconditions[]": 0,
+            "features[].acceptance_criteria[].rationale": 0,
+            "features[].acceptance_criteria[].removal_planned": 0,
+            "features[].acceptance_criteria[].state": 0,
+            "features[].acceptance_criteria[].version": 0,
+            "features[].business_value[]": 0,
+            "features[].deprecated_at": 0,
+            "features[].deprecation_reason": 0,
+            "features[].entity_id": 2,
+            "features[].external_dependencies[]": 1,
+            "features[].feature_dependencies[]": 1,
+            "features[].func_type": 0,
+            "features[].functionalities[]": 1,
+            "features[].narrative": 0,
+            "features[].not_in_scope[]": 0,
+            "features[].notes[]": 0,
+            "features[].owners[]": 2,
+            "features[].pages[].functionalities[]": 0,
+            "features[].pages[].is_primary": 2,
+            "features[].pages[].notes[]": 0,
+            "features[].pages[].owners[]": 2,
+            "features[].pages[].page_object": 2,
+            "features[].pages[].purpose": 2,
+            "features[].pages[].route": 2,
+            "features[].parent": 0,
+            "features[].preconditions[]": 0,
+            "features[].purpose": 2,
+            "features[].rationale": 0,
+            "features[].source": 0,
+            "features[].source_ref.area_path": 0,
+            "features[].source_ref.iteration_path": 0,
+            "features[].source_ref.native_id": 2,
+            "features[].source_ref.native_type": 2,
+            "features[].source_ref.system": 2,
+            "features[].source_ref.tracker_state": 2,
+            "features[].source_ref.url": 2,
+            "features[].state": 2,
+            "features[].state_origin": 2,
+            "features[].stub_reason": 1,
+            "features[].superseded_by": 0,
+            "features[].surface_type": 2,
+            "features[].tags[]": 0,
+            "features[].timestamps.closed_at": 0,
+            "features[].timestamps.created_at": 0,
+            "features[].timestamps.updated_at": 0,
+            "features[].title": 2,
+            "features[].type": 2,
+            "features[].user_stories[]": 1,
+            "features[].wizard_steps[]": 0,
+            "functionalities[].acceptance_criteria[].aspect[]": 2,
+            "functionalities[].acceptance_criteria[].description": 4,
+            "functionalities[].acceptance_criteria[].id": 4,
+            "functionalities[].acceptance_criteria[].not_in_scope[]": 0,
+            "functionalities[].acceptance_criteria[].placeholder_values": 1,
+            "functionalities[].acceptance_criteria[].preconditions[]": 0,
+            "functionalities[].acceptance_criteria[].rationale": 0,
+            "functionalities[].acceptance_criteria[].removal_planned": 0,
+            "functionalities[].acceptance_criteria[].state": 4,
+            "functionalities[].acceptance_criteria[].version": 3,
+            "functionalities[].business_value[]": 0,
+            "functionalities[].deprecated_at": 0,
+            "functionalities[].deprecation_reason": 0,
+            "functionalities[].entity_id": 2,
+            "functionalities[].external_dependencies[]": 0,
+            "functionalities[].feature_dependencies[]": 0,
+            "functionalities[].func_type": 2,
+            "functionalities[].functionalities[]": 0,
+            "functionalities[].narrative": 0,
+            "functionalities[].not_in_scope[]": 1,
+            "functionalities[].notes[]": 0,
+            "functionalities[].owners[]": 0,
+            "functionalities[].pages[].functionalities[]": 0,
+            "functionalities[].pages[].is_primary": 0,
+            "functionalities[].pages[].notes[]": 0,
+            "functionalities[].pages[].owners[]": 0,
+            "functionalities[].pages[].page_object": 0,
+            "functionalities[].pages[].purpose": 0,
+            "functionalities[].pages[].route": 0,
+            "functionalities[].parent": 2,
+            "functionalities[].preconditions[]": 0,
+            "functionalities[].purpose": 0,
+            "functionalities[].rationale": 0,
+            "functionalities[].source": 0,
+            "functionalities[].source_ref.area_path": 0,
+            "functionalities[].source_ref.iteration_path": 0,
+            "functionalities[].source_ref.native_id": 2,
+            "functionalities[].source_ref.native_type": 2,
+            "functionalities[].source_ref.system": 2,
+            "functionalities[].source_ref.tracker_state": 2,
+            "functionalities[].source_ref.url": 2,
+            "functionalities[].state": 2,
+            "functionalities[].state_origin": 2,
+            "functionalities[].stub_reason": 0,
+            "functionalities[].superseded_by": 0,
+            "functionalities[].surface_type": 0,
+            "functionalities[].tags[]": 0,
+            "functionalities[].timestamps.closed_at": 0,
+            "functionalities[].timestamps.created_at": 0,
+            "functionalities[].timestamps.updated_at": 0,
+            "functionalities[].title": 2,
+            "functionalities[].type": 2,
+            "functionalities[].user_stories[]": 0,
+            "functionalities[].wizard_steps[]": 0,
+            "user_stories[].acceptance_criteria[].aspect[]": 0,
+            "user_stories[].acceptance_criteria[].description": 4,
+            "user_stories[].acceptance_criteria[].id": 4,
+            "user_stories[].acceptance_criteria[].not_in_scope[]": 0,
+            "user_stories[].acceptance_criteria[].placeholder_values": 0,
+            "user_stories[].acceptance_criteria[].preconditions[]": 1,
+            "user_stories[].acceptance_criteria[].rationale": 0,
+            "user_stories[].acceptance_criteria[].removal_planned": 1,
+            "user_stories[].acceptance_criteria[].state": 4,
+            "user_stories[].acceptance_criteria[].version": 4,
+            "user_stories[].business_value[]": 1,
+            "user_stories[].deprecated_at": 0,
+            "user_stories[].deprecation_reason": 0,
+            "user_stories[].entity_id": 1,
+            "user_stories[].external_dependencies[]": 0,
+            "user_stories[].feature_dependencies[]": 0,
+            "user_stories[].func_type": 0,
+            "user_stories[].functionalities[]": 0,
+            "user_stories[].narrative": 0,
+            "user_stories[].not_in_scope[]": 0,
+            "user_stories[].notes[]": 0,
+            "user_stories[].owners[]": 0,
+            "user_stories[].pages[].functionalities[]": 0,
+            "user_stories[].pages[].is_primary": 0,
+            "user_stories[].pages[].notes[]": 0,
+            "user_stories[].pages[].owners[]": 0,
+            "user_stories[].pages[].page_object": 0,
+            "user_stories[].pages[].purpose": 0,
+            "user_stories[].pages[].route": 0,
+            "user_stories[].parent": 0,
+            "user_stories[].preconditions[]": 0,
+            "user_stories[].purpose": 0,
+            "user_stories[].rationale": 0,
+            "user_stories[].source": 0,
+            "user_stories[].source_ref.area_path": 0,
+            "user_stories[].source_ref.iteration_path": 0,
+            "user_stories[].source_ref.native_id": 1,
+            "user_stories[].source_ref.native_type": 1,
+            "user_stories[].source_ref.system": 1,
+            "user_stories[].source_ref.tracker_state": 1,
+            "user_stories[].source_ref.url": 1,
+            "user_stories[].state": 1,
+            "user_stories[].state_origin": 1,
+            "user_stories[].stub_reason": 0,
+            "user_stories[].superseded_by": 0,
+            "user_stories[].surface_type": 0,
+            "user_stories[].tags[]": 0,
+            "user_stories[].timestamps.closed_at": 0,
+            "user_stories[].timestamps.created_at": 0,
+            "user_stories[].timestamps.updated_at": 0,
+            "user_stories[].title": 1,
+            "user_stories[].type": 1,
+            "user_stories[].user_stories[]": 0,
+            "user_stories[].wizard_steps[]": 0
+          }
+        },
+        "selected_stats": {
+          "cardinality": {
+            "entities": 3,
+            "entities_by_type": {
+              "DocumentedUserStory": 1,
+              "DocumentedFunctionality": 2
+            },
+            "acceptance_criteria": 6,
+            "scenarios": 0,
+            "warnings_by_code": {
+              "FEATURE_WITHOUT_FUNCTIONALITY": 1,
+              "UNRESOLVED_RELATION": 1
+            },
+            "sources_configured": 1,
+            "sources_failed": 0,
+            "unresolved_refs": 1,
+            "entities_skipped": 0
+          },
+          "field_occupancy": {
+            "user_stories[].entity_id": 1,
+            "user_stories[].source_ref.system": 1,
+            "user_stories[].source_ref.native_id": 1,
+            "user_stories[].source_ref.native_type": 1,
+            "user_stories[].source_ref.url": 1,
+            "user_stories[].source_ref.tracker_state": 1,
+            "user_stories[].source_ref.area_path": 0,
+            "user_stories[].source_ref.iteration_path": 0,
+            "user_stories[].type": 1,
+            "user_stories[].title": 1,
+            "user_stories[].state": 1,
+            "user_stories[].state_origin": 1,
+            "user_stories[].tags[]": 0,
+            "user_stories[].timestamps.created_at": 0,
+            "user_stories[].timestamps.updated_at": 0,
+            "user_stories[].timestamps.closed_at": 0,
+            "user_stories[].narrative": 0,
+            "user_stories[].purpose": 0,
+            "user_stories[].source": 0,
+            "user_stories[].notes[]": 0,
+            "user_stories[].business_value[]": 1,
+            "user_stories[].acceptance_criteria[].id": 3,
+            "user_stories[].acceptance_criteria[].state": 3,
+            "user_stories[].acceptance_criteria[].version": 3,
+            "user_stories[].acceptance_criteria[].description": 3,
+            "user_stories[].acceptance_criteria[].aspect[]": 0,
+            "user_stories[].acceptance_criteria[].preconditions[]": 1,
+            "user_stories[].acceptance_criteria[].not_in_scope[]": 0,
+            "user_stories[].acceptance_criteria[].removal_planned": 1,
+            "user_stories[].acceptance_criteria[].rationale": 0,
+            "user_stories[].acceptance_criteria[].placeholder_values": 0,
+            "user_stories[].preconditions[]": 0,
+            "user_stories[].not_in_scope[]": 0,
+            "user_stories[].deprecated_at": 0,
+            "user_stories[].deprecation_reason": 0,
+            "user_stories[].superseded_by": 0,
+            "user_stories[].surface_type": 0,
+            "user_stories[].owners[]": 0,
+            "user_stories[].user_stories[]": 0,
+            "user_stories[].functionalities[]": 0,
+            "user_stories[].external_dependencies[]": 0,
+            "user_stories[].feature_dependencies[]": 0,
+            "user_stories[].stub_reason": 0,
+            "user_stories[].wizard_steps[]": 0,
+            "user_stories[].pages[].is_primary": 0,
+            "user_stories[].pages[].route": 0,
+            "user_stories[].pages[].page_object": 0,
+            "user_stories[].pages[].owners[]": 0,
+            "user_stories[].pages[].purpose": 0,
+            "user_stories[].pages[].functionalities[]": 0,
+            "user_stories[].pages[].notes[]": 0,
+            "user_stories[].parent": 0,
+            "user_stories[].func_type": 0,
+            "user_stories[].rationale": 0,
+            "features[].entity_id": 0,
+            "features[].source_ref.system": 0,
+            "features[].source_ref.native_id": 0,
+            "features[].source_ref.native_type": 0,
+            "features[].source_ref.url": 0,
+            "features[].source_ref.tracker_state": 0,
+            "features[].source_ref.area_path": 0,
+            "features[].source_ref.iteration_path": 0,
+            "features[].type": 0,
+            "features[].title": 0,
+            "features[].state": 0,
+            "features[].state_origin": 0,
+            "features[].tags[]": 0,
+            "features[].timestamps.created_at": 0,
+            "features[].timestamps.updated_at": 0,
+            "features[].timestamps.closed_at": 0,
+            "features[].narrative": 0,
+            "features[].purpose": 0,
+            "features[].source": 0,
+            "features[].notes[]": 0,
+            "features[].business_value[]": 0,
+            "features[].acceptance_criteria[].id": 0,
+            "features[].acceptance_criteria[].state": 0,
+            "features[].acceptance_criteria[].version": 0,
+            "features[].acceptance_criteria[].description": 0,
+            "features[].acceptance_criteria[].aspect[]": 0,
+            "features[].acceptance_criteria[].preconditions[]": 0,
+            "features[].acceptance_criteria[].not_in_scope[]": 0,
+            "features[].acceptance_criteria[].removal_planned": 0,
+            "features[].acceptance_criteria[].rationale": 0,
+            "features[].acceptance_criteria[].placeholder_values": 0,
+            "features[].preconditions[]": 0,
+            "features[].not_in_scope[]": 0,
+            "features[].deprecated_at": 0,
+            "features[].deprecation_reason": 0,
+            "features[].superseded_by": 0,
+            "features[].surface_type": 0,
+            "features[].owners[]": 0,
+            "features[].user_stories[]": 0,
+            "features[].functionalities[]": 0,
+            "features[].external_dependencies[]": 0,
+            "features[].feature_dependencies[]": 0,
+            "features[].stub_reason": 0,
+            "features[].wizard_steps[]": 0,
+            "features[].pages[].is_primary": 0,
+            "features[].pages[].route": 0,
+            "features[].pages[].page_object": 0,
+            "features[].pages[].owners[]": 0,
+            "features[].pages[].purpose": 0,
+            "features[].pages[].functionalities[]": 0,
+            "features[].pages[].notes[]": 0,
+            "features[].parent": 0,
+            "features[].func_type": 0,
+            "features[].rationale": 0,
+            "functionalities[].entity_id": 2,
+            "functionalities[].source_ref.system": 2,
+            "functionalities[].source_ref.native_id": 2,
+            "functionalities[].source_ref.native_type": 2,
+            "functionalities[].source_ref.url": 2,
+            "functionalities[].source_ref.tracker_state": 2,
+            "functionalities[].source_ref.area_path": 0,
+            "functionalities[].source_ref.iteration_path": 0,
+            "functionalities[].type": 2,
+            "functionalities[].title": 2,
+            "functionalities[].state": 2,
+            "functionalities[].state_origin": 2,
+            "functionalities[].tags[]": 0,
+            "functionalities[].timestamps.created_at": 0,
+            "functionalities[].timestamps.updated_at": 0,
+            "functionalities[].timestamps.closed_at": 0,
+            "functionalities[].narrative": 0,
+            "functionalities[].purpose": 0,
+            "functionalities[].source": 0,
+            "functionalities[].notes[]": 0,
+            "functionalities[].business_value[]": 0,
+            "functionalities[].acceptance_criteria[].id": 3,
+            "functionalities[].acceptance_criteria[].state": 3,
+            "functionalities[].acceptance_criteria[].version": 3,
+            "functionalities[].acceptance_criteria[].description": 3,
+            "functionalities[].acceptance_criteria[].aspect[]": 2,
+            "functionalities[].acceptance_criteria[].preconditions[]": 0,
+            "functionalities[].acceptance_criteria[].not_in_scope[]": 0,
+            "functionalities[].acceptance_criteria[].removal_planned": 0,
+            "functionalities[].acceptance_criteria[].rationale": 0,
+            "functionalities[].acceptance_criteria[].placeholder_values": 1,
+            "functionalities[].preconditions[]": 0,
+            "functionalities[].not_in_scope[]": 1,
+            "functionalities[].deprecated_at": 0,
+            "functionalities[].deprecation_reason": 0,
+            "functionalities[].superseded_by": 0,
+            "functionalities[].surface_type": 0,
+            "functionalities[].owners[]": 0,
+            "functionalities[].user_stories[]": 0,
+            "functionalities[].functionalities[]": 0,
+            "functionalities[].external_dependencies[]": 0,
+            "functionalities[].feature_dependencies[]": 0,
+            "functionalities[].stub_reason": 0,
+            "functionalities[].wizard_steps[]": 0,
+            "functionalities[].pages[].is_primary": 0,
+            "functionalities[].pages[].route": 0,
+            "functionalities[].pages[].page_object": 0,
+            "functionalities[].pages[].owners[]": 0,
+            "functionalities[].pages[].purpose": 0,
+            "functionalities[].pages[].functionalities[]": 0,
+            "functionalities[].pages[].notes[]": 0,
+            "functionalities[].parent": 2,
+            "functionalities[].func_type": 2,
+            "functionalities[].rationale": 0
+          }
+        }
+      },
+      {
+        "schema_version": "ui-tests-v1.0.0",
+        "producer": {
+          "name": "AbsaOSS/living-doc-collector-gh",
+          "version": "0.1.1",
+          "build": null,
+          "utilities_version": "0.7.0"
+        },
+        "run": {
+          "run_id": null,
+          "run_attempt": null,
+          "actor": null,
+          "workflow": null,
+          "ref": null,
+          "sha": null
+        },
+        "source": {
+          "project_id": "living-doc-examples",
+          "systems": [
+            "GitHub"
+          ],
+          "organizations": [
+            "AbsaOSS"
+          ],
+          "repositories": [
+            "AbsaOSS/living-doc"
+          ],
+          "extraction_mode": null
+        },
+        "stats": {
+          "cardinality": {
+            "entities": 0,
+            "entities_by_type": {},
+            "acceptance_criteria": 0,
+            "scenarios": 6,
+            "warnings_by_code": {},
+            "sources_configured": 1,
+            "sources_failed": 0,
+            "unresolved_refs": 0,
+            "entities_skipped": 0
+          },
+          "field_occupancy": {
+            "scenarios[].acceptance_criteria[].aspect": 4,
+            "scenarios[].acceptance_criteria[].id": 6,
+            "scenarios[].scenario_id": 6,
+            "scenarios[].source_ref.area_path": 0,
+            "scenarios[].source_ref.iteration_path": 0,
+            "scenarios[].source_ref.native_id": 6,
+            "scenarios[].source_ref.native_type": 6,
+            "scenarios[].source_ref.system": 6,
+            "scenarios[].source_ref.tracker_state": 6,
+            "scenarios[].source_ref.url": 6,
+            "scenarios[].tags[]": 6,
+            "scenarios[].title": 6
+          }
+        },
+        "selected_stats": {
+          "cardinality": {
+            "entities": 0,
+            "entities_by_type": {},
+            "acceptance_criteria": 0,
+            "scenarios": 6,
+            "warnings_by_code": {},
+            "sources_configured": 1,
+            "sources_failed": 0,
+            "unresolved_refs": 0,
+            "entities_skipped": 0
+          },
+          "field_occupancy": {
+            "scenarios[].scenario_id": 6,
+            "scenarios[].title": 6,
+            "scenarios[].source_ref.system": 6,
+            "scenarios[].source_ref.native_id": 6,
+            "scenarios[].source_ref.native_type": 6,
+            "scenarios[].source_ref.url": 6,
+            "scenarios[].source_ref.tracker_state": 6,
+            "scenarios[].source_ref.area_path": 0,
+            "scenarios[].source_ref.iteration_path": 0,
+            "scenarios[].tags[]": 6,
+            "scenarios[].acceptance_criteria[].id": 6,
+            "scenarios[].acceptance_criteria[].aspect": 4
+          }
+        }
+      }
+    ]
+  },
+  "warnings": [
+    {
+      "code": "FEATURE_WITHOUT_FUNCTIONALITY",
+      "message": "Feature has no linked Functionality in this run \u2014 either it is not yet populated, or it has been fully retired. Author its Functionalities, or remove the Feature.",
+      "context": "source_input='doc-source-v1.0.0' entity_id='FEAT-003'",
+      "entity_id": "FEAT-003",
+      "ac_id": null,
+      "line_no": null,
+      "path": null,
+      "source_url": null
+    },
+    {
+      "code": "UNRESOLVED_RELATION",
+      "message": "'feature_dependencies' points outside the collected entity set.",
+      "context": "source_input='doc-source-v1.0.0' entity_id='FEAT-003' target='FEAT-002'",
+      "entity_id": "FEAT-003",
+      "ac_id": null,
+      "line_no": null,
+      "path": null,
+      "source_url": null
+    }
+  ],
+  "document": {
+    "view": "inner"
+  },
+  "entities": [
+    {
+      "entity_id": "US-001",
+      "type": "DocumentedUserStory",
+      "title": "US-001 \u00b7 Customer Login",
+      "state": "active",
+      "acceptance_criteria": [
+        {
+          "ac_id": "US-001-01",
+          "state": "active",
+          "status": "covered",
+          "keyword": null,
+          "aspects": [],
+          "scenario_ids": [
+            "AbsaOSS/living-doc/docs/examples/gherkin/liv_doc_us/us-001-customer-login.feature/customer-signs-in-with-valid-credentials"
+          ]
+        },
+        {
+          "ac_id": "US-001-02",
+          "state": "active",
+          "status": "not_covered",
+          "keyword": null,
+          "aspects": [],
+          "scenario_ids": []
+        },
+        {
+          "ac_id": "US-001-04",
+          "state": "deprecated",
+          "status": "covered",
+          "keyword": null,
+          "aspects": [],
+          "scenario_ids": [
+            "AbsaOSS/living-doc/docs/examples/gherkin/liv_doc_us/us-001-customer-login.feature/remembered-customer-is-still-signed-in-after-a-browser-restart"
+          ]
+        }
+      ],
+      "summary": {
+        "counted_acs": 3,
+        "covered_acs": 2,
+        "partially_covered_acs": 0,
+        "not_covered_acs": 1,
+        "coverage_pct": 66.7
+      }
+    },
+    {
+      "entity_id": "FUNC-001",
+      "type": "DocumentedFunctionality",
+      "title": "FUNC-001 \u00b7 Login Page - Validate Password Strength",
+      "state": "active",
+      "acceptance_criteria": [
+        {
+          "ac_id": "FUNC-001-01",
+          "state": "active",
+          "status": "covered",
+          "keyword": null,
+          "aspects": [],
+          "scenario_ids": [
+            "AbsaOSS/living-doc/docs/examples/gherkin/liv_doc_func/func-001-validate-password-strength.feature/password-shorter-than-the-minimum-length-is-rejected",
+            "AbsaOSS/living-doc/docs/examples/gherkin/liv_doc_func/func-001-validate-password-strength.feature/password-missing-a-required-character-class-is-rejected",
+            "AbsaOSS/living-doc/docs/examples/gherkin/liv_doc_func/func-001-validate-password-strength.feature/password-containing-the-username-is-rejected"
+          ]
+        },
+        {
+          "ac_id": "FUNC-001-02",
+          "state": "active",
+          "status": "not_covered",
+          "keyword": null,
+          "aspects": [],
+          "scenario_ids": []
+        },
+        {
+          "ac_id": "FUNC-001-03",
+          "state": "active",
+          "status": "covered",
+          "keyword": null,
+          "aspects": [],
+          "scenario_ids": [
+            "AbsaOSS/living-doc/docs/examples/gherkin/liv_doc_func/func-001-validate-password-strength.feature/password-shorter-than-the-minimum-length-shows-the-minimum-length-rule"
+          ]
+        }
+      ],
+      "summary": {
+        "counted_acs": 3,
+        "covered_acs": 2,
+        "partially_covered_acs": 0,
+        "not_covered_acs": 1,
+        "coverage_pct": 66.7
+      }
+    },
+    {
+      "entity_id": "FUNC-002",
+      "type": "DocumentedFunctionality",
+      "title": "FUNC-002 \u00b7 Login Page - Reject Breached Password",
+      "state": "planned",
+      "acceptance_criteria": [],
+      "summary": {
+        "counted_acs": 0,
+        "covered_acs": 0,
+        "partially_covered_acs": 0,
+        "not_covered_acs": 0,
+        "coverage_pct": null
+      }
+    }
+  ],
+  "planned_summary": {
+    "total": 2,
+    "backlog": 1,
+    "by_target_version": {
+      "1.1.0": 1
+    }
+  },
+  "summary": {
+    "counted_acs": 6,
+    "covered_acs": 4,
+    "partially_covered_acs": 0,
+    "not_covered_acs": 2,
+    "coverage_pct": 66.7
+  }
+}

@@ -2,7 +2,7 @@ name: 'Living Documentation Toolkit'
 description: 'Run one Living Documentation Toolkit command over its input files and write the file it produces.'
 inputs:
   command:
-    description: 'Command to run: `normalize-docs`, `normalize-tests` or `coverage-matrix`. `normalize-docs` and `normalize-tests` run.'
+    description: 'Command to run: `normalize-docs`, `normalize-tests` or `coverage-matrix`; every command runs.'
     required: true
   input:
     description: 'Every command: path to the input JSON file; the documentation file for `normalize-docs` and `coverage-matrix`, the tests file for `normalize-tests`.'
@@ -23,7 +23,7 @@ inputs:
     required: false
     default: ''
   fail-under:
-    description: '`coverage-matrix` only: fail when the coverage percentage is below this number.'
+    description: '`coverage-matrix` only: fail when the coverage percentage is below this number, or there is none; the file is written first, and `output-path` is not set.'
     required: false
     default: ''
   verbose-logging:

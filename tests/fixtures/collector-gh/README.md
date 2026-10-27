@@ -15,6 +15,6 @@ change each:
     model rejects, so `read_artifact` would fail both files with `SCHEMA_VALIDATION_FAILED`.
 - Both were written by `AbsaOSS/living-doc-collector-gh` `0.1.1` on `living-doc-utilities` `0.7.0`, for the
   project `living-doc-examples`.
-- `packages/core`'s tests and the `integration.yml` jobs read this one copy.
+- Every package's tests, the root `tests/` and the `integration.yml` jobs read this one copy.
 - To refresh them, copy both files again from one `living-doc` commit, set `metadata.generated_at` to that commit's
   time, and update the commit above.
