@@ -31,12 +31,12 @@ def test_cli_version(runner):
     assert "0.1.0" in result.output
 
 
-def test_cli_registers_normalize_docs_only(runner):
-    """`normalize-docs` is the one command so far; a command not registered yet is an unknown command."""
-    assert list(cli.commands) == ["normalize-docs"]
-    result = runner.invoke(cli, ["normalize-tests"])
+def test_cli_registers_the_available_commands(runner):
+    """`normalize-docs` and `normalize-tests` are registered; coverage-matrix is not."""
+    assert list(cli.commands) == ["normalize-docs", "normalize-tests"]
+    result = runner.invoke(cli, ["coverage-matrix"])
     assert result.exit_code == 2
-    assert "No such command 'normalize-tests'" in result.output
+    assert "No such command 'coverage-matrix'" in result.output
 
 
 @pytest.mark.parametrize("verbose", [True, False])

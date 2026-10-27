@@ -16,6 +16,7 @@ dependencies = [
     "click>=8.1.0,<9.0.0",
     "living-doc-core",
     "living-doc-service-normalize-docs",
+    "living-doc-service-normalize-tests",
     "living-doc-utilities==0.8.0"
 ]
 
@@ -66,7 +67,14 @@ exclude = '^(tests/|build/)'
 
 # The toolkit's packages ship no `py.typed`; read their annotations instead of an inline ignore on each import.
 [[tool.mypy.overrides]]
-module = ["living_doc_core", "living_doc_core.*", "living_doc_service_normalize_docs", "living_doc_service_normalize_docs.*"]
+module = [
+    "living_doc_core",
+    "living_doc_core.*",
+    "living_doc_service_normalize_docs",
+    "living_doc_service_normalize_docs.*",
+    "living_doc_service_normalize_tests",
+    "living_doc_service_normalize_tests.*",
+]
 follow_untyped_imports = true
 
 # `deptry .` from this directory: the [dev] extra holds only tools, which no module imports; `src/` is this package.

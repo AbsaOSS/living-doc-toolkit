@@ -22,6 +22,7 @@ import pytest
 from living_doc_utilities.contracts.envelope import Run
 from living_doc_utilities.contracts.generator_ready import GeneratorReadyResult
 from living_doc_utilities.contracts.io import read_artifact
+from living_doc_utilities.contracts.ui_test_catalog import UiTestCatalogResult
 
 import main
 from main import run
@@ -31,7 +32,7 @@ DOC_SOURCE = REPO_ROOT / "tests" / "fixtures" / "collector-gh" / "doc-source.jso
 UI_TESTS = REPO_ROOT / "tests" / "fixtures" / "collector-gh" / "ui-tests.json"
 CLI = [sys.executable, "-I", "-m", "living_doc_cli.main"]
 COMMANDS = ["normalize-docs", "normalize-tests", "coverage-matrix"]
-NOT_AVAILABLE = ["normalize-tests", "coverage-matrix"]
+NOT_AVAILABLE = ["coverage-matrix"]
 # The CI run the entry point runs in, as GitHub Actions sets it.
 RUN_CONTEXT = {
     "GITHUB_RUN_ID": "4242",
@@ -82,7 +83,7 @@ def _cli(monkeypatch, tmp_path) -> _FakeCli:
 
 @pytest.fixture(name="available")
 def _available(monkeypatch) -> None:
-    """Every command available, as once the CLI runs them, so the run path is tested for the two not run yet."""
+    """Every command available, as once the CLI runs them, so the run path is tested for `coverage-matrix`."""
     monkeypatch.setattr(main, "NOT_AVAILABLE_YET", ())
 
 
@@ -136,7 +137,7 @@ def test_a_command_with_valid_inputs_fails_with_one_line_saying_it_is_not_availa
     assert cli.runs == []
 
 
-def test_normalize_docs_runs_and_the_two_other_commands_the_action_declares_are_not_available_yet():
+def test_the_action_runs_normalize_docs_and_normalize_tests_but_not_coverage_matrix():
     # Assert
     assert list(main.COMMAND_INPUTS) == COMMANDS
     assert list(main.NOT_AVAILABLE_YET) == NOT_AVAILABLE
@@ -226,7 +227,7 @@ def test_a_fail_under_that_is_not_a_number_fails_with_one_line_naming_it(cli, mo
     assert cli.runs == []
 
 
-def test_an_empty_input_the_command_does_not_take_is_not_passed(cli, available, monkeypatch, capsys):
+def test_an_empty_input_the_command_does_not_take_is_not_passed(cli, monkeypatch, capsys):
     # Arrange: `action.yml` passes every input, an unset optional one as its empty default.
     _set_inputs(
         monkeypatch,
@@ -507,13 +508,47 @@ def test_the_entry_point_ends_a_failed_normalize_docs_with_the_clis_line_and_exi
 def test_the_entry_point_stops_a_command_not_available_yet_with_one_line(tmp_path):
     # Act
     result = _run_entry_point(
-        tmp_path, {"command": "normalize-tests", "input": os.fspath(UI_TESTS), "output": "ui-test-catalog.json"}
+        tmp_path,
+        {
+            "command": "coverage-matrix",
+            "input": os.fspath(DOC_SOURCE),
+            "tests-input": os.fspath(UI_TESTS),
+            "output": "coverage-matrix.json",
+        },
     )
 
     # Assert
     assert result.returncode == 1, result.stderr
-    assert _errors(result.stderr) == ["[ERROR] Command `normalize-tests` is not available yet."]
+    assert _errors(result.stderr) == ["[ERROR] Command `coverage-matrix` is not available yet."]
     assert not (tmp_path / "github-output").exists()
+
+
+def test_the_entry_point_runs_normalize_tests_over_the_fixture_and_sets_the_output_path(tmp_path):
+    output_path = "out/ui-test-catalog.json"
+
+    result = _run_entry_point(
+        tmp_path,
+        {"command": "normalize-tests", "input": os.fspath(UI_TESTS), "output": output_path},
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert _errors(result.stderr) == []
+    written = read_artifact(tmp_path / output_path, expected="ui-test-catalog")
+    assert isinstance(written, UiTestCatalogResult)
+    assert written.document.view == "inner"
+    assert [feature_file.feature_file for feature_file in written.feature_files] == [
+        "AbsaOSS/living-doc/docs/examples/gherkin/liv_doc_func/func-001-validate-password-strength.feature",
+        "AbsaOSS/living-doc/docs/examples/gherkin/liv_doc_us/us-001-customer-login.feature",
+    ]
+    assert [(group.entity_id, len(group.scenarios)) for group in written.feature_files[0].linked_to_functionality] == [
+        ("FUNC-001", 4)
+    ]
+    assert [(group.entity_id, len(group.scenarios)) for group in written.feature_files[1].linked_to_user_story] == [
+        ("US-001", 2)
+    ]
+    assert written.metadata.run.run_id == RUN_CONTEXT["GITHUB_RUN_ID"]
+    assert written.metadata.producer.build is None
+    assert (tmp_path / "github-output").read_text(encoding="utf-8") == (f"output-path={tmp_path / output_path}\n")
 
 
 def test_a_module_in_the_callers_working_directory_does_not_shadow_the_clis(tmp_path):

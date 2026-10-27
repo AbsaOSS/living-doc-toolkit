@@ -2,7 +2,7 @@
 
 CLI wrapper for the Living Documentation Toolkit: the `living-doc` command group.
 
-It registers `normalize-docs`. `normalize-tests` and `coverage-matrix` are added to the group as each lands.
+It registers `normalize-docs` and `normalize-tests`. `coverage-matrix` is added as it lands.
 
 ## Installation
 
@@ -13,7 +13,7 @@ pip install -e .
 ## Usage
 
 ```bash
-# Show help; it lists normalize-docs
+# Show help; it lists normalize-docs and normalize-tests
 living-doc --help
 
 # Show version
@@ -25,11 +25,14 @@ living-doc normalize-docs --input doc-source.json --output generator-ready.json
 # The release view, with the document's own title and version
 living-doc normalize-docs --input doc-source.json --output generator-ready.json \
   --view release --document-title "Payments service" --document-version 2.3.0
+
+# ui-tests.json to ui-test-catalog.json
+living-doc normalize-tests --input ui-tests.json --output ui-test-catalog.json
 ```
 
 - `--verbose` is the group's option, so it goes before the command name: `living-doc --verbose normalize-docs …` logs
   at DEBUG. No command takes it, and the action passes it there.
-- A command name the group does not register yet, such as `living-doc normalize-tests`, fails with click's
+- A command name the group does not register yet, such as `living-doc coverage-matrix`, fails with click's
   "No such command" and exit code 2.
 
 ## normalize-docs
@@ -57,6 +60,23 @@ A run that fails exits 1, writes no file, and leaves a file already at `--output
 | The output cannot be written | one: ``[ERROR] normalize-docs - the output cannot be written: <reason>`` |
 
 - An option click rejects, such as a `--view` that is neither `inner` nor `release`, exits 2 with click's usage error.
+
+## normalize-tests
+
+Reads one tests file and writes `ui-test-catalog.json`. What it groups and how it checks that no scenario field is
+lost: [`living-doc-service-normalize-tests`](../../packages/services/normalize_tests/README.md).
+
+| Option | Required | Default | Description |
+|---|---|---|---|
+| `--input` | yes | | The tests input, `ui-tests.json`. |
+| `--output` | yes | | The `ui-test-catalog.json` to write; its directory is created when missing. |
+
+A run that succeeds exits 0 and logs one line:
+``[INFO] normalize-tests - written: `<output>` (<feature files> feature files, <scenarios> scenarios).``
+
+A run that fails exits 1 and writes no file. Input validation reports one `[ERROR]` line per problem before the
+transform; `FIELD_LOSS` and output-write failures use one line each, as described for
+[`normalize-docs`](#normalize-docs).
 
 ## Development
 

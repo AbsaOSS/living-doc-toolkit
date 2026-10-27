@@ -86,6 +86,45 @@ jobs:
           ' "$OUTPUT_PATH" "$GITHUB_RUN_ID"
           echo '::notice::normalize-docs wrote a valid generator-ready file in the release view, with this run, at the output-path.'
 
+      - name: Run normalize-tests
+        id: normalize-tests
+        uses: ./
+        with:
+          command: normalize-tests
+          input: tests/fixtures/collector-gh/ui-tests.json
+          output: output/ui-test-catalog.json
+
+      - name: normalize-tests wrote a valid catalog with this run, and output-path names it
+        env:
+          VENV: ${{ runner.temp }}/living-doc-toolkit-venv
+          OUTPUT_PATH: ${{ steps.normalize-tests.outputs.output-path }}
+        run: |
+          set -euo pipefail
+          if [[ "$OUTPUT_PATH" != "$GITHUB_WORKSPACE/output/ui-test-catalog.json" ]]; then
+            echo "::error::output-path must be the absolute path of the file written; it is '$OUTPUT_PATH'."; exit 1
+          fi
+          "$VENV/bin/python" -I -c '
+          import sys
+          from living_doc_utilities.contracts.io import read_artifact
+          from living_doc_utilities.contracts.ui_test_catalog import UiTestCatalogResult
+          result = read_artifact(sys.argv[1], expected="ui-test-catalog")
+          assert isinstance(result, UiTestCatalogResult), type(result)
+          assert result.document.view == "inner", result.document
+          assert [feature_file.feature_file for feature_file in result.feature_files] == [
+              "AbsaOSS/living-doc/docs/examples/gherkin/liv_doc_func/func-001-validate-password-strength.feature",
+              "AbsaOSS/living-doc/docs/examples/gherkin/liv_doc_us/us-001-customer-login.feature",
+          ]
+          functionality_file, user_story_file = result.feature_files
+          assert [(group.entity_id, len(group.scenarios)) for group in functionality_file.linked_to_functionality] == [("FUNC-001", 4)]
+          assert [(group.entity_id, len(group.scenarios)) for group in user_story_file.linked_to_user_story] == [("US-001", 2)]
+          assert not any(feature_file.unlinked for feature_file in result.feature_files)
+          assert result.metadata.run.run_id == sys.argv[2], (result.metadata.run, sys.argv[2])
+          assert result.metadata.producer.build is None, result.metadata.producer
+          print(result.document.view)
+          print(result.metadata.run)
+          ' "$OUTPUT_PATH" "$GITHUB_RUN_ID"
+          echo '::notice::normalize-tests wrote a valid ui-test-catalog file with this run at the output-path.'
+
   action-venv-isolation:
     runs-on: ubuntu-latest
     name: Action Venv - Isolation and Reuse

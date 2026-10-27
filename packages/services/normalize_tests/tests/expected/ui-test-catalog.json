@@ -1,0 +1,335 @@
+{
+  "schema_version": "ui-test-catalog-v1.0.0",
+  "metadata": {
+    "producer": {
+      "name": "AbsaOSS/living-doc-toolkit",
+      "version": "0.1.0",
+      "build": null,
+      "utilities_version": "0.8.0"
+    },
+    "run": {
+      "run_id": null,
+      "run_attempt": null,
+      "actor": null,
+      "workflow": null,
+      "ref": null,
+      "sha": null
+    },
+    "source": {
+      "project_id": "living-doc-examples",
+      "systems": [
+        "GitHub"
+      ],
+      "organizations": [
+        "AbsaOSS"
+      ],
+      "repositories": [
+        "AbsaOSS/living-doc"
+      ],
+      "extraction_mode": null
+    },
+    "generated_at": "2026-10-22T00:00:00Z",
+    "stats": {
+      "cardinality": {
+        "entities": 0,
+        "entities_by_type": {},
+        "acceptance_criteria": 0,
+        "scenarios": 6,
+        "warnings_by_code": {},
+        "sources_configured": 0,
+        "sources_failed": 0,
+        "unresolved_refs": 0,
+        "entities_skipped": 0
+      },
+      "field_occupancy": {
+        "feature_files[].feature_file": 2,
+        "feature_files[].linked_to_user_story[].entity_id": 1,
+        "feature_files[].linked_to_user_story[].scenarios[].scenario_id": 2,
+        "feature_files[].linked_to_user_story[].scenarios[].title": 2,
+        "feature_files[].linked_to_user_story[].scenarios[].source_ref.system": 2,
+        "feature_files[].linked_to_user_story[].scenarios[].source_ref.native_id": 2,
+        "feature_files[].linked_to_user_story[].scenarios[].source_ref.native_type": 2,
+        "feature_files[].linked_to_user_story[].scenarios[].source_ref.url": 2,
+        "feature_files[].linked_to_user_story[].scenarios[].source_ref.tracker_state": 2,
+        "feature_files[].linked_to_user_story[].scenarios[].source_ref.area_path": 0,
+        "feature_files[].linked_to_user_story[].scenarios[].source_ref.iteration_path": 0,
+        "feature_files[].linked_to_user_story[].scenarios[].tags[]": 2,
+        "feature_files[].linked_to_user_story[].scenarios[].acceptance_criteria[].id": 2,
+        "feature_files[].linked_to_user_story[].scenarios[].acceptance_criteria[].aspect": 0,
+        "feature_files[].linked_to_functionality[].entity_id": 1,
+        "feature_files[].linked_to_functionality[].scenarios[].scenario_id": 4,
+        "feature_files[].linked_to_functionality[].scenarios[].title": 4,
+        "feature_files[].linked_to_functionality[].scenarios[].source_ref.system": 4,
+        "feature_files[].linked_to_functionality[].scenarios[].source_ref.native_id": 4,
+        "feature_files[].linked_to_functionality[].scenarios[].source_ref.native_type": 4,
+        "feature_files[].linked_to_functionality[].scenarios[].source_ref.url": 4,
+        "feature_files[].linked_to_functionality[].scenarios[].source_ref.tracker_state": 4,
+        "feature_files[].linked_to_functionality[].scenarios[].source_ref.area_path": 0,
+        "feature_files[].linked_to_functionality[].scenarios[].source_ref.iteration_path": 0,
+        "feature_files[].linked_to_functionality[].scenarios[].tags[]": 4,
+        "feature_files[].linked_to_functionality[].scenarios[].acceptance_criteria[].id": 4,
+        "feature_files[].linked_to_functionality[].scenarios[].acceptance_criteria[].aspect": 4,
+        "feature_files[].unlinked[].scenario_id": 0,
+        "feature_files[].unlinked[].title": 0,
+        "feature_files[].unlinked[].source_ref.system": 0,
+        "feature_files[].unlinked[].source_ref.native_id": 0,
+        "feature_files[].unlinked[].source_ref.native_type": 0,
+        "feature_files[].unlinked[].source_ref.url": 0,
+        "feature_files[].unlinked[].source_ref.tracker_state": 0,
+        "feature_files[].unlinked[].source_ref.area_path": 0,
+        "feature_files[].unlinked[].source_ref.iteration_path": 0,
+        "feature_files[].unlinked[].tags[]": 0,
+        "feature_files[].unlinked[].acceptance_criteria[].id": 0,
+        "feature_files[].unlinked[].acceptance_criteria[].aspect": 0
+      }
+    },
+    "source_inputs": [
+      {
+        "schema_version": "ui-tests-v1.0.0",
+        "producer": {
+          "name": "AbsaOSS/living-doc-collector-gh",
+          "version": "0.1.1",
+          "build": null,
+          "utilities_version": "0.7.0"
+        },
+        "run": {
+          "run_id": null,
+          "run_attempt": null,
+          "actor": null,
+          "workflow": null,
+          "ref": null,
+          "sha": null
+        },
+        "source": {
+          "project_id": "living-doc-examples",
+          "systems": [
+            "GitHub"
+          ],
+          "organizations": [
+            "AbsaOSS"
+          ],
+          "repositories": [
+            "AbsaOSS/living-doc"
+          ],
+          "extraction_mode": null
+        },
+        "stats": {
+          "cardinality": {
+            "entities": 0,
+            "entities_by_type": {},
+            "acceptance_criteria": 0,
+            "scenarios": 6,
+            "warnings_by_code": {},
+            "sources_configured": 1,
+            "sources_failed": 0,
+            "unresolved_refs": 0,
+            "entities_skipped": 0
+          },
+          "field_occupancy": {
+            "scenarios[].acceptance_criteria[].aspect": 4,
+            "scenarios[].acceptance_criteria[].id": 6,
+            "scenarios[].scenario_id": 6,
+            "scenarios[].source_ref.area_path": 0,
+            "scenarios[].source_ref.iteration_path": 0,
+            "scenarios[].source_ref.native_id": 6,
+            "scenarios[].source_ref.native_type": 6,
+            "scenarios[].source_ref.system": 6,
+            "scenarios[].source_ref.tracker_state": 6,
+            "scenarios[].source_ref.url": 6,
+            "scenarios[].tags[]": 6,
+            "scenarios[].title": 6
+          }
+        },
+        "selected_stats": {
+          "cardinality": {
+            "entities": 0,
+            "entities_by_type": {},
+            "acceptance_criteria": 0,
+            "scenarios": 6,
+            "warnings_by_code": {},
+            "sources_configured": 1,
+            "sources_failed": 0,
+            "unresolved_refs": 0,
+            "entities_skipped": 0
+          },
+          "field_occupancy": {
+            "scenarios[].scenario_id": 6,
+            "scenarios[].title": 6,
+            "scenarios[].source_ref.system": 6,
+            "scenarios[].source_ref.native_id": 6,
+            "scenarios[].source_ref.native_type": 6,
+            "scenarios[].source_ref.url": 6,
+            "scenarios[].source_ref.tracker_state": 6,
+            "scenarios[].source_ref.area_path": 0,
+            "scenarios[].source_ref.iteration_path": 0,
+            "scenarios[].tags[]": 6,
+            "scenarios[].acceptance_criteria[].id": 6,
+            "scenarios[].acceptance_criteria[].aspect": 4
+          }
+        }
+      }
+    ]
+  },
+  "warnings": [],
+  "document": {
+    "view": "inner"
+  },
+  "feature_files": [
+    {
+      "feature_file": "AbsaOSS/living-doc/docs/examples/gherkin/liv_doc_func/func-001-validate-password-strength.feature",
+      "linked_to_user_story": [],
+      "linked_to_functionality": [
+        {
+          "entity_id": "FUNC-001",
+          "scenarios": [
+            {
+              "scenario_id": "AbsaOSS/living-doc/docs/examples/gherkin/liv_doc_func/func-001-validate-password-strength.feature/password-shorter-than-the-minimum-length-is-rejected",
+              "title": "Password shorter than the minimum length is rejected",
+              "source_ref": {
+                "system": "GitHub",
+                "native_id": "docs/examples/gherkin/liv_doc_func/func-001-validate-password-strength.feature",
+                "native_type": "scenario",
+                "url": "https://github.com/AbsaOSS/living-doc/blob/<normalized-for-snapshot>/docs/examples/gherkin/liv_doc_func/func-001-validate-password-strength.feature",
+                "tracker_state": "committed",
+                "area_path": null,
+                "iteration_path": null
+              },
+              "tags": [
+                "@AC:FUNC-001-01/aspect:minimum-length"
+              ],
+              "acceptance_criteria": [
+                {
+                  "id": "FUNC-001-01",
+                  "aspect": "minimum-length"
+                }
+              ]
+            },
+            {
+              "scenario_id": "AbsaOSS/living-doc/docs/examples/gherkin/liv_doc_func/func-001-validate-password-strength.feature/password-missing-a-required-character-class-is-rejected",
+              "title": "Password missing a required character class is rejected",
+              "source_ref": {
+                "system": "GitHub",
+                "native_id": "docs/examples/gherkin/liv_doc_func/func-001-validate-password-strength.feature",
+                "native_type": "scenario",
+                "url": "https://github.com/AbsaOSS/living-doc/blob/<normalized-for-snapshot>/docs/examples/gherkin/liv_doc_func/func-001-validate-password-strength.feature",
+                "tracker_state": "committed",
+                "area_path": null,
+                "iteration_path": null
+              },
+              "tags": [
+                "@AC:FUNC-001-01/aspect:character-classes"
+              ],
+              "acceptance_criteria": [
+                {
+                  "id": "FUNC-001-01",
+                  "aspect": "character-classes"
+                }
+              ]
+            },
+            {
+              "scenario_id": "AbsaOSS/living-doc/docs/examples/gherkin/liv_doc_func/func-001-validate-password-strength.feature/password-containing-the-username-is-rejected",
+              "title": "Password containing the username is rejected",
+              "source_ref": {
+                "system": "GitHub",
+                "native_id": "docs/examples/gherkin/liv_doc_func/func-001-validate-password-strength.feature",
+                "native_type": "scenario",
+                "url": "https://github.com/AbsaOSS/living-doc/blob/<normalized-for-snapshot>/docs/examples/gherkin/liv_doc_func/func-001-validate-password-strength.feature",
+                "tracker_state": "committed",
+                "area_path": null,
+                "iteration_path": null
+              },
+              "tags": [
+                "@AC:FUNC-001-01/aspect:no-username"
+              ],
+              "acceptance_criteria": [
+                {
+                  "id": "FUNC-001-01",
+                  "aspect": "no-username"
+                }
+              ]
+            },
+            {
+              "scenario_id": "AbsaOSS/living-doc/docs/examples/gherkin/liv_doc_func/func-001-validate-password-strength.feature/password-shorter-than-the-minimum-length-shows-the-minimum-length-rule",
+              "title": "Password shorter than the minimum length shows the minimum-length rule",
+              "source_ref": {
+                "system": "GitHub",
+                "native_id": "docs/examples/gherkin/liv_doc_func/func-001-validate-password-strength.feature",
+                "native_type": "scenario",
+                "url": "https://github.com/AbsaOSS/living-doc/blob/<normalized-for-snapshot>/docs/examples/gherkin/liv_doc_func/func-001-validate-password-strength.feature",
+                "tracker_state": "committed",
+                "area_path": null,
+                "iteration_path": null
+              },
+              "tags": [
+                "@AC:FUNC-001-03/rule:minimum-length"
+              ],
+              "acceptance_criteria": [
+                {
+                  "id": "FUNC-001-03",
+                  "aspect": "minimum-length"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "unlinked": []
+    },
+    {
+      "feature_file": "AbsaOSS/living-doc/docs/examples/gherkin/liv_doc_us/us-001-customer-login.feature",
+      "linked_to_user_story": [
+        {
+          "entity_id": "US-001",
+          "scenarios": [
+            {
+              "scenario_id": "AbsaOSS/living-doc/docs/examples/gherkin/liv_doc_us/us-001-customer-login.feature/customer-signs-in-with-valid-credentials",
+              "title": "Customer signs in with valid credentials",
+              "source_ref": {
+                "system": "GitHub",
+                "native_id": "docs/examples/gherkin/liv_doc_us/us-001-customer-login.feature",
+                "native_type": "scenario",
+                "url": "https://github.com/AbsaOSS/living-doc/blob/<normalized-for-snapshot>/docs/examples/gherkin/liv_doc_us/us-001-customer-login.feature",
+                "tracker_state": "committed",
+                "area_path": null,
+                "iteration_path": null
+              },
+              "tags": [
+                "@AC:US-001-01"
+              ],
+              "acceptance_criteria": [
+                {
+                  "id": "US-001-01",
+                  "aspect": null
+                }
+              ]
+            },
+            {
+              "scenario_id": "AbsaOSS/living-doc/docs/examples/gherkin/liv_doc_us/us-001-customer-login.feature/remembered-customer-is-still-signed-in-after-a-browser-restart",
+              "title": "Remembered customer is still signed in after a browser restart",
+              "source_ref": {
+                "system": "GitHub",
+                "native_id": "docs/examples/gherkin/liv_doc_us/us-001-customer-login.feature",
+                "native_type": "scenario",
+                "url": "https://github.com/AbsaOSS/living-doc/blob/<normalized-for-snapshot>/docs/examples/gherkin/liv_doc_us/us-001-customer-login.feature",
+                "tracker_state": "committed",
+                "area_path": null,
+                "iteration_path": null
+              },
+              "tags": [
+                "@AC:US-001-04"
+              ],
+              "acceptance_criteria": [
+                {
+                  "id": "US-001-04",
+                  "aspect": null
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "linked_to_functionality": [],
+      "unlinked": []
+    }
+  ]
+}

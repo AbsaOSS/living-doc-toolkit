@@ -44,12 +44,13 @@ reinstalls every package editable with its `[dev]` extra, in dependency order:
 pip install -r requirements-dev.txt
 pip install -e packages/core[dev]
 pip install -e "packages/services/normalize_docs[dev]"
+pip install -e "packages/services/normalize_tests[dev]"
 pip install -e "apps/cli[dev]"
 ```
 
 | File | What it holds | Who installs it |
 |---|---|---|
-| `requirements.txt` | Runtime only: the three package directories, each after the ones it depends on (`./packages/core`, `./packages/services/normalize_docs`, `./apps/cli`) | `action.yml`, into its venv, on every run; the README Quickstart |
+| `requirements.txt` | Runtime only: `./packages/core`, `./packages/services/normalize_docs`, `./packages/services/normalize_tests`, `./apps/cli`, in dependency order | `action.yml`, into its venv, on every run; the README Quickstart |
 | `requirements-dev.txt` | `-r requirements.txt`, the gate and test tools pinned, and `PyYAML` for `tests/test_action_yml.py` | `make install` and CI |
 
 - Each package declares its own runtime dependencies in its `pyproject.toml`; `requirements.txt`
@@ -78,16 +79,17 @@ pip install -e "apps/cli[dev]"
 - Dependabot covers both files from its `pip` entry on `/`, beside one entry per package
   directory, in `.github/dependabot.yml`.
   - Each package entry ignores `living-doc-utilities`: its pin moves by hand, in every package in one change.
-    - Why: an entry updates its own directory only, so its bump would move one pin, and the three packages would
+    - Why: an entry updates its own directory only, so its bump would move one pin, and the four packages would
       no longer install together. A new `living-doc-utilities` is also a contract change, made in its own issue.
 
 ## Monorepo Layout
 
 | Path | Package | Description |
 |---|---|---|
-| `packages/core` | `living-doc-core` | Logging, the reader table, the shared input validation and the view filter ([README](packages/core/README.md)) |
+| `packages/core` | `living-doc-core` | Logging, the shared envelope, reader table, input validation, view filter and CI run context ([README](packages/core/README.md)) |
 | `packages/services/normalize_docs` | `living-doc-service-normalize-docs` | The `normalize-docs` transform and its lineage table ([README](packages/services/normalize_docs/README.md)) |
-| `apps/cli` | `living-doc-cli` | CLI entry point (`living-doc` command group); registers `normalize-docs` ([README](apps/cli/README.md)) |
+| `packages/services/normalize_tests` | `living-doc-service-normalize-tests` | The `normalize-tests` transform and its lineage table ([README](packages/services/normalize_tests/README.md)) |
+| `apps/cli` | `living-doc-cli` | CLI entry point (`living-doc` command group); registers `normalize-docs` and `normalize-tests` ([README](apps/cli/README.md)) |
 
 - A package directory `packages/<group>/<name>` is named by the group's singular and its name: the distribution
   `living-doc-<kind>-<name>`, with `-` for `_`, and the import `living_doc_<kind>_<name>`:
@@ -160,11 +162,12 @@ form `<target>-<alias>`, and one repository-wide target.
 
 ### Run QA for a specific package
 
-Package aliases: `core`, `normalize-docs`, `cli`.
+Package aliases: `core`, `normalize-docs`, `normalize-tests`, `cli`.
 
 ```shell
 make qa-core                  # all gates for packages/core
 make qa-normalize-docs        # packages/services/normalize_docs
+make qa-normalize-tests      # packages/services/normalize_tests
 make qa-cli                   # apps/cli
 ```
 
@@ -286,9 +289,11 @@ make no-vendored-schemas     # wraps: python -m living_doc_utilities.contracts.c
     tracking it, and nothing reports that.
 - R12 check 2, one read path and one write path, is the code's: every read goes through `read_artifact` and returns a
   contract model ([core README](packages/core/README.md#the-reader-table)), and every write goes through
-  `write_artifact` from a contract model ([normalize-docs README](packages/services/normalize_docs/README.md#what-a-run-does)).
+  `write_artifact` from a contract model ([normalize-docs README](packages/services/normalize_docs/README.md#what-a-run-does),
+  [normalize-tests README](packages/services/normalize_tests/README.md#what-a-run-does)).
 - R12 check 3 and R11 are each transform's own tests: the full-sample test, and `assert_complete` over its lineage
-  table ([normalize-docs README](packages/services/normalize_docs/README.md#lineage)).
+  table ([normalize-docs README](packages/services/normalize_docs/README.md#lineage),
+  [normalize-tests README](packages/services/normalize_tests/README.md#lineage)).
 
 ## Running Unit Tests
 
@@ -312,8 +317,8 @@ gate that CI enforces.
 `.github/workflows/integration.yml` runs the action itself, through `uses: ./`, on real
 interpreters ([CI](#ci)). It has no local form: it needs a GitHub runner.
 
-- Locally, `normalize-docs` runs end to end over the fixtures in `packages/services/normalize_docs`'
-  tests, against committed goldens, and through the entry point in `tests/test_main.py`.
+- Locally, `normalize-docs` and `normalize-tests` run end to end over their fixtures and committed goldens, and
+  through the entry point in `tests/test_main.py`.
 - Each command's change brings its own end-to-end tests and its step in `action-run`.
 
 ## Code Coverage
@@ -340,13 +345,15 @@ open packages/core/htmlcov/index.html
 ## Run CLI Locally
 
 After installing all packages (see [Get Started](#get-started)), the `living-doc`
-command is available. It registers `normalize-docs`:
+command is available. It registers `normalize-docs` and `normalize-tests`:
 
 ```shell
 living-doc --version
 living-doc --help
 living-doc --verbose normalize-docs --input tests/fixtures/collector-gh/doc-source.json \
   --output output/generator-ready.json --view release
+living-doc normalize-tests --input tests/fixtures/collector-gh/ui-tests.json \
+  --output output/ui-test-catalog.json
 ```
 
 ## Action venv
@@ -385,9 +392,9 @@ What differs from `living-doc-generator-markdown`:
   - Why the variable, not `${{ github.action_path }}`: in a `container:` job the expression gives
     the runner host's path, which does not exist inside the container.
 - The import check imports `living_doc_cli.main`, which imports `click`, the CLI package and each
-  command it registers, with the packages that command imports: for `normalize-docs`, its service,
+  command it registers, with the packages those commands import: the two services,
   `living-doc-core` and `living-doc-utilities`.
-- pip rebuilds a local directory on every install, so each run reinstalls the three packages into the
+- pip rebuilds a local directory on every install, so each run reinstalls the four packages into the
   reused venv; their dependencies stay installed.
 
 ### The entry point
@@ -406,7 +413,7 @@ on the venv's interpreter. The CLI's exit code is the step's.
   An empty required input, `tests-input` for `coverage-matrix` included, fails with one line naming
   it, and so does a `fail-under` that is not a finite number.
 - Only once the inputs pass is a command in `NOT_AVAILABLE_YET` refused, with one line:
-  ``Command `<command>` is not available yet.`` `normalize-tests` and `coverage-matrix` are in it today.
+  ``Command `<command>` is not available yet.`` `coverage-matrix` is the only command in it today.
   - Why last: an input the command does not take is rejected the same way for a command not available yet.
 - Verbose logging comes from `verbose-logging: 'true'`, in any case, or from `RUNNER_DEBUG=1`, which a
   re-run with debug logging sets. Either adds the group's `--verbose` before the command name, so no
@@ -418,8 +425,9 @@ on the venv's interpreter. The CLI's exit code is the step's.
     `metadata.run` for audit only ([core README](packages/core/README.md#the-ci-run-context)).
 - Once the command succeeds, `output-path` is set to the absolute path of `output`.
 - `tests/test_main.py` replaces the CLI to test the run itself: the command line, the exit code passed
-  through, and `output-path`; it empties `NOT_AVAILABLE_YET` to test it for the two commands not
-  available yet. It also runs `normalize-docs` through the entry point over the fixture, for real.
+  through, and `output-path`; it empties `NOT_AVAILABLE_YET` to test the run path for `coverage-matrix`,
+  not available yet. It also runs `normalize-docs` and `normalize-tests` through the entry point over
+  their fixtures, for real.
 
 A debug run, from the repository root after `make install`:
 
@@ -463,11 +471,11 @@ the Markdown links.
   - Why: the action runs on whatever Python ≥ 3.10 the caller puts on `PATH`.
 - `integration.yml`'s jobs run the action through `uses: ./` over the committed fixtures.
 - `action-run` runs each command the action runs and checks what it wrote: `normalize-docs` over
-  `doc-source.json` in the release view.
+  `doc-source.json` in the release view, and `normalize-tests` over `ui-tests.json`.
   - It reads the file with `read_artifact` on the action's venv, checks `document.view`, the
     `selection_summary` and that `metadata.run.run_id` is the job's `GITHUB_RUN_ID`, and checks that
     `output-path` is the file's absolute path.
-  - `normalize-tests` and `coverage-matrix` each add their step when they land.
+  - `coverage-matrix` adds its step when it lands.
 - The venv jobs run `normalize-docs`, which writes its file, and the isolation job also runs
   `coverage-matrix`, which fails on the "not available yet" line.
   - Each run step has `continue-on-error`, and the job asserts its `outcome`: `success` for
