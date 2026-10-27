@@ -54,12 +54,16 @@ def coverage_matrix(
     @param output_path: The `coverage-matrix.json` to write.
     @param view: `document.view`, `inner` or `release`.
     @return: The output as built, before `write_artifact` filled its stats.
+    @raise TypeError: `doc_inputs` is one path, not a sequence of them.
     @raise InputValidationError: The inputs failed a step of the shared input validation.
     @raise RuntimeError: The shared input validation passed but returned no documentation or no tests input, a
         defect in it.
     @raise ContractError: `FIELD_LOSS`, or the output failed validation on write; no file is written either way.
     @raise OSError: The output file cannot be written.
     """
+    # A `str` is a `Sequence[str]` too, and `list()` would read each of its characters as a path.
+    if isinstance(doc_inputs, (str, Path)):
+        raise TypeError(f"{COMMAND} - doc_inputs is one path, {str(doc_inputs)!r}; pass a sequence of paths")
     inputs = validate_inputs(COMMAND, {Role.DOCUMENTATION: list(doc_inputs), Role.TESTS: [tests_input]})
     # `validate_inputs` returns an input for every role the command takes, or raises.
     if inputs.documentation is None:

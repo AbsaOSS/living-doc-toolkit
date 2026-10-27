@@ -160,6 +160,19 @@ def test_a_matrix_with_no_coverage_percentage_fails_any_fail_under_and_keeps_the
     assert _read(output).summary.coverage_pct is None
 
 
+@pytest.mark.parametrize("value", ["nan", "inf", "-inf"])
+def test_a_fail_under_that_is_not_a_finite_number_is_a_usage_error_and_writes_no_file(
+    runner, doc_source, ui_tests, tmp_path, value
+):
+    output = tmp_path / "coverage-matrix.json"
+
+    result = runner.invoke(cli, _args(doc_source, ui_tests, output, f"--fail-under={value}"))
+
+    assert result.exit_code == 2
+    assert f"Invalid value for '--fail-under': {float(value)} is not a finite number." in result.output
+    assert not output.exists()
+
+
 def test_two_documentation_files_of_one_project_fail_with_one_line_each_before_any_transform(
     runner, monkeypatch, changed_copy, doc_source, ui_tests, tmp_path
 ):

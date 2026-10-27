@@ -35,6 +35,10 @@ def _no_build(*_args, **_kwargs):
     raise AssertionError("the builder ran")
 
 
+def _no_validation(*_args, **_kwargs):
+    raise AssertionError("the shared input validation ran")
+
+
 def _written(path: Path) -> dict:
     payload = json.loads(path.read_text(encoding="utf-8"))
     payload["metadata"]["generated_at"] = "<masked>"
@@ -158,6 +162,20 @@ def test_a_repeated_entity_id_and_a_repeated_criterion_id_each_fail_with_one_pro
             "one at the source",
         ),
     ]
+
+
+@pytest.mark.parametrize("doc_inputs", [str(DOC_SOURCE), DOC_SOURCE])
+def test_one_documentation_path_in_place_of_a_sequence_is_refused_before_validation(monkeypatch, tmp_path, doc_inputs):
+    monkeypatch.setattr(service, "validate_inputs", _no_validation)
+    output = tmp_path / "coverage-matrix.json"
+
+    with pytest.raises(TypeError) as error:
+        coverage_matrix(doc_inputs, UI_TESTS, output)
+
+    assert str(error.value) == (
+        f"coverage-matrix - doc_inputs is one path, {str(DOC_SOURCE)!r}; pass a sequence of paths"
+    )
+    assert not output.exists()
 
 
 @pytest.mark.parametrize("role", ["documentation", "tests"])

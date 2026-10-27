@@ -94,7 +94,7 @@ What it counts, in which order, and how it checks that no field is lost:
 | `--tests-input` | yes | | The tests input, `ui-tests.json`. |
 | `--output` | yes | | The `coverage-matrix.json` to write; its directory is created when missing. |
 | `--view` | no | `inner` | `inner` or `release`: `document.view`. Both views count the same criteria. |
-| `--fail-under` | no | | A number: the run fails when the matrix's root `coverage_pct` is below it, or is `null` because no criterion is counted. |
+| `--fail-under` | no | | A finite number: the run fails when the matrix's root `coverage_pct` is below it, or is `null` because no criterion is counted. |
 
 A run that succeeds exits 0 and logs one line:
 ``[INFO] coverage-matrix - written: `<output>` (<view> view; <n> counted acceptance criteria, <n> covered, <pct>%).``
@@ -102,6 +102,11 @@ With no counted criterion the line ends `no coverage percentage)` instead.
 
 `--fail-under` is checked after the file is written: a run below it logs the success line, then one error line, and
 exits 1 with the file left in place. At or above it, the run succeeds.
+
+- The gate compares `coverage_pct` as written, rounded to one decimal, so `--fail-under 100` passes at 99.95 % or
+  more. Rounding:
+  [rendering](https://github.com/AbsaOSS/living-doc-utilities/blob/master/docs/contracts/rendering.md#coverage-summary),
+  § Coverage summary.
 
 Any other failure exits 1, writes no file, and leaves a file already at `--output` untouched:
 
@@ -118,7 +123,8 @@ The gate's lines, after the file is written:
 | The coverage percentage is below `--fail-under` | ``[ERROR] coverage-matrix - the coverage percentage, <pct>, is below --fail-under <n>.`` |
 | No criterion is counted, so there is no percentage | ``[ERROR] coverage-matrix - no acceptance criterion is counted, so the matrix has no coverage percentage, which fails --fail-under <n>.`` |
 
-- An option click rejects, such as a `--fail-under` that is not a number, exits 2 with click's usage error.
+- An option click rejects, such as a `--fail-under` that is not a finite number (`nan` and `inf` included), exits 2
+  with click's usage error and writes no file.
 
 ## Development
 

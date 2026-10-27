@@ -6,6 +6,7 @@ fails.
 """
 
 import logging
+import math
 import sys
 from typing import cast, get_args
 
@@ -23,6 +24,16 @@ logger = logging.getLogger("living_doc.coverage_matrix")
 def _percentage(summary: CoverageSummary) -> str:
     """The matrix's coverage percentage as the success line names it."""
     return "no coverage percentage" if summary.coverage_pct is None else f"{summary.coverage_pct}%"
+
+
+def _finite(_ctx: click.Context, _param: click.Parameter, value: float | None) -> float | None:
+    """
+    `--fail-under` as a finite number, as the action takes it: click's float reads `nan` and `inf` too, and no
+    percentage is below `nan`, so the gate would never fail.
+    """
+    if value is not None and not math.isfinite(value):
+        raise click.BadParameter(f"{value} is not a finite number.")
+    return value
 
 
 @click.command("coverage-matrix")
@@ -46,6 +57,7 @@ def _percentage(summary: CoverageSummary) -> str:
 @click.option(
     "--fail-under",
     type=float,
+    callback=_finite,
     help="Fail the run when the matrix's coverage percentage is below this number, or there is none; "
     "the file is written first.",
 )

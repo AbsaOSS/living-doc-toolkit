@@ -23,7 +23,7 @@ inputs:
     required: false
     default: ''
   fail-under:
-    description: '`coverage-matrix` only: fail when the coverage percentage is below this number.'
+    description: '`coverage-matrix` only: fail when the coverage percentage is below this number, or there is none; the file is written first, and `output-path` is not set.'
     required: false
     default: ''
   verbose-logging:
