@@ -19,6 +19,7 @@ import sys
 from pathlib import Path
 
 import pytest
+from living_doc_utilities.contracts.coverage_matrix import CoverageMatrixResult
 from living_doc_utilities.contracts.envelope import Run
 from living_doc_utilities.contracts.generator_ready import GeneratorReadyResult
 from living_doc_utilities.contracts.io import read_artifact
@@ -32,7 +33,6 @@ DOC_SOURCE = REPO_ROOT / "tests" / "fixtures" / "collector-gh" / "doc-source.jso
 UI_TESTS = REPO_ROOT / "tests" / "fixtures" / "collector-gh" / "ui-tests.json"
 CLI = [sys.executable, "-I", "-m", "living_doc_cli.main"]
 COMMANDS = ["normalize-docs", "normalize-tests", "coverage-matrix"]
-NOT_AVAILABLE = ["coverage-matrix"]
 # The CI run the entry point runs in, as GitHub Actions sets it.
 RUN_CONTEXT = {
     "GITHUB_RUN_ID": "4242",
@@ -81,12 +81,6 @@ def _cli(monkeypatch, tmp_path) -> _FakeCli:
     return fake
 
 
-@pytest.fixture(name="available")
-def _available(monkeypatch) -> None:
-    """Every command available, as once the CLI runs them, so the run path is tested for `coverage-matrix`."""
-    monkeypatch.setattr(main, "NOT_AVAILABLE_YET", ())
-
-
 def _run_failing(capsys) -> tuple[int, list[str]]:
     with pytest.raises(SystemExit) as exit_info:
         run()
@@ -121,26 +115,9 @@ def test_an_unknown_command_fails_with_one_line_listing_the_valid_commands(cli, 
     assert cli.runs == []
 
 
-@pytest.mark.parametrize("command", NOT_AVAILABLE)
-def test_a_command_with_valid_inputs_fails_with_one_line_saying_it_is_not_available_yet(
-    cli, monkeypatch, capsys, command
-):
-    # Arrange
-    _set_required_inputs(monkeypatch, command)
-
-    # Act
-    code, errors = _run_failing(capsys)
-
-    # Assert
-    assert code == 1
-    assert errors == [f"[ERROR] Command `{command}` is not available yet."]
-    assert cli.runs == []
-
-
-def test_the_action_runs_normalize_docs_and_normalize_tests_but_not_coverage_matrix():
+def test_the_action_runs_the_three_commands_it_declares():
     # Assert
     assert list(main.COMMAND_INPUTS) == COMMANDS
-    assert list(main.NOT_AVAILABLE_YET) == NOT_AVAILABLE
 
 
 @pytest.mark.parametrize(
@@ -155,10 +132,8 @@ def test_the_action_runs_normalize_docs_and_normalize_tests_but_not_coverage_mat
         ({"command": "coverage-matrix", "tests_input": "tests.json", "document_title": "Title"}, "document-title"),
     ],
 )
-def test_an_input_the_command_does_not_take_fails_with_one_line_naming_it_before_it_is_refused(
-    cli, monkeypatch, capsys, inputs, untaken
-):
-    # Arrange: the untaken input is rejected before the command runs or is refused.
+def test_an_input_the_command_does_not_take_fails_with_one_line_naming_it(cli, monkeypatch, capsys, inputs, untaken):
+    # Arrange: the untaken input is rejected before the command runs.
     _set_inputs(monkeypatch, input="in.json", output="out.json", **inputs)
 
     # Act
@@ -248,7 +223,7 @@ def test_an_empty_input_the_command_does_not_take_is_not_passed(cli, monkeypatch
     assert cli.runs == [[*CLI, "normalize-tests", "--input=ui-tests.json", f"--output={Path.cwd() / 'out.json'}"]]
 
 
-def test_coverage_matrix_gets_each_input_as_its_option_and_the_output_as_an_absolute_path(cli, available, monkeypatch):
+def test_coverage_matrix_gets_each_input_as_its_option_and_the_output_as_an_absolute_path(cli, monkeypatch):
     # Arrange
     _set_inputs(
         monkeypatch,
@@ -505,21 +480,54 @@ def test_the_entry_point_ends_a_failed_normalize_docs_with_the_clis_line_and_exi
     assert not (tmp_path / "github-output").exists()
 
 
-def test_the_entry_point_stops_a_command_not_available_yet_with_one_line(tmp_path):
+def _coverage_matrix_inputs(**inputs: str) -> dict[str, str]:
+    return {
+        "command": "coverage-matrix",
+        "input": os.fspath(DOC_SOURCE),
+        "tests-input": os.fspath(UI_TESTS),
+        "output": "out/coverage-matrix.json",
+        **inputs,
+    }
+
+
+@pytest.mark.parametrize(
+    ("inputs", "view"),
+    [
+        ({}, "inner"),
+        # At the matrix's own percentage, the gate passes.
+        ({"view": "release", "fail-under": "66.7"}, "release"),
+    ],
+)
+def test_the_entry_point_runs_coverage_matrix_over_the_fixture_pair_and_sets_the_output_path(tmp_path, inputs, view):
     # Act
-    result = _run_entry_point(
-        tmp_path,
-        {
-            "command": "coverage-matrix",
-            "input": os.fspath(DOC_SOURCE),
-            "tests-input": os.fspath(UI_TESTS),
-            "output": "coverage-matrix.json",
-        },
-    )
+    result = _run_entry_point(tmp_path, _coverage_matrix_inputs(**inputs))
 
     # Assert
+    assert result.returncode == 0, result.stderr
+    assert _errors(result.stderr) == []
+    written = read_artifact(tmp_path / "out" / "coverage-matrix.json", expected="coverage-matrix")
+    assert isinstance(written, CoverageMatrixResult)
+    assert written.document.view == view
+    assert [entity.entity_id for entity in written.entities] == ["US-001", "FUNC-001", "FUNC-002"]
+    summary = written.summary
+    assert (summary.counted_acs, summary.covered_acs, summary.not_covered_acs, summary.coverage_pct) == (6, 4, 2, 66.7)
+    assert written.metadata.run.run_id == RUN_CONTEXT["GITHUB_RUN_ID"]
+    assert written.metadata.producer.build is None
+    assert (tmp_path / "github-output").read_text(encoding="utf-8") == (
+        f"output-path={tmp_path / 'out' / 'coverage-matrix.json'}\n"
+    )
+
+
+def test_the_entry_point_ends_a_coverage_matrix_below_fail_under_with_the_clis_line_and_sets_no_output(tmp_path):
+    # Act
+    result = _run_entry_point(tmp_path, _coverage_matrix_inputs(**{"fail-under": "66.8"}))
+
+    # Assert: the matrix is written before the gate, and the step fails.
     assert result.returncode == 1, result.stderr
-    assert _errors(result.stderr) == ["[ERROR] Command `coverage-matrix` is not available yet."]
+    assert _errors(result.stderr) == [
+        "[ERROR] coverage-matrix - the coverage percentage, 66.7, is below --fail-under 66.8."
+    ]
+    assert (tmp_path / "out" / "coverage-matrix.json").exists()
     assert not (tmp_path / "github-output").exists()
 
 

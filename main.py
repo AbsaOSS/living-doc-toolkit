@@ -59,8 +59,6 @@ COMMAND_INPUTS: dict[str, dict[str, tuple[str, bool]]] = {
         FAIL_UNDER: ("--fail-under", False),
     },
 }
-# Declared by `action.yml`, not registered by the CLI yet: checked like the others, then refused.
-NOT_AVAILABLE_YET = ("coverage-matrix",)
 
 VALID_COMMANDS = ", ".join(COMMAND_INPUTS)
 # Every input a command can take, in `action.yml` order.
@@ -69,8 +67,8 @@ COMMAND_INPUT_NAMES = list(dict.fromkeys(name for inputs in COMMAND_INPUTS.value
 
 class ActionInputError(Exception):
     """
-    A missing, invalid or untaken input, or a command not available yet; the message is the one line the run fails
-    with, naming the input or the command.
+    A missing, invalid or untaken input; the message is the one line the run fails with, naming the input or the
+    command.
     """
 
 
@@ -123,8 +121,7 @@ def build_command_line(verbose: bool) -> tuple[list[str], str]:
     @return: The arguments after `python -I -m living_doc_cli.main`, and the absolute path of the file the command
         writes.
     @raise ActionInputError: `command` is empty or unknown; an input the command does not take is set; an input the
-        command requires is empty; `output` holds a line break; `fail-under` is not a number; or, once its inputs
-        passed, the command is not available yet.
+        command requires is empty; `output` holds a line break; or `fail-under` is not a number.
     """
     command = _command()
     taken = COMMAND_INPUTS[command]
@@ -147,10 +144,6 @@ def build_command_line(verbose: bool) -> tuple[list[str], str]:
     fail_under = get_input(FAIL_UNDER)
     if fail_under and not _is_number(fail_under):
         raise ActionInputError(f"Input `{FAIL_UNDER}` is {fail_under!r}, not a number.")
-
-    # Last, so a wrong input is reported for a command not available yet too.
-    if command in NOT_AVAILABLE_YET:
-        raise ActionInputError(f"Command `{command}` is not available yet.")
 
     # `--verbose` is the group's option, so no command repeats it.
     arguments = ["--verbose", command] if verbose else [command]

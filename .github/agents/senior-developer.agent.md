@@ -101,7 +101,7 @@ Repo specifics
   - Must keep Python imports at top of file (not inside functions/methods).
 - Quality gates (use the `Makefile` targets — `.github/workflows/test.yml` runs the same)
   - Full gate, all packages: `make qa`
-  - Per package: `make qa-<alias>` (`<alias>` ∈ `core`, `normalize-docs`, `normalize-tests`, `cli`)
+  - Per package: `make qa-<alias>` (`<alias>` ∈ `core`, `normalize-docs`, `normalize-tests`, `coverage-matrix`, `cli`)
   - Individual: `make format-<alias>` (check-only `make format-check-<alias>`), `make lint-<alias>` (Pylint ≥ 9.5), `make types-<alias>`, `make deptry-<alias>`, `make test-<alias>`, `make coverage-<alias>` (`--cov-fail-under=80`)
 - Contract-sensitive outputs
   - CLI argument names/defaults; the action's inputs and `output-path` output; `main.py`'s error lines.

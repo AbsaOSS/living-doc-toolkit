@@ -1,6 +1,8 @@
-# Runtime only: the three packages, each after the ones it depends on; install from the repository root.
-# Development tools go in `requirements-dev.txt`.
+# Runtime only: the five packages, each after the ones it depends on, and the `living-doc-utilities` pin every package
+# declares; install from the repository root. Development tools go in `requirements-dev.txt`.
+living-doc-utilities==0.8.0
 ./packages/core
 ./packages/services/normalize_docs
 ./packages/services/normalize_tests
+./packages/services/coverage_matrix
 ./apps/cli

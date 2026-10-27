@@ -32,7 +32,7 @@ guessing.
 | An input that fails one validation step | `changed_copy(fixture, change)` writes the fixture under `tmp_path` with `change` applied to its parsed JSON | `packages/core/tests/conftest.py`, `test_input_validation.py` |
 | Every optional field of a contract filled | `living_doc_utilities.contracts.testing.full_sample(contract_id)` | `living-doc-utilities` |
 | A read through `read_artifact` | `monkeypatch.setattr(readers, "read_artifact", ...)` around the real one, to record the call | `packages/core/tests/test_readers.py` |
-| The CLI the action runs | `_FakeCli` replaces `subprocess.run`; the `available` fixture empties `NOT_AVAILABLE_YET` to test the run itself | `tests/test_main.py` |
+| The CLI the action runs | `_FakeCli` replaces `subprocess.run` to test the run itself | `tests/test_main.py` |
 | Action inputs | `INPUT_<NAME>` environment variables via `monkeypatch.setenv`; `tests/conftest.py` clears inherited ones | `tests/test_main.py`, `tests/conftest.py` |
 | The action's venv step | a fake interpreter and pip, run through bash | `tests/test_action_yml.py` |
 | CLI invocation + exit code + output | `click.testing.CliRunner().invoke(cli, [...])`, assert `result.exit_code` and `result.output` | `apps/cli/tests/test_cli.py` |
