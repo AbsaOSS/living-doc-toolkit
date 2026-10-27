@@ -31,6 +31,9 @@ Nothing is written when a step fails.
 - There is one `feature_files[]` entry per feature file, named from the scenario's `scenario_id` up to its last `/`
   only when that prefix ends with `/<source_ref.native_id>` and exactly two non-empty path components (`<org>/<repo>`)
   precede the native path. Otherwise the key and name are `source_ref.native_id`.
+  - Why exactly two: a `metadata.source.repositories[]` entry is `org/repo` on GitHub and `org/project` on Azure
+    DevOps ([artifact rules](https://github.com/AbsaOSS/living-doc-utilities/blob/master/docs/contracts/artifact-rules.md),
+    § The metadata envelope), so a prefix of any other length is not a repository the contracts name.
 - The repository-qualified name relies on `collector-gh`'s `scenario_id` shape, which no contract defines. Until a
   contract field names the repository, other id shapes use the native path; the final repository identifier belongs
   in a future contract change.

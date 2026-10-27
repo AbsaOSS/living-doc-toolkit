@@ -36,7 +36,7 @@ Module map — four packages under `packages/` and `apps/`, each with its own `p
 
 | Path | Package (`pip` name) | Responsibility |
 |---|---|---|
-| `packages/core` | `living-doc-core` | `logging_config.py` (`setup_logging`), `readers.py` (the reader table, `read_documentation`, `read_tests`), `input_validation.py` (`validate_inputs`, the shared input validation), `views.py` (`select_records`, the view filter), `run_context.py` (`run_context`, the CI run for `metadata.run`). Depends on `living-doc-utilities==0.8.0`. |
+| `packages/core` | `living-doc-core` | `logging_config.py` (`setup_logging`), `envelope.py` (`PRODUCER_NAME`, `TOOLKIT_VERSION`, `forwarded`, the producer identity and warning forwarding every transform shares), `readers.py` (the reader table, `read_documentation`, `read_tests`), `input_validation.py` (`validate_inputs`, the shared input validation), `views.py` (`select_records`, the view filter), `run_context.py` (`run_context`, the CI run for `metadata.run`). Depends on `living-doc-utilities==0.8.0`. |
 | `packages/services/normalize_docs` | `living-doc-service-normalize-docs` | `builder.py` (`build_generator_ready`), `lineage.py` (`LINEAGE_TABLE`), `service.py` (`normalize_docs`, the command, and `check_no_field_loss`). |
 | `packages/services/normalize_tests` | `living-doc-service-normalize-tests` | `builder.py` (`build_ui_test_catalog`), `lineage.py` (`LINEAGE_TABLE`), `service.py` (`normalize_tests`, the command, and the runtime field-loss check). |
 | `apps/cli` | `living-doc-cli` | CLI entry point — `main.py` (`cli()` click group), one module per command under `commands/`. Registers `normalize-docs` and `normalize-tests`. |

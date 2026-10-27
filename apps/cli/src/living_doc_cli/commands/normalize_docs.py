@@ -5,15 +5,14 @@ The `normalize-docs` command: its options, and the error lines and exit code of 
 """
 
 import logging
-import sys
 from typing import cast, get_args
 
 import click
-from living_doc_core.input_validation import InputValidationError
 from living_doc_core.logging_config import setup_logging
 from living_doc_service_normalize_docs import service
-from living_doc_utilities.contracts.codes import ContractError
 from living_doc_utilities.contracts.common import View
+
+from living_doc_cli.failures import exit_on_failure
 
 logger = logging.getLogger("living_doc.normalize_docs")
 
@@ -45,7 +44,7 @@ def normalize_docs(  # pylint: disable=too-many-arguments,too-many-positional-ar
     Normalize one doc-source.json into generator-ready.json.
     """
     setup_logging(verbose=bool((ctx.obj or {}).get("verbose")))
-    try:
+    with exit_on_failure(logger, "normalize-docs"):
         result = service.normalize_docs(
             input_path,
             output_path,
@@ -53,16 +52,6 @@ def normalize_docs(  # pylint: disable=too-many-arguments,too-many-positional-ar
             document_title=document_title,
             document_version=document_version,
         )
-    except InputValidationError as error:
-        for problem in error.problems:
-            logger.error("%s", problem)
-        sys.exit(1)
-    except ContractError as error:
-        logger.error("%s", error)
-        sys.exit(1)
-    except OSError as error:
-        logger.error("normalize-docs - the output cannot be written: %s", error)
-        sys.exit(1)
 
     summary = result.document.selection_summary
     logger.info(

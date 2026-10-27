@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 
 import pytest
-from living_doc_core.input_validation import InputValidationError
+from living_doc_core.input_validation import InputValidationError, ValidatedInputs
 from living_doc_utilities.contracts.codes import Code, ContractError
 from living_doc_utilities.contracts.envelope import AuditStats, ContractWarning, Run
 from living_doc_utilities.contracts.io import read_artifact, write_artifact
@@ -15,11 +15,27 @@ from living_doc_utilities.contracts.ui_tests import AcLink
 
 from living_doc_service_normalize_tests import service
 from living_doc_service_normalize_tests.builder import build_ui_test_catalog
-from living_doc_service_normalize_tests.lineage import FUNCTIONALITY_SCENARIO_ROOT, USER_STORY_SCENARIO_ROOT
+from living_doc_service_normalize_tests.lineage import (
+    FUNCTIONALITY_SCENARIO_ROOT,
+    SCENARIO_PATHS,
+    UNLINKED_SCENARIO_ROOT,
+    USER_STORY_SCENARIO_ROOT,
+)
 from living_doc_service_normalize_tests.service import normalize_tests
 
 FIXTURE = Path(__file__).resolve().parents[4] / "tests" / "fixtures" / "collector-gh" / "ui-tests.json"
 EXPECTED = Path(__file__).resolve().parent / "expected"
+
+
+@pytest.fixture(name="sample_file")
+def _sample_file(tmp_path) -> Path:
+    path = tmp_path / "full-sample.json"
+    write_artifact(full_sample("ui-tests-v1.0.0"), path)
+    return path
+
+
+def _no_build(*_args, **_kwargs):
+    raise AssertionError("the builder ran")
 
 
 def _masked(payload: dict) -> dict:
@@ -89,16 +105,25 @@ def test_the_producer_uses_the_toolkit_identity_and_keeps_build_null(ui_tests, r
 
 
 def test_invalid_input_fails_before_the_builder_runs(monkeypatch, tmp_path):
-    def no_build(*_args, **_kwargs):
-        raise AssertionError("the builder ran")
-
-    monkeypatch.setattr(service, "build_ui_test_catalog", no_build)
+    monkeypatch.setattr(service, "build_ui_test_catalog", _no_build)
     output = tmp_path / "ui-test-catalog.json"
 
     with pytest.raises(InputValidationError) as error:
         normalize_tests(tmp_path / "missing.json", output)
 
     assert [problem.code for problem in error.value.problems] == [Code.MISSING_INPUT]
+    assert not output.exists()
+
+
+def test_a_validation_that_returns_no_tests_input_stops_before_any_transform(monkeypatch, tmp_path):
+    # A defect in the shared input validation, which returns an input for every role the command takes.
+    monkeypatch.setattr(service, "validate_inputs", lambda *_args: ValidatedInputs())
+    monkeypatch.setattr(service, "build_ui_test_catalog", _no_build)
+    output = tmp_path / "ui-test-catalog.json"
+
+    with pytest.raises(RuntimeError, match="^normalize-tests - the shared input validation returned no tests input"):
+        normalize_tests(FIXTURE, output)
+
     assert not output.exists()
 
 
@@ -140,14 +165,10 @@ def test_every_input_warning_is_forwarded_unchanged_but_for_its_context(ui_tests
     assert result.warnings[0].context == ("source_input='ui-tests-v1.0.0' entity_id='US-001' target='FEAT-999'")
 
 
-def test_the_utilities_full_sample_passes_validation_and_lineage(ui_tests, tmp_path):
-    sample = full_sample("ui-tests-v1.0.0")
-    input_path = tmp_path / "full-sample.json"
-    output_path = tmp_path / "ui-test-catalog.json"
-    write_artifact(sample, input_path)
-
-    result = normalize_tests(input_path, output_path)
-    written_sample = read_artifact(input_path, expected="ui-tests")
+def test_the_utilities_full_sample_passes_validation_and_lineage(sample_file, run_command):
+    # The command raises FIELD_LOSS on a loss, and writes no file.
+    result = run_command(sample_file)
+    written_sample = read_artifact(sample_file, expected="ui-tests")
 
     assert (
         result.metadata.source_inputs[0].selected_stats.field_occupancy == written_sample.metadata.stats.field_occupancy
@@ -163,7 +184,14 @@ def test_the_utilities_full_sample_passes_validation_and_lineage(ui_tests, tmp_p
         ("US-002", 1)
     ]
     assert not result.feature_files[0].unlinked
-    assert output_path.exists()
+
+
+def test_over_the_full_sample_every_scenario_path_has_data_in_the_output(sample_file, run_command):
+    occupancy = run_command(sample_file).metadata.stats.field_occupancy
+
+    group_roots = (USER_STORY_SCENARIO_ROOT, FUNCTIONALITY_SCENARIO_ROOT, UNLINKED_SCENARIO_ROOT)
+    empty = [path for path in SCENARIO_PATHS if sum(occupancy.get(f"{root}{path}", 0) for root in group_roots) == 0]
+    assert empty == []
 
 
 @pytest.mark.parametrize(

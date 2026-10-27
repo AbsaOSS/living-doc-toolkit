@@ -425,9 +425,9 @@ on the venv's interpreter. The CLI's exit code is the step's.
     `metadata.run` for audit only ([core README](packages/core/README.md#the-ci-run-context)).
 - Once the command succeeds, `output-path` is set to the absolute path of `output`.
 - `tests/test_main.py` replaces the CLI to test the run itself: the command line, the exit code passed
-  through, and `output-path`; it empties `NOT_AVAILABLE_YET` to test the run path for the available
-  commands. It also runs `normalize-docs` and `normalize-tests` through the entry point over their
-  fixtures, for real.
+  through, and `output-path`; it empties `NOT_AVAILABLE_YET` to test the run path for `coverage-matrix`,
+  not available yet. It also runs `normalize-docs` and `normalize-tests` through the entry point over
+  their fixtures, for real.
 
 A debug run, from the repository root after `make install`:
 

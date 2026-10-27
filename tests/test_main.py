@@ -83,7 +83,7 @@ def _cli(monkeypatch, tmp_path) -> _FakeCli:
 
 @pytest.fixture(name="available")
 def _available(monkeypatch) -> None:
-    """Every command available, as once the CLI runs them, so the run path is tested for the two not run yet."""
+    """Every command available, as once the CLI runs them, so the run path is tested for `coverage-matrix`."""
     monkeypatch.setattr(main, "NOT_AVAILABLE_YET", ())
 
 
@@ -227,7 +227,7 @@ def test_a_fail_under_that_is_not_a_number_fails_with_one_line_naming_it(cli, mo
     assert cli.runs == []
 
 
-def test_an_empty_input_the_command_does_not_take_is_not_passed(cli, available, monkeypatch, capsys):
+def test_an_empty_input_the_command_does_not_take_is_not_passed(cli, monkeypatch, capsys):
     # Arrange: `action.yml` passes every input, an unset optional one as its empty default.
     _set_inputs(
         monkeypatch,
