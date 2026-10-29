@@ -11,6 +11,7 @@
 - [Running Integration Tests](#running-integration-tests)
 - [Code Coverage](#code-coverage)
 - [Run CLI Locally](#run-cli-locally)
+- [Local Integration Run](#local-integration-run)
 - [Action venv](#action-venv)
 - [CI](#ci)
 - [Branch Naming Convention (PID:H-1)](#branch-naming-convention-pidh-1)
@@ -194,10 +195,10 @@ and each aggregate target (`make lint`, `make test`, …) except `deptry` includ
 
 | Target | Runs | Gate |
 |---|---|---|
-| `format-check-root` / `format-root` | Black over `main.py` and `tests/` | line length **120** |
-| `lint-root` | ruff over `main.py` and `tests/`, then Pylint over `main.py` | score ≥ **9.5** / 10 |
-| `types-root` | mypy over `main.py` | clean |
-| `test-root` / `coverage-root` | pytest over `tests/`, measuring `main.py` | ≥ **80 %** |
+| `format-check-root` / `format-root` | Black over `main.py`, `tools/` and `tests/` | line length **120** |
+| `lint-root` | ruff over `main.py`, `tools/` and `tests/`, then Pylint over `main.py` and `tools/` | score ≥ **9.5** / 10 |
+| `types-root` | mypy over `main.py` and `tools/` | clean |
+| `test-root` / `coverage-root` | pytest over `tests/`, measuring `main.py` and `tools/` | ≥ **80 %** |
 
 ### Deprecated target names
 
@@ -364,6 +365,78 @@ living-doc normalize-tests --input tests/fixtures/collector-gh/ui-tests.json \
 living-doc coverage-matrix --doc-input tests/fixtures/collector-gh/doc-source.json \
   --tests-input tests/fixtures/collector-gh/ui-tests.json --output output/coverage-matrix.json --fail-under 50
 ```
+
+## Local Integration Run
+
+`local-integration.sh` runs the real toolkit over a given `doc-source.json` and `ui-tests.json`, on the machine that
+has them, outside any workflow. It runs the three commands through `main.py` in a venv of its own, re-reads every
+output with `read_artifact`, and prints what ran and what came out. No workflow runs it; like any local run, it is a
+development and operator-check affordance, not a second supported deployment target.
+
+- The usual inputs are the two files a `living-doc-collector-gh` run wrote: its
+  [Local Integration Run](https://github.com/AbsaOSS/living-doc-collector-gh/blob/master/DEVELOPER.md#local-integration-run)
+  says where they land. The script never derives another component's paths; you configure both files.
+
+### What You Prepare
+
+The script checks the Python version, `git` and the two inputs, and nothing else of the environment → `local-integration.sh::--check`. The rest is yours:
+
+- **Python ≥ 3.10**, with its `venv` module. The script uses `PYTHON` from `.env.local` when set, else `python3`, else `python` from `PATH`, the order `action.yml` uses.
+  - On Git Bash for Windows, `python3` may be the Microsoft Store alias, which does not run: set `PYTHON=python`.
+- **`git`** on `PATH`: the report's header names this repository's commit.
+- **Network and pip configuration** that lets `pip install -r requirements.txt` succeed: `pip.conf`, `PIP_INDEX_URL`, `PIP_FIND_LINKS`, a proxy. The script leaves them as they are.
+- **A POSIX shell**: bash 3.2 or later; Linux, macOS, or Git Bash on Windows.
+
+No token: every command reads local files and calls no API, so the script reads no credential.
+
+- It unsets `GITHUB_TOKEN`, `GH_TOKEN`, `GH_ENTERPRISE_TOKEN`, `GITHUB_ENTERPRISE_TOKEN` and every inherited `INPUT_*` before it starts anything → `local-integration.sh::GH_TOKEN`
+- `.env.local` is read as data, never sourced. A token left in it is ignored; the script reports its line by number, never its text.
+
+### Configure It
+
+```shell
+cp .env.local.example .env.local      # .env.local is git-ignored
+```
+
+As committed, the example runs over the fixture pair in `tests/fixtures/collector-gh/`, unchanged.
+
+| Key | Required | What it sets |
+|---|---|---|
+| `DOC_INPUT` | yes | the documentation input, a `doc-source` artifact: `normalize-docs` and `coverage-matrix` `input` |
+| `TESTS_INPUT` | yes | the tests input, a `ui-tests` artifact: `normalize-tests` `input`, `coverage-matrix` `tests-input` |
+| `VIEW` | no | `view` for `normalize-docs` and `coverage-matrix`: `inner` (the default) or `release` |
+| `OUT_DIR` | no | the output root, default `./output` (git-ignored) |
+| `PYTHON` | no | the interpreter the venv is built from |
+
+- A relative path resolves against this repository's root; `~/` is the home directory.
+- One `KEY=value` per line; a line starting with `#` is a comment, and values are taken literally.
+
+### Run It
+
+```shell
+./local-integration.sh --check   # Python, git, the configuration and both inputs; creates no venv, runs nothing
+./local-integration.sh           # the run
+```
+
+A run, in order:
+
+1. **Checks** what `--check` checks. A missing setting or input file, an input inside a directory the run clears, a `VIEW` other than `inner` or `release`, or a Python below 3.10 stops it with one line that names it.
+2. **Builds its venv**, `.venv-local-integration/` (git-ignored), separate from the development `.venv`. It installs only `requirements.txt` (`pip install -r`), from the repository root: a runtime requirement missing from that file fails here, as on a runner.
+   - It follows [Action venv](#action-venv): the same six variables unset, the same import check after the install, and `main.py` run with `-E`.
+   - The venv is reused only when the same interpreter built it from the same `requirements.txt`.
+3. **Prints what runs**: this repository's commit, the installed `living-doc-utilities` version, the Python version, both inputs, the view and the output directory. The commit is marked when tracked files differ from it.
+4. **Runs `normalize-docs`, `normalize-tests`, then `coverage-matrix`**, each as its own `main.py` run with only the inputs it takes ([The entry point](#the-entry-point)), into `$OUT_DIR/toolkit/<command>/`, having cleared the three directories first. Each command is echoed before it runs.
+   - A command that fails stops the run with one line naming it, after the toolkit's own error lines. A `DOC_INPUT` that is not a `doc-source` artifact stops `normalize-docs` with `[CONTRACT_MISMATCH]`.
+5. **Validates and reports** each output → `tools/local_integration.py::report`
+   - It re-reads the output with `read_artifact` against its contract, then prints its producer, run time, size and `metadata.stats.cardinality`, and for `coverage-matrix` the root `summary`.
+   - It prints each `metadata.source_inputs[]` entry: the input's contract, the producer that wrote it, `source.project_id` and `source.repositories`.
+   - It prints the warnings by code: each code's count and its first ten occurrences.
+   - Per input, it matches each of the input's warnings to one the output carries unchanged, every field the same but the context, which names the input first. It prints how many matched beside the input's own count; one that does not match fails the run ([`errors.md` § Forwarded warnings](https://github.com/AbsaOSS/living-doc-utilities/blob/master/docs/contracts/errors.md#forwarded-warnings)).
+   - In the report, text from the files is printed with control characters spelled out (`\n`, `\x1b`), so an input cannot forge a report line. The toolkit's own log lines above it are printed as the toolkit writes them.
+
+- It exits non-zero when a check, the install, a command or a validation fails → `tools/local_integration.py::main`
+- Outside GitHub Actions every `metadata.run` field is empty; the inputs' producers in `metadata.source_inputs[]` say where the run's data came from.
+- For an issue or a report, keep the whole output: `set -o pipefail; ./local-integration.sh 2>&1 | tee local-integration.log`.
 
 ## Action venv
 

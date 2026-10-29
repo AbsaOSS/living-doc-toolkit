@@ -215,6 +215,11 @@ outputs/
 /ui-tests.json
 /doc-source.json
 /coverage-matrix.json
+# local-integration.sh: its configuration (the committed `.env.local.example` stays tracked), its own venv and its
+# default output; DEVELOPER.md § Run CLI Locally writes to `output/` too.
+.env.local
+.venv-local-integration/
+/output/
 
 # SPEC.md is a tracked process document (prospective-spec process for new
 # services / adapters — see the file). The pre-Phase-0 implementation spec was

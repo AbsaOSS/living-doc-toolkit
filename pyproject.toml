@@ -29,5 +29,5 @@ follow_untyped_imports = true
 omit = ["tests/*"]
 
 [tool.pytest.ini_options]
-addopts = "--cov=main --cov-report=term --cov-fail-under=80"
+addopts = "--cov=main --cov=tools --cov-report=term --cov-fail-under=80"
 testpaths = ["tests"]

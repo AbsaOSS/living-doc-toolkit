@@ -7,7 +7,7 @@
 #   make qa                 Run format-check -> lint -> types -> deptry -> test on every package, then the root
 #                           checks, then no-vendored-schemas
 #   make qa-<alias>         Same, for one package
-#   make qa-root            The root checks: main.py and tests/
+#   make qa-root            The root checks: main.py, tools/ and tests/
 #   make lint-<alias>       One gate, one package  (also: format, format-check, types, deptry, test, coverage)
 #   make <gate>             One gate, every package and the root (deptry: every package)
 #   make no-vendored-schemas  R12 check 1 over the whole repository
@@ -28,8 +28,8 @@ dir-normalize-tests := packages/services/normalize_tests
 dir-coverage-matrix := packages/services/coverage_matrix
 dir-cli            := apps/cli
 
-# --- Root: the action's entry point and its tests ----------------------------
-ROOT_SRC := main.py
+# --- Root: the action's entry point, local-integration.sh's helper, their tests
+ROOT_SRC := main.py tools
 ROOT_PY  := $(ROOT_SRC) tests
 
 # --- Tools / thresholds ------------------------------------------------------
@@ -69,7 +69,7 @@ help: ## Show this help message
 	@echo "                               and no-vendored-schemas"
 	@echo "  make lint | format | format-check | types | deptry | test | coverage"
 	@echo ""
-	@echo "$(YELLOW)Root (main.py, tests/):$(NC)"
+	@echo "$(YELLOW)Root (main.py, tools/, tests/):$(NC)"
 	@echo "  make qa-root                 All gates for the root"
 	@echo ""
 	@echo "$(YELLOW)Whole repository:$(NC)"
@@ -168,7 +168,7 @@ no-vendored-schemas: ## Fail on any committed *-schema.json / *.schema.json outs
 	$(PYTHON) -m living_doc_utilities.contracts.check_no_vendored_schemas
 
 # ============================================================================
-# Root targets — main.py and tests/, run from the repository root
+# Root targets — main.py, tools/ and tests/, run from the repository root
 # ============================================================================
 
 qa-root: format-check-root lint-root types-root test-root
@@ -198,7 +198,7 @@ test-root:
 
 coverage-root:
 	@echo "$(YELLOW)→ Coverage: root (tests/, >= $(MIN_COVERAGE)%)$(NC)"
-	$(PYTHON) -m pytest tests/ --cov=main --cov-fail-under=$(MIN_COVERAGE)
+	$(PYTHON) -m pytest tests/ --cov=main --cov=tools --cov-fail-under=$(MIN_COVERAGE)
 
 # ============================================================================
 # Deprecated aliases — pre-Phase-0 names, kept for one release (§7.5)
