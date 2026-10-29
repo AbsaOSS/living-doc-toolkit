@@ -156,8 +156,10 @@ jobs:
               summary.covered_acs,
               summary.partially_covered_acs,
               summary.not_covered_acs,
-          ) == (6, 4, 0, 2), summary
-          assert summary.coverage_pct == 66.7, summary
+          ) == (6, 3, 1, 2), summary
+          assert summary.coverage_pct == 55.6, summary
+          row = next(row for entity in result.entities for row in entity.acceptance_criteria if row.ac_id == "FUNC-001-03")
+          assert (row.status, row.keyword) == ("partially_covered", "rule"), row
           assert result.metadata.run.run_id == sys.argv[2], (result.metadata.run, sys.argv[2])
           assert result.metadata.producer.build is None, result.metadata.producer
           print(summary)
@@ -248,7 +250,7 @@ jobs:
           import sys
           from living_doc_utilities.contracts.io import read_artifact
           summary = read_artifact(sys.argv[1], expected="coverage-matrix").summary
-          assert (summary.counted_acs, summary.coverage_pct) == (6, 66.7), summary
+          assert (summary.counted_acs, summary.coverage_pct) == (6, 55.6), summary
           ' "$@"
           }
           written output/first/generator-ready.json inner living-doc-examples

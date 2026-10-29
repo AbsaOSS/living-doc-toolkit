@@ -84,8 +84,8 @@ transform; `FIELD_LOSS` and output-write failures use one line each, as describe
 
 ## coverage-matrix
 
-Reads one documentation file and one tests file and writes `coverage-matrix.json`, counted per acceptance criterion.
-What it counts, in which order, and how it checks that no field is lost:
+Reads one documentation file and one tests file and writes `coverage-matrix.json`, counted per declared aspect of each
+acceptance criterion. What it counts, in which order, the warnings it writes, and how it checks that no field is lost:
 [`living-doc-service-coverage-matrix`](../../packages/services/coverage_matrix/README.md).
 
 | Option | Required | Default | Description |

@@ -28,7 +28,7 @@
       ],
       "extraction_mode": null
     },
-    "generated_at": "2026-10-27T11:13:06Z",
+    "generated_at": "2026-10-29T17:00:11Z",
     "stats": {
       "cardinality": {
         "entities": 3,
@@ -55,11 +55,11 @@
         "entities[].acceptance_criteria[].ac_id": 6,
         "entities[].acceptance_criteria[].state": 6,
         "entities[].acceptance_criteria[].status": 6,
-        "entities[].acceptance_criteria[].keyword": 0,
-        "entities[].acceptance_criteria[].aspects[].aspect": 0,
-        "entities[].acceptance_criteria[].aspects[].status": 0,
-        "entities[].acceptance_criteria[].aspects[].scenario_ids[]": 0,
-        "entities[].acceptance_criteria[].scenario_ids[]": 4,
+        "entities[].acceptance_criteria[].keyword": 1,
+        "entities[].acceptance_criteria[].aspects[].aspect": 6,
+        "entities[].acceptance_criteria[].aspects[].status": 6,
+        "entities[].acceptance_criteria[].aspects[].scenario_ids[]": 4,
+        "entities[].acceptance_criteria[].scenario_ids[]": 2,
         "entities[].summary.counted_acs": 3,
         "entities[].summary.covered_acs": 3,
         "entities[].summary.partially_covered_acs": 3,
@@ -631,12 +631,30 @@
           "state": "active",
           "status": "covered",
           "keyword": null,
-          "aspects": [],
-          "scenario_ids": [
-            "AbsaOSS/living-doc/docs/examples/gherkin/liv_doc_func/func-001-validate-password-strength.feature/password-shorter-than-the-minimum-length-is-rejected",
-            "AbsaOSS/living-doc/docs/examples/gherkin/liv_doc_func/func-001-validate-password-strength.feature/password-missing-a-required-character-class-is-rejected",
-            "AbsaOSS/living-doc/docs/examples/gherkin/liv_doc_func/func-001-validate-password-strength.feature/password-containing-the-username-is-rejected"
-          ]
+          "aspects": [
+            {
+              "aspect": "minimum-length",
+              "status": "covered",
+              "scenario_ids": [
+                "AbsaOSS/living-doc/docs/examples/gherkin/liv_doc_func/func-001-validate-password-strength.feature/password-shorter-than-the-minimum-length-is-rejected"
+              ]
+            },
+            {
+              "aspect": "character-classes",
+              "status": "covered",
+              "scenario_ids": [
+                "AbsaOSS/living-doc/docs/examples/gherkin/liv_doc_func/func-001-validate-password-strength.feature/password-missing-a-required-character-class-is-rejected"
+              ]
+            },
+            {
+              "aspect": "no-username",
+              "status": "covered",
+              "scenario_ids": [
+                "AbsaOSS/living-doc/docs/examples/gherkin/liv_doc_func/func-001-validate-password-strength.feature/password-containing-the-username-is-rejected"
+              ]
+            }
+          ],
+          "scenario_ids": []
         },
         {
           "ac_id": "FUNC-001-02",
@@ -649,20 +667,36 @@
         {
           "ac_id": "FUNC-001-03",
           "state": "active",
-          "status": "covered",
-          "keyword": null,
-          "aspects": [],
-          "scenario_ids": [
-            "AbsaOSS/living-doc/docs/examples/gherkin/liv_doc_func/func-001-validate-password-strength.feature/password-shorter-than-the-minimum-length-shows-the-minimum-length-rule"
-          ]
+          "status": "partially_covered",
+          "keyword": "rule",
+          "aspects": [
+            {
+              "aspect": "minimum-length",
+              "status": "covered",
+              "scenario_ids": [
+                "AbsaOSS/living-doc/docs/examples/gherkin/liv_doc_func/func-001-validate-password-strength.feature/password-shorter-than-the-minimum-length-shows-the-minimum-length-rule"
+              ]
+            },
+            {
+              "aspect": "character-classes",
+              "status": "not_covered",
+              "scenario_ids": []
+            },
+            {
+              "aspect": "no-username",
+              "status": "not_covered",
+              "scenario_ids": []
+            }
+          ],
+          "scenario_ids": []
         }
       ],
       "summary": {
         "counted_acs": 3,
-        "covered_acs": 2,
-        "partially_covered_acs": 0,
+        "covered_acs": 1,
+        "partially_covered_acs": 1,
         "not_covered_acs": 1,
-        "coverage_pct": 66.7
+        "coverage_pct": 44.4
       }
     },
     {
@@ -689,9 +723,9 @@
   },
   "summary": {
     "counted_acs": 6,
-    "covered_acs": 4,
-    "partially_covered_acs": 0,
+    "covered_acs": 3,
+    "partially_covered_acs": 1,
     "not_covered_acs": 2,
-    "coverage_pct": 66.7
+    "coverage_pct": 55.6
   }
 }

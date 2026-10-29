@@ -80,6 +80,8 @@ MAPPED_ENTITY_PATHS = {
     "state": f"{ENTITY_ROOT}state",
     "acceptance_criteria[].id": f"{ROW_ROOT}ac_id",
     "acceptance_criteria[].state": f"{ROW_ROOT}state",
+    "acceptance_criteria[].aspect[]": f"{ROW_ROOT}aspects[].aspect",
+    "acceptance_criteria[].placeholder_values": f"{ROW_ROOT}keyword",
 }
 
 # Every field path of one scenario, relative to `scenarios[]`, in the model's field order.
@@ -102,22 +104,18 @@ NO_FEATURE_ROW = Dropped(
     "the coverage matrix has no Feature entity: it counts the acceptance criteria of User Stories and Functionalities"
 )
 NOT_CONTENT = Dropped("the coverage matrix carries coverage, not the documentation's content")
-NOT_PER_ASPECT_YET = Dropped(
-    "each criterion is one coverage row: per-aspect coverage, which reads the declared aspects and values and each "
-    "link's aspect, is not computed yet"
-)
 LINK_ROUTES_SCENARIO = Dropped(
     "a link decides which criterion's row lists its scenario; the row's ac_id comes from the documentation input"
+)
+LINK_ROUTES_ASPECT = Dropped(
+    "a link's aspect decides which aspect of the criterion's row lists its scenario; the row's aspects come from the "
+    "documentation input"
 )
 SCENARIO_BY_ID = Dropped("a coverage row names its scenarios by scenario_id only")
 
 
 def _entity_entry(path: str) -> LineageEntry:
-    if path in MAPPED_ENTITY_PATHS:
-        return MAPPED_ENTITY_PATHS[path]
-    if path in ("acceptance_criteria[].aspect[]", "acceptance_criteria[].placeholder_values"):
-        return NOT_PER_ASPECT_YET
-    return NOT_CONTENT
+    return MAPPED_ENTITY_PATHS.get(path, NOT_CONTENT)
 
 
 def _scenario_entry(path: str) -> LineageEntry:
@@ -126,7 +124,7 @@ def _scenario_entry(path: str) -> LineageEntry:
     if path == "acceptance_criteria[].id":
         return LINK_ROUTES_SCENARIO
     if path == "acceptance_criteria[].aspect":
-        return NOT_PER_ASPECT_YET
+        return LINK_ROUTES_ASPECT
     return SCENARIO_BY_ID
 
 

@@ -13,7 +13,9 @@ from click.testing import CliRunner
 from living_doc_service_coverage_matrix import service
 from living_doc_utilities.contracts.codes import Code, ContractError
 from living_doc_utilities.contracts.coverage_matrix import CoverageMatrixResult
-from living_doc_utilities.contracts.io import read_artifact
+from living_doc_utilities.contracts.doc_source import DocSourceResult
+from living_doc_utilities.contracts.io import read_artifact, write_artifact
+from living_doc_utilities.contracts.ui_tests import AcLink, UITestsResult
 
 from living_doc_cli.main import cli
 
@@ -98,9 +100,9 @@ def test_over_the_fixture_pair_it_writes_a_valid_matrix_in_the_inner_view(runner
     assert matrix.document.view == "inner"
     assert [entity.entity_id for entity in matrix.entities] == ["US-001", "FUNC-001", "FUNC-002"]
     summary = matrix.summary
-    assert (summary.counted_acs, summary.covered_acs, summary.not_covered_acs, summary.coverage_pct) == (6, 4, 2, 66.7)
+    assert (summary.counted_acs, summary.covered_acs, summary.not_covered_acs, summary.coverage_pct) == (6, 3, 2, 55.6)
     assert (
-        f"[INFO] coverage-matrix - written: `{output}` (inner view; 6 counted acceptance criteria, 4 covered, 66.7%)."
+        f"[INFO] coverage-matrix - written: `{output}` (inner view; 6 counted acceptance criteria, 3 covered, 55.6%)."
         in result.stderr.splitlines()
     )
 
@@ -113,13 +115,13 @@ def test_the_release_view_sets_document_view_and_counts_the_same(runner, doc_sou
     assert result.exit_code == 0, result.output
     matrix = _read(output)
     assert matrix.document.view == "release"
-    assert (matrix.summary.counted_acs, matrix.summary.coverage_pct) == (6, 66.7)
+    assert (matrix.summary.counted_acs, matrix.summary.coverage_pct) == (6, 55.6)
 
 
 def test_fail_under_at_the_coverage_percentage_passes(runner, doc_source, ui_tests, tmp_path):
     output = tmp_path / "coverage-matrix.json"
 
-    result = runner.invoke(cli, _args(doc_source, ui_tests, output, "--fail-under=66.7"))
+    result = runner.invoke(cli, _args(doc_source, ui_tests, output, "--fail-under=55.6"))
 
     assert result.exit_code == 0, result.output
     assert _errors(result.stderr) == []
@@ -131,13 +133,50 @@ def test_fail_under_just_above_the_coverage_percentage_fails_with_one_line_and_k
 ):
     output = tmp_path / "coverage-matrix.json"
 
-    result = runner.invoke(cli, _args(doc_source, ui_tests, output, "--fail-under=66.8"))
+    result = runner.invoke(cli, _args(doc_source, ui_tests, output, "--fail-under=55.7"))
 
     assert result.exit_code == 1
     assert _errors(result.stderr) == [
-        "[ERROR] coverage-matrix - the coverage percentage, 66.7, is below --fail-under 66.8."
+        "[ERROR] coverage-matrix - the coverage percentage, 55.6, is below --fail-under 55.7."
     ]
-    assert _read(output).summary.coverage_pct == 66.7
+    assert _read(output).summary.coverage_pct == 55.6
+
+
+def test_a_link_to_an_in_review_criterion_is_a_warning_in_the_file_and_the_run_succeeds(
+    runner, doc_source, ui_tests, tmp_path
+):
+    documentation = read_artifact(doc_source, expected="doc-source")
+    tests = read_artifact(ui_tests, expected="ui-tests")
+    assert isinstance(documentation, DocSourceResult)
+    assert isinstance(tests, UITestsResult)
+    user_story = documentation.user_stories[0]
+    criteria = [*user_story.acceptance_criteria]
+    criteria[1] = criteria[1].model_copy(update={"state": "in_review"})
+    documentation_path = tmp_path / "doc-source.json"
+    write_artifact(
+        documentation.model_copy(
+            update={"user_stories": [user_story.model_copy(update={"acceptance_criteria": criteria})]}
+        ),
+        documentation_path,
+    )
+    scenario = tests.scenarios[4]
+    tests.scenarios[4] = scenario.model_copy(
+        update={"acceptance_criteria": [*scenario.acceptance_criteria, AcLink(id="US-001-02")]}
+    )
+    tests_path = tmp_path / "ui-tests.json"
+    write_artifact(tests, tests_path)
+    output = tmp_path / "coverage-matrix.json"
+
+    result = runner.invoke(cli, _args(documentation_path, tests_path, output, "--fail-under=0"))
+
+    assert result.exit_code == 0, result.output
+    # The warning is the file's: no command logs one.
+    assert [line for line in result.stderr.splitlines() if not line.startswith("[INFO]")] == []
+    matrix = _read(output)
+    assert [(warning.code, warning.ac_id) for warning in matrix.warnings[2:]] == [
+        ("IN_REVIEW_AC_HAS_TESTS", "US-001-02")
+    ]
+    assert "US-001-02" not in [row.ac_id for row in matrix.entities[0].acceptance_criteria]
 
 
 def test_a_matrix_with_no_coverage_percentage_fails_any_fail_under_and_keeps_the_file(

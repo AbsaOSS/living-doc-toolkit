@@ -12,6 +12,7 @@ from living_doc_utilities.contracts.coverage_matrix import CoverageMatrixResult,
 from living_doc_utilities.contracts.envelope import Run
 from living_doc_utilities.contracts.io import write_artifact
 from living_doc_utilities.contracts.testing import full_sample
+from living_doc_utilities.contracts.ui_tests import AcLink
 
 from living_doc_service_coverage_matrix import service
 from living_doc_service_coverage_matrix.service import coverage_matrix
@@ -80,7 +81,7 @@ def test_over_the_fixture_pair_the_matrix_counts_six_criteria(run_command):
 
     assert [entity.entity_id for entity in result.entities] == ["US-001", "FUNC-001", "FUNC-002"]
     assert result.summary == CoverageSummary(
-        counted_acs=6, covered_acs=4, partially_covered_acs=0, not_covered_acs=2, coverage_pct=66.7
+        counted_acs=6, covered_acs=3, partially_covered_acs=1, not_covered_acs=2, coverage_pct=55.6
     )
     assert result.planned_summary.model_dump() == {"total": 2, "backlog": 1, "by_target_version": {"1.1.0": 1}}
     assert [warning.code for warning in result.warnings] == ["FEATURE_WITHOUT_FUNCTIONALITY", "UNRESOLVED_RELATION"]
@@ -88,7 +89,9 @@ def test_over_the_fixture_pair_the_matrix_counts_six_criteria(run_command):
 
 
 @pytest.mark.parametrize("view", ["inner", "release"])
-def test_the_utilities_full_samples_pass_validation_and_lineage_in_every_view(sample_files, run_command, view):
+def test_over_the_utilities_full_samples_every_entity_and_summary_equals_the_coverage_matrix_samples(
+    sample_files, run_command, view
+):
     # The command raises FIELD_LOSS on a loss, and writes no file.
     result = run_command(*sample_files, view=view)
     sample = full_sample("coverage-matrix-v1.0.0")
@@ -102,14 +105,17 @@ def test_the_utilities_full_samples_pass_validation_and_lineage_in_every_view(sa
         "FUNC-002",
         "FUNC-003",
     ]
-    rows = {entity.entity_id: [row.ac_id for row in entity.acceptance_criteria] for entity in result.entities}
-    # The sample lists its entities in another order, so it is compared by id.
-    assert rows == {entity.entity_id: [row.ac_id for row in entity.acceptance_criteria] for entity in sample.entities}
-    assert [entity_id for entity_id, ids in rows.items() if not ids] == ["US-010", "FUNC-001", "FUNC-003"]
-    assert result.summary == CoverageSummary(
-        counted_acs=7, covered_acs=3, partially_covered_acs=0, not_covered_acs=4, coverage_pct=42.9
+    # The sample lists its entities in another order, so it is compared by id: every row, aspect, keyword and summary.
+    assert {entity.entity_id: entity for entity in result.entities} == {
+        entity.entity_id: entity for entity in sample.entities
+    }
+    assert (
+        result.summary
+        == sample.summary
+        == CoverageSummary(counted_acs=7, covered_acs=2, partially_covered_acs=1, not_covered_acs=4, coverage_pct=33.3)
     )
     assert result.planned_summary == sample.planned_summary
+    assert result.warnings == []
 
 
 def test_an_invalid_input_fails_before_the_builder_runs(monkeypatch, tmp_path):
@@ -236,6 +242,52 @@ def test_a_documentation_file_whose_criteria_are_all_planned_gets_its_matrix_wit
     }
 
 
+def test_a_link_to_an_in_review_criterion_warns_and_the_matrix_is_still_written(
+    documentation, ui_tests, tmp_path, run_command
+):
+    user_story = documentation.user_stories[0]
+    criteria = [*user_story.acceptance_criteria]
+    criteria[1] = criteria[1].model_copy(update={"state": "in_review"})
+    in_review = documentation.model_copy(
+        update={"user_stories": [user_story.model_copy(update={"acceptance_criteria": criteria})]}
+    )
+    scenario = ui_tests.scenarios[4]
+    linked = scenario.model_copy(
+        update={"acceptance_criteria": [*scenario.acceptance_criteria, AcLink(id="US-001-02")]}
+    )
+    tests = ui_tests.model_copy(update={"scenarios": [*ui_tests.scenarios[:4], linked, ui_tests.scenarios[5]]})
+    documentation_path = tmp_path / "doc-source.json"
+    tests_path = tmp_path / "ui-tests.json"
+    write_artifact(in_review, documentation_path)
+    write_artifact(tests, tests_path)
+
+    result = run_command(documentation_path, tests_path)
+
+    assert [row.ac_id for row in result.entities[0].acceptance_criteria] == ["US-001-01", "US-001-04"]
+    assert [(warning.code, warning.ac_id, warning.entity_id, warning.context) for warning in result.warnings[2:]] == [
+        ("IN_REVIEW_AC_HAS_TESTS", "US-001-02", "US-001", f"scenario_id={scenario.scenario_id!r}")
+    ]
+
+
+def _with_rows(result: CoverageMatrixResult, change: dict) -> CoverageMatrixResult:
+    """The result with `change` applied to every row; `model_copy` skips the row checks the write would run."""
+    entities = [
+        entity.model_copy(
+            update={"acceptance_criteria": [row.model_copy(update=change) for row in entity.acceptance_criteria]}
+        )
+        for entity in result.entities
+    ]
+    return result.model_copy(update={"entities": entities})
+
+
+def _without_aspects(result: CoverageMatrixResult) -> CoverageMatrixResult:
+    return _with_rows(result, {"aspects": [], "keyword": None})
+
+
+def _without_keywords(result: CoverageMatrixResult) -> CoverageMatrixResult:
+    return _with_rows(result, {"keyword": None})
+
+
 def _without_rows(result: CoverageMatrixResult) -> CoverageMatrixResult:
     entities = [
         entity.model_copy(update={"acceptance_criteria": [], "summary": CoverageSummary.from_rows([])})
@@ -255,6 +307,10 @@ def _without_titles(result: CoverageMatrixResult) -> CoverageMatrixResult:
     [
         (_without_rows, "user_stories[].acceptance_criteria[].id"),
         (_without_titles, "functionalities[].title"),
+        # The fixture declares its aspects and its keyword on FUNC-001 only.
+        (_without_aspects, "functionalities[].acceptance_criteria[].aspect[]"),
+        (_without_aspects, "functionalities[].acceptance_criteria[].placeholder_values"),
+        (_without_keywords, "functionalities[].acceptance_criteria[].placeholder_values"),
     ],
 )
 def test_a_builder_that_drops_a_mapped_field_fails_with_field_loss_and_writes_no_file(
