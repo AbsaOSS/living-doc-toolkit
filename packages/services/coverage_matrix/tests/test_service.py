@@ -328,6 +328,30 @@ def test_a_builder_that_drops_a_mapped_field_fails_with_field_loss_and_writes_no
     assert not output.exists()
 
 
+@pytest.mark.parametrize(
+    ("drop", "lost"),
+    [
+        (_without_aspects, "user_stories[].acceptance_criteria[].aspect[]"),
+        (_without_keywords, "user_stories[].acceptance_criteria[].placeholder_values"),
+    ],
+)
+def test_over_the_full_samples_a_builder_that_drops_user_story_aspects_fails_with_field_loss(
+    monkeypatch, sample_files, tmp_path, drop, lost
+):
+    # The fixture declares aspects on a Functionality only; the full samples declare them on User Stories too.
+    build = service.build_coverage_matrix
+    monkeypatch.setattr(service, "build_coverage_matrix", lambda *args, **kwargs: drop(build(*args, **kwargs)))
+    documentation, tests = sample_files
+    output = tmp_path / "coverage-matrix.json"
+
+    with pytest.raises(ContractError) as error:
+        coverage_matrix([documentation], tests, output)
+
+    assert error.value.code is Code.FIELD_LOSS
+    assert f"'{lost}' had occupancy" in error.value.message
+    assert not output.exists()
+
+
 def test_field_loss_leaves_an_existing_output_untouched(monkeypatch, tmp_path):
     monkeypatch.setattr(service, "check_no_field_loss", lambda _result: _raise_field_loss())
     output = tmp_path / "coverage-matrix.json"
