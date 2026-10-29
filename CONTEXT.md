@@ -28,7 +28,8 @@ command's inputs together, and writes the contract a generator reads.
 | `packages/services/` | One package per command: builder, lineage table, command ([CONTEXT](packages/services/CONTEXT.md)) |
 | `apps/cli/` | `living-doc-cli`: the click group and one module per command under `commands/` ([README](apps/cli/README.md)) |
 | `main.py`, `action.yml` | The action: `action.yml` builds the venv, `main.py` checks `INPUT_*` and runs `living-doc <command>` with `-I` |
-| `tests/` | The action's tests (`test_main.py`, `test_action_yml.py`) and the one fixture copy under `tests/fixtures/` |
+| `local-integration.sh`, `tools/` | The operator's run of the three commands outside any workflow; `tools/local_integration.py` validates and reports each output |
+| `tests/` | The root tests (`test_main.py`, `test_action_yml.py`, `test_local_integration.py`) and the one fixture copy under `tests/fixtures/` |
 | `.github/workflows/` | `test.yml` runs the `make` targets; `integration.yml` runs the action through `uses: ./` |
 | `SPEC.md` | Process document with the pending-specifications list; specs move out as they ship |
 
@@ -78,6 +79,10 @@ All owned by `living-doc-utilities`; this repo defines none and commits no schem
 - `PYTHON` passed to `make` must be an absolute path (unverified).
 - The action's entry point: `python3 main.py` with `INPUT_*` variables; `metadata.run` reads `GITHUB_RUN_ID`,
   `GITHUB_RUN_ATTEMPT`, `GITHUB_ACTOR`, `GITHUB_WORKFLOW`, `GITHUB_REF`, `GITHUB_SHA`.
+- `./local-integration.sh [--check]`: the three commands through `main.py` over `.env.local`'s `DOC_INPUT` and
+  `TESTS_INPUT`, in `.venv-local-integration/` built from `requirements.txt` alone, into `$OUT_DIR/toolkit/`; then
+  `python -m tools.local_integration report` re-reads each output and fails on an input warning not forwarded
+  (`DEVELOPER.md` § Local Integration Run). No workflow runs it.
 
 ## Conventions
 
@@ -105,4 +110,6 @@ All owned by `living-doc-utilities`; this repo defines none and commits no schem
 - `make lint` reads `git ls-files`: `git add` a new file before linting it.
 - `main.py`'s input checks run in a fixed order, and `tests/test_main.py` asserts its one-line errors exactly.
 - `tests/test_action_yml.py`'s bash tests fail on Windows only; CI runs them on ubuntu (unverified).
+- `tests/test_local_integration.py` runs the real script in a copy whose venv is pre-seeded with the test's own
+  interpreter, so no test installs from the network; `.env.local.example`'s keys must equal the script's `KEYS`.
 - `.local_context/` is private and never committed.

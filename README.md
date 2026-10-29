@@ -19,7 +19,7 @@ A monorepo of Python packages that transform and enrich machine-readable artifac
 
 ## Overview
 
-**Expected usage: GitHub Actions first.** The `living-doc` CLI is invoked as a step in a GitHub Actions workflow, chained between the upstream `living-doc-*` collector actions and the downstream generator actions. Running `living-doc <command>` locally — the pattern documented in [DEVELOPER.md](DEVELOPER.md) — is a development and debugging affordance only, not a second supported deployment target.
+**Expected usage: GitHub Actions first.** The `living-doc` CLI is invoked as a step in a GitHub Actions workflow, chained between the upstream `living-doc-*` collector actions and the downstream generator actions. Running `living-doc <command>` locally — the pattern documented in [DEVELOPER.md](DEVELOPER.md) — is a development and debugging affordance only, not a second supported deployment target. So is a run of the three commands over another component's output: [Local Integration Run](DEVELOPER.md#local-integration-run).
 
 **The Living Documentation pipeline runs AI-free.** Every step — collect → normalize → generate — is deterministic tooling (Python, JSON Schema validation, Jinja2/Markdown templates) with no LLM call anywhere in that path. [`AbsaOSS/agentic-toolkit`](https://github.com/AbsaOSS/agentic-toolkit) can accelerate the upstream *authoring* of GitHub Issues and `.feature` files, but it is never a runtime dependency of this pipeline: a human writing the same input by hand is a fully supported, identical path.
 
