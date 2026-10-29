@@ -5,8 +5,11 @@
 [`ui-tests.json`](../../../../../tests/fixtures/collector-gh/ui-tests.json):
 
 - three entities, `US-001`, `FUNC-001` and `FUNC-002`, in that order;
-- six counted criteria, four covered and two not covered, 66.7; `FUNC-002` has no counted criterion and no
-  percentage;
+- `US-001`: three plain rows, two covered and one not, 66.7;
+- `FUNC-001`: `FUNC-001-01` covered over its three aspects, one scenario each; `FUNC-001-02` not covered;
+  `FUNC-001-03`, keyword `rule`, partially covered, 1/3; 44.4;
+- `FUNC-002` has no counted criterion and no percentage;
+- six counted criteria at the root, three covered, one partially covered and two not covered, 55.6;
 - two planned criteria, one for `1.1.0` and one in the backlog;
 - the documentation input's two warnings, forwarded.
 

@@ -122,9 +122,10 @@ Every command the action declares runs.
   How it maps the input and checks that no field is lost: [its package README](packages/services/normalize_docs/README.md).
 - `normalize-tests` groups each scenario by feature file and every User Story or Functionality it links to, carrying
   the scenario unchanged. How it groups records and checks lineage: [its package README](packages/services/normalize_tests/README.md).
-- `coverage-matrix` counts each `active` or `deprecated` acceptance criterion of every User Story and Functionality as
-  covered or not by the scenarios that link it, and adds a summary per entity, for the whole matrix and for the
-  planned work. How it counts and checks lineage: [its package README](packages/services/coverage_matrix/README.md).
+- `coverage-matrix` counts each `active` or `deprecated` acceptance criterion of every User Story and Functionality
+  from the scenarios that link it, per declared aspect where the criterion declares aspects, and adds a summary per
+  entity, for the whole matrix and for the planned work. A scenario link it does not count as written is a warning in
+  the file. How it counts, warns and checks lineage: [its package README](packages/services/coverage_matrix/README.md).
   - It reads exactly one documentation file: a second one fails with `MULTIPLE_DOCUMENTATION_SOURCES`. A repeated
     entity id, or a repeated criterion id under one entity, fails with `DUPLICATE_ENTITY_ID` or `DUPLICATE_AC_ID`,
     listing every place.

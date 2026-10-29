@@ -495,7 +495,7 @@ def _coverage_matrix_inputs(**inputs: str) -> dict[str, str]:
     [
         ({}, "inner"),
         # At the matrix's own percentage, the gate passes.
-        ({"view": "release", "fail-under": "66.7"}, "release"),
+        ({"view": "release", "fail-under": "55.6"}, "release"),
     ],
 )
 def test_the_entry_point_runs_coverage_matrix_over_the_fixture_pair_and_sets_the_output_path(tmp_path, inputs, view):
@@ -510,7 +510,7 @@ def test_the_entry_point_runs_coverage_matrix_over_the_fixture_pair_and_sets_the
     assert written.document.view == view
     assert [entity.entity_id for entity in written.entities] == ["US-001", "FUNC-001", "FUNC-002"]
     summary = written.summary
-    assert (summary.counted_acs, summary.covered_acs, summary.not_covered_acs, summary.coverage_pct) == (6, 4, 2, 66.7)
+    assert (summary.counted_acs, summary.covered_acs, summary.not_covered_acs, summary.coverage_pct) == (6, 3, 2, 55.6)
     assert written.metadata.run.run_id == RUN_CONTEXT["GITHUB_RUN_ID"]
     assert written.metadata.producer.build is None
     assert (tmp_path / "github-output").read_text(encoding="utf-8") == (
@@ -520,12 +520,12 @@ def test_the_entry_point_runs_coverage_matrix_over_the_fixture_pair_and_sets_the
 
 def test_the_entry_point_ends_a_coverage_matrix_below_fail_under_with_the_clis_line_and_sets_no_output(tmp_path):
     # Act
-    result = _run_entry_point(tmp_path, _coverage_matrix_inputs(**{"fail-under": "66.8"}))
+    result = _run_entry_point(tmp_path, _coverage_matrix_inputs(**{"fail-under": "55.7"}))
 
     # Assert: the matrix is written before the gate, and the step fails.
     assert result.returncode == 1, result.stderr
     assert _errors(result.stderr) == [
-        "[ERROR] coverage-matrix - the coverage percentage, 66.7, is below --fail-under 66.8."
+        "[ERROR] coverage-matrix - the coverage percentage, 55.6, is below --fail-under 55.7."
     ]
     assert (tmp_path / "out" / "coverage-matrix.json").exists()
     assert not (tmp_path / "github-output").exists()

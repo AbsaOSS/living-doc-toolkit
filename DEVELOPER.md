@@ -362,7 +362,7 @@ living-doc --verbose normalize-docs --input tests/fixtures/collector-gh/doc-sour
 living-doc normalize-tests --input tests/fixtures/collector-gh/ui-tests.json \
   --output output/ui-test-catalog.json
 living-doc coverage-matrix --doc-input tests/fixtures/collector-gh/doc-source.json \
-  --tests-input tests/fixtures/collector-gh/ui-tests.json --output output/coverage-matrix.json --fail-under 60
+  --tests-input tests/fixtures/collector-gh/ui-tests.json --output output/coverage-matrix.json --fail-under 50
 ```
 
 ## Action venv
@@ -483,8 +483,9 @@ the Markdown links.
   `doc-source.json` in the release view, `normalize-tests` over `ui-tests.json`, and `coverage-matrix`
   over both in the release view.
   - It reads the file with `read_artifact` on the action's venv, checks `document.view`, the
-    `selection_summary`, the feature files or the root coverage summary, and that `metadata.run.run_id` is the
-    job's `GITHUB_RUN_ID` and `producer.build` is `null`, and checks that `output-path` is the file's absolute path.
+    `selection_summary`, the feature files or the root coverage summary and a keyword row's status and keyword, and
+    that `metadata.run.run_id` is the job's `GITHUB_RUN_ID` and `producer.build` is `null`, and checks that
+    `output-path` is the file's absolute path.
 - The venv jobs run `normalize-docs`, and the isolation job also runs `coverage-matrix`; each writes its file.
   - Each run step has `continue-on-error`, and the job asserts its `outcome`: `success` for each.
   - A step cannot read another step's log, so each job then replays the run's inputs on the action's
