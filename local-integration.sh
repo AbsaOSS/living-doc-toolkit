@@ -163,6 +163,28 @@ TESTS_INPUT="$(input_file TESTS_INPUT)"
 OUT="$(resolve "$CFG_OUT_DIR")"
 [ ! -e "$OUT" ] || [ -d "$OUT" ] || die "OUT_DIR is not a directory: $OUT"
 
+# A run clears each command's output directory before its first command, so an input inside one would be deleted
+# before it is read. Compared as physical paths (`pwd -P`): a symlink, or a case-insensitive file system, can spell
+# the same directory another way. A symlinked input is followed to its file, which the run would delete.
+if [ -d "$OUT/toolkit" ]; then
+  CLEARED="$(cd "$OUT/toolkit" && pwd -P)"
+  for key in DOC_INPUT TESTS_INPUT; do
+    var="CFG_$key"
+    path="$(resolve "${!var}")"
+    while [ -L "$path" ]; do
+      target="$(readlink "$path")"
+      case "$target" in
+        /*) path="$target" ;;
+        *) path="$(dirname "$path")/$target" ;;
+      esac
+    done
+    case "$(cd "$(dirname "$path")" && pwd -P)/" in
+      "$CLEARED"/normalize-docs/* | "$CLEARED"/normalize-tests/* | "$CLEARED"/coverage-matrix/*)
+        die "$key is in a directory the run clears: $path; move it, or set another OUT_DIR" ;;
+    esac
+  done
+fi
+
 if [ "$CHECK_ONLY" = true ]; then
   printf '%s: check passed - Python %s (%s), git, %s, DOC_INPUT %s, TESTS_INPUT %s, VIEW %s\n' \
     "$ME" "$PY_VERSION" "$PY" "$ENV_FILE" "$DOC_INPUT" "$TESTS_INPUT" "$CFG_VIEW"

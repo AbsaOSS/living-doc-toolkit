@@ -23,8 +23,10 @@ the standard library only.
 """
 
 import argparse
+import json
 import os
 import sys
+from collections import Counter
 from collections.abc import Sequence
 from typing import Any, Optional
 
@@ -41,7 +43,7 @@ INPUT_CONTRACTS = {"doc-source", "ui-tests"}
 
 
 class NotForwarded(Exception):
-    """The output carries fewer of an input's warnings than the input holds."""
+    """The output does not carry every warning of an input unchanged."""
 
 
 def _printable(line: str) -> str:
@@ -100,19 +102,31 @@ def _source_input(entry: SourceInputEntry) -> list[str]:
     ]
 
 
+def _key(warning: ContractWarning) -> str:
+    """Every field of one warning, as one comparable value."""
+    return json.dumps(warning.model_dump(mode="json"), sort_keys=True)
+
+
 def _forwarded(warnings: Sequence[ContractWarning], input_path: str) -> str:
     """
-    How many of one input's warnings the output carries: those whose context starts by naming the input's contract,
-    as a command names it when it forwards one.
+    How many of one input's warnings the output carries unchanged, as a command forwards one: every field the same,
+    its context naming the input's contract first. Each output warning stands for one input warning at most, so a
+    duplicate cannot stand in for one the output dropped.
 
     @param warnings: The output's warnings.
     @param input_path: One input the command read.
     @return: The report line.
-    @raise NotForwarded: When the output carries fewer than the input holds.
+    @raise NotForwarded: When an input warning is not among them.
     """
     source = read_artifact(input_path, INPUT_CONTRACTS)
     named = f"source_input={source.schema_version!r}"
-    count = sum(1 for warning in warnings if (warning.context or "").startswith(named))
+    carried = Counter(_key(warning) for warning in warnings)
+    count = 0
+    for warning in source.warnings:
+        key = _key(warning.model_copy(update={"context": f"{named} {warning.context}" if warning.context else named}))
+        if carried[key]:
+            carried[key] -= 1
+            count += 1
     if count < len(source.warnings):
         raise NotForwarded(
             f"forwards {count} of the {len(source.warnings)} warnings of its {source.schema_version} input "

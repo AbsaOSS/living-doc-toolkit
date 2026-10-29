@@ -420,7 +420,7 @@ As committed, the example runs over the fixture pair in `tests/fixtures/collecto
 
 A run, in order:
 
-1. **Checks** what `--check` checks. A missing setting or input file, a `VIEW` other than `inner` or `release`, or a Python below 3.10 stops it with one line that names it.
+1. **Checks** what `--check` checks. A missing setting or input file, an input inside a directory the run clears, a `VIEW` other than `inner` or `release`, or a Python below 3.10 stops it with one line that names it.
 2. **Builds its venv**, `.venv-local-integration/` (git-ignored), separate from the development `.venv`. It installs only `requirements.txt` (`pip install -r`), from the repository root: a runtime requirement missing from that file fails here, as on a runner.
    - It follows [Action venv](#action-venv): the same six variables unset, the same import check after the install, and `main.py` run with `-E`.
    - The venv is reused only when the same interpreter built it from the same `requirements.txt`.
@@ -431,8 +431,8 @@ A run, in order:
    - It re-reads the output with `read_artifact` against its contract, then prints its producer, run time, size and `metadata.stats.cardinality`, and for `coverage-matrix` the root `summary`.
    - It prints each `metadata.source_inputs[]` entry: the input's contract, the producer that wrote it, `source.project_id` and `source.repositories`.
    - It prints the warnings by code: each code's count and its first ten occurrences.
-   - Per input, it counts the output's warnings forwarded from it beside the input's own count. Fewer than the input holds fails the run ([`errors.md` § Forwarded warnings](https://github.com/AbsaOSS/living-doc-utilities/blob/master/docs/contracts/errors.md#forwarded-warnings)).
-   - Text from the files is printed with control characters spelled out (`\n`, `\x1b`), so an input cannot forge a report line.
+   - Per input, it matches each of the input's warnings to one the output carries unchanged, every field the same but the context, which names the input first. It prints how many matched beside the input's own count; one that does not match fails the run ([`errors.md` § Forwarded warnings](https://github.com/AbsaOSS/living-doc-utilities/blob/master/docs/contracts/errors.md#forwarded-warnings)).
+   - In the report, text from the files is printed with control characters spelled out (`\n`, `\x1b`), so an input cannot forge a report line. The toolkit's own log lines above it are printed as the toolkit writes them.
 
 - It exits non-zero when a check, the install, a command or a validation fails → `tools/local_integration.py::main`
 - Outside GitHub Actions every `metadata.run` field is empty; the inputs' producers in `metadata.source_inputs[]` say where the run's data came from.

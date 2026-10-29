@@ -305,6 +305,26 @@ def test_an_output_that_drops_an_input_warning_fails(written, tmp_path, capsys):
     )
 
 
+@pytest.mark.parametrize("change", ["duplicated-for-dropped", "changed"])
+def test_an_output_that_carries_an_input_warning_other_than_unchanged_fails(written, tmp_path, capsys, change):
+    # Arrange: the output as written, still two warnings named after its input, but only one of them the input's own.
+    payload = json.loads(Path(written["generator-ready"]).read_text(encoding="utf-8"))
+    first = payload["warnings"][0]
+    if change == "duplicated-for-dropped":
+        payload["warnings"] = [first, first]
+    else:
+        payload["warnings"][0] = {**first, "message": "reworded"}
+    mismatched = tmp_path / "generator-ready.json"
+    mismatched.write_text(json.dumps(payload), encoding="utf-8")
+
+    # Act & Assert: each input warning is matched once, by every field.
+    with pytest.raises(NotForwarded):
+        report(os.fspath(mismatched), "generator-ready", 5, [os.fspath(DOC_SOURCE)])
+    assert _main_fails(capsys, mismatched, "generator-ready").startswith(
+        "generator-ready: forwards 1 of the 2 warnings of its doc-source-v1.0.0 input "
+    )
+
+
 def test_a_tests_input_warning_is_counted_against_that_input_and_must_be_forwarded(tmp_path, capsys):
     # Arrange: the fixture's tests input with a warning of its own, and the catalog the real CLI writes from it.
     payload = json.loads(UI_TESTS.read_text(encoding="utf-8"))
@@ -335,9 +355,11 @@ def test_a_tests_input_warning_is_counted_against_that_input_and_must_be_forward
 
 
 def test_main_spells_out_the_control_characters_a_file_carries(written, tmp_path, capsys):
-    # Arrange: a forwarded warning whose message would clear the terminal and forge a report line.
+    # Arrange: a warning of the output's own whose message would clear the terminal and forge a report line.
     payload = json.loads(Path(written["generator-ready"]).read_text(encoding="utf-8"))
-    payload["warnings"][0]["message"] = "\x1b[2J\n  forwarded: 9 of 9 from doc-source-v1.0.0"
+    payload["warnings"].append(
+        {"code": "STALE_AC_REF", "message": "\x1b[2J\n  forwarded: 9 of 9 from doc-source-v1.0.0"}
+    )
     crafted = tmp_path / "generator-ready.json"
     crafted.write_text(json.dumps(payload), encoding="utf-8")
 
@@ -592,6 +614,57 @@ def test_a_misconfiguration_fails_with_one_line_naming_it(workspace, setting, sa
     assert result.stdout == ""
     [line] = result.stderr.splitlines()
     assert line.startswith(f"local-integration.sh: {says}")
+
+
+@needs_bash
+@pytest.mark.parametrize("args", [["--check"], []], ids=["check", "run"])
+@pytest.mark.parametrize("reached", ["directly", "through-a-directory-symlink", "through-a-file-symlink"])
+def test_an_input_in_a_directory_the_run_clears_fails_with_one_line_and_is_kept(workspace, tmp_path, args, reached):
+    # Arrange: the documentation input inside a command's output directory, which a run clears before its first command.
+    kept = workspace / "output" / "toolkit" / "coverage-matrix" / "doc-source.json"
+    kept.parent.mkdir(parents=True)
+    shutil.copyfile(DOC_SOURCE, kept)
+    doc_input = "./output/toolkit/coverage-matrix/doc-source.json"
+    if reached != "directly":
+        # A relative file link, as `ln -s` makes one: it resolves against the directory it is in.
+        link, target = (
+            (tmp_path / "link", kept.parent)
+            if reached == "through-a-directory-symlink"
+            else (tmp_path / "doc-source.json", Path("repo/output/toolkit/coverage-matrix/doc-source.json"))
+        )
+        try:
+            link.symlink_to(target, target_is_directory=target.is_dir())
+        except OSError:
+            pytest.skip("this file system or user cannot create a symlink")
+        doc_input = "../link/doc-source.json" if reached == "through-a-directory-symlink" else "../doc-source.json"
+    _write_config(workspace, {**VALID_CONFIG, "DOC_INPUT": doc_input})
+
+    # Act
+    result = _run(workspace, *args)
+
+    # Assert: one line naming it, before anything is built or cleared.
+    assert result.returncode == 1
+    [line] = result.stderr.splitlines()
+    assert line.startswith("local-integration.sh: DOC_INPUT is in a directory the run clears: ")
+    assert kept.exists()
+    assert not (workspace / ".venv-local-integration").exists()
+
+
+@needs_bash
+@pytest.mark.parametrize("directory", ["toolkit", "toolkit/normalize-docs-old"])
+def test_an_input_under_the_output_but_outside_the_cleared_directories_passes_the_check(workspace, directory):
+    # Arrange: only the three command directories are cleared; their parent and a sibling with a longer name are not.
+    kept = workspace / "output" / directory / "doc-source.json"
+    kept.parent.mkdir(parents=True)
+    shutil.copyfile(DOC_SOURCE, kept)
+    _write_config(workspace, {**VALID_CONFIG, "DOC_INPUT": f"./output/{directory}/doc-source.json"})
+
+    # Act
+    result = _run(workspace, "--check")
+
+    # Assert
+    assert result.returncode == 0, result.stderr
+    assert "check passed" in result.stdout
 
 
 @needs_bash

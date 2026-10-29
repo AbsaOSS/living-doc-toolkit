@@ -82,7 +82,7 @@ All owned by `living-doc-utilities`; this repo defines none and commits no schem
 - `./local-integration.sh [--check]`: the three commands through `main.py` over `.env.local`'s `DOC_INPUT` and
   `TESTS_INPUT`, in `.venv-local-integration/` built from `requirements.txt` alone, into `$OUT_DIR/toolkit/`; then
   `python -m tools.local_integration report` re-reads each output and fails on an input warning not forwarded
-  (`DEVELOPER.md` § Local Integration Run). No workflow runs it.
+  unchanged (`DEVELOPER.md` § Local Integration Run). No workflow runs it.
 
 ## Conventions
 
