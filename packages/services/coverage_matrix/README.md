@@ -110,7 +110,7 @@ After them, the command adds a warning for each scenario link it does not count 
 | `IN_REVIEW_AC_HAS_TESTS` | an `in_review` criterion, whatever the aspect | counts nowhere; the criterion has no row |
 
 - `ac_id` is the link's criterion, and `entity_id` that id without its last `-<n>`. `line_no`, `path` and `source_url` stay unset: a collector fills them
-- `message` names the scenario, the criterion and an undeclared aspect. `context` holds them as `scenario_id='<id>'`, with ` aspect='<value>'` for an undeclared aspect
+- `message` names the scenario, the criterion and an undeclared aspect. `context` holds them as `scenario_id='<id>'`, then a space and `aspect='<value>'` for an undeclared aspect
 - There is one warning per scenario and criterion, and per scenario, criterion and aspect for an undeclared aspect, in scenario order, then link order
 - The run still succeeds, and no command logs a warning: the warnings are the file's
 - A scenario on a `planned` or `in_review` criterion keeps its link in `ui-test-catalog` → [normalize-tests](../normalize_tests/README.md)

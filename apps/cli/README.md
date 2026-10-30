@@ -45,7 +45,7 @@ The `living-doc` group registers `normalize-docs`, `normalize-tests` and `covera
 
 - `--help` lists the commands, and `--version` prints the toolkit's version.
 - `--verbose` is the group's option, so it goes before the command name: `living-doc --verbose normalize-docs …` logs at DEBUG. No command takes it, and the action passes it there.
-- Every line goes to stderr as `[LEVEL] message`
+- The toolkit's log lines go to stderr as `[LEVEL] message`; click prints `--help` and `--version` to stdout, and a usage error in its own format
 - A command name the group does not register, such as `living-doc generate`, fails with click's "No such command" → [Exit codes](#exit-codes)
 
 ## normalize-docs

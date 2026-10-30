@@ -91,8 +91,8 @@ commands `main.py` passes each input to.
 - Each input goes only to the commands that take it, as `--<option>=<value>`, so a value starting with `-` stays the option's value
 - `output` reaches the CLI as an absolute path
 - Verbose logging adds the group's `--verbose` before the command name, so it applies to every command and no command declares it
-  - Why `--verbose`: the CLI reads no `INPUT_*` variable, so an option is the way in.
-  - `INPUT_VERBOSE_LOGGING` stays in the run step's `env:`, for when the toolkit reads it, as `living-doc-utilities`' logging does.
+  - Why `--verbose`: the CLI reads no `INPUT_*` variable, so `main.py` reads `INPUT_VERBOSE_LOGGING` and passes an option.
+  - The variable also stays in the CLI's environment; `living-doc-utilities`' own logging reads it.
 - The only variables the CLI reads are the `GITHUB_*` run context, recorded in an output's `metadata.run` for audit only → [The CI run context](../packages/core/README.md#the-ci-run-context)
 
 ## Outputs
@@ -122,5 +122,5 @@ The step fails at the first check that does not pass, in this order:
 | output | `output-path` cannot be written | one line |
 
 - The venv step's checks run before it creates or installs anything that depends on them
-- `main.py` checks the inputs in the table's order and stops at the first failure, with exit code 1
+- `main.py` checks in the order of the `input` rows above: the command, an untaken input, an empty required input, `output`, then `fail-under`; it stops at the first failure, with exit code 1
 - A failed command ends the step with the command's own exit code; any other failure here ends it with exit code 1

@@ -96,7 +96,7 @@ def test_json_example_parses(block):
 def test_python_example_runs(block, tmp_path, monkeypatch):
     """The block runs in a fresh namespace, in a temporary working directory."""
     monkeypatch.chdir(tmp_path)
-    exec(compile(block.code, "<doc example>", "exec"), {"__name__": "doc_example"})  # pylint: disable=exec-used
+    exec(compile(block.code, "<doc example>", "exec"), {"__name__": "doc_example"})
 
 
 def test_the_pages_carry_examples():

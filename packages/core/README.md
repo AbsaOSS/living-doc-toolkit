@@ -98,7 +98,7 @@ returns the kept entities and the contract's own `SelectionSummary`:
 | `ref` | `GITHUB_REF` |
 | `sha` | `GITHUB_SHA` |
 
-- An unset or empty variable is `None`, so outside GitHub Actions every field is
+- An unset or empty variable is `None`, so outside GitHub Actions every field is `None`
 - A command sets it as its output's `metadata.run`. It is audit information: nothing reads it to decide anything → [Shared envelope](#shared-envelope)
 - An input's own `run` stays in its `metadata.source_inputs[]` entry → [Shared envelope](#shared-envelope)
 - `run` is defined on the artifact rules' § The metadata envelope → [artifact rules](https://github.com/AbsaOSS/living-doc-utilities/blob/master/docs/contracts/artifact-rules.md)
