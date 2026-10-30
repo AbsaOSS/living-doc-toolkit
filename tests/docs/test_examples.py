@@ -253,3 +253,15 @@ def test_planted_unparseable_yaml_is_reported():
     """A block that is not YAML fails."""
     problems = yaml_example_problems(CodeBlock("yaml", "with:\n  command: [unclosed\n", ""))
     assert len(problems) == 1 and problems[0].startswith("does not parse:")
+
+
+def test_a_commented_out_example_is_no_example():
+    """A fence inside an HTML comment is not rendered, so it is neither parsed nor run."""
+    assert code_blocks("<!--\n```python\nraise SystemExit('ran')\n```\n-->\n") == []
+
+
+def test_a_comment_marker_inside_a_code_block_is_code():
+    """`<!--` inside a real code block is code: the block is returned and the page after it is still read."""
+    page = "```html\n<!--\n```\n\n## After\n"
+    assert [block.code for block in code_blocks(page)] == ["<!--\n"]
+    assert headings(page, 2) == ["After"]

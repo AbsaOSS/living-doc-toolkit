@@ -72,6 +72,7 @@ _LIST_MARKER_RE = re.compile(_LIST_MARKER)
 # A code span: an exact run of backticks closed by the same run, across line breaks but not across a blank line.
 _CODE_SPAN = r"(?<!`)(?P<ticks>`+)(?:(?!\n[ \t]*\n).)+?(?<!`)(?P=ticks)(?!`)"
 _CODE_SPAN_RE = re.compile(_CODE_SPAN, re.S)
+_COMMENT_MARK_RE = re.compile(r"<!--|-->")
 # One left-to-right pass, so `<!--` inside a code span is text, not the start of a comment.
 _CODE_SPAN_OR_COMMENT_RE = re.compile(rf"(?P<span>{_CODE_SPAN})|<!--.*?-->", re.S)
 
@@ -109,13 +110,15 @@ class CodeBlock(NamedTuple):
 
 class _Fence(NamedTuple):
     """An open fence: its run, its `>` depth, its column after the quotes, whether a list item or blockquote holds
-    it (the block then ends where that container ends), and the prefix its code lines carry."""
+    it (the block then ends where that container ends), the prefix its code lines carry, and its container's content
+    column, from which a closing run may be indented up to three spaces."""
 
     run: str
     depth: int
     column: int
     contained: bool
     indent: str
+    close_column: int
 
 
 def _quotes(line: str, depth: int | None = None) -> str:
@@ -130,8 +133,13 @@ def _open(fence_m: re.Match[str]) -> _Fence:
     prefix = fence_m.group("prefix")
     quotes = _quotes(prefix)
     after = _LIST_MARKER_RE.sub(lambda marker_m: " " * len(marker_m.group(0)), prefix[len(quotes) :])
-    contained = bool(quotes) or after != prefix[len(quotes) :] or len(after) >= 4
-    return _Fence(fence_m.group("fence"), quotes.count(">"), len(after), contained, quotes + after)
+    listed = after != prefix[len(quotes) :]
+    contained = bool(quotes) or listed or len(after) >= 4
+    # The closing run's three spaces count from the container's content column, never from the opener's own
+    # indentation: a list item's column when a marker or four spaces put the opener in one, else the margin or the one
+    # optional space after a `>`.
+    close_column = len(after) if listed or len(after) >= 4 else int(bool(quotes) and after.startswith(" "))
+    return _Fence(fence_m.group("fence"), quotes.count(">"), len(after), contained, quotes + after, close_column)
 
 
 def _step(line: str, fence: _Fence) -> str:
@@ -143,7 +151,7 @@ def _step(line: str, fence: _Fence) -> str:
     lead = len(after) - len(after.lstrip(" "))
     stripped = after.strip()
     run_m = _FENCE_RUN_RE.fullmatch(stripped)
-    if run_m and stripped[0] == fence.run[0] and len(stripped) >= len(fence.run) and lead <= fence.column + 3:
+    if run_m and stripped[0] == fence.run[0] and len(stripped) >= len(fence.run) and lead <= fence.close_column + 3:
         return "close"
     if fence.contained and stripped and lead < fence.column:
         return "end"
@@ -156,6 +164,15 @@ def _code_line(line: str, fence: _Fence) -> str:
         return line[len(fence.indent) :]
     after = line[len(_quotes(line, fence.depth)) :]
     return after[min(fence.column, len(after) - len(after.lstrip(" "))) :]
+
+
+def _in_comment_after(line: str, in_comment: bool) -> bool:
+    """Whether an HTML comment is still open after `line`, given whether one was open before it; a marker inside a
+    code span is text."""
+    for mark_m in _COMMENT_MARK_RE.finditer(_CODE_SPAN_RE.sub("", line)):
+        if (mark_m.group(0) == "<!--") != in_comment:
+            in_comment = not in_comment
+    return in_comment
 
 
 def read_page(page: str) -> str:
@@ -205,6 +222,7 @@ def unfenced_lines(text: str) -> list[str]:
     commented-out heading or link, is never read as one."""
     lines: list[str] = []
     fence: _Fence | None = None
+    in_comment = False
     for line in text.splitlines():
         if fence is not None:
             step = _step(line, fence)
@@ -212,22 +230,25 @@ def unfenced_lines(text: str) -> list[str]:
                 fence = None if step == "close" else fence
                 continue
             fence = None
-        fence_m = _fence_open(line)
+        fence_m = None if in_comment else _fence_open(line)
         if fence_m:
             fence = _open(fence_m)
             continue
         lines.append(line)
+        in_comment = _in_comment_after(line, in_comment)
     return _CODE_SPAN_OR_COMMENT_RE.sub(lambda m: m.group("span") or "", "\n".join(lines)).splitlines()
 
 
 def code_blocks(text: str) -> list[CodeBlock]:
-    """Every fenced block of the page, in order."""
+    """Every fenced block of the page, in order; a fence inside an HTML comment is not rendered, so it is no block."""
     blocks: list[CodeBlock] = []
     lines = text.splitlines()
     index = 0
+    in_comment = False
     while index < len(lines):
-        fence_m = _fence_open(lines[index])
+        fence_m = None if in_comment else _fence_open(lines[index])
         if fence_m is None:
+            in_comment = _in_comment_after(lines[index], in_comment)
             index += 1
             continue
         fence = _open(fence_m)

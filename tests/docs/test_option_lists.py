@@ -50,6 +50,8 @@ _SUBJECT_RE = re.compile(r"^- ((?:`[^`\s]+`(?:,\s*)?)+)")
 _NO_DEFAULT = "—"
 # Upper-case names a page may tick that belong to another tool, not to this repository's code: pip's settings.
 EXTERNAL_NAMES = {"PIP_INDEX_URL", "PIP_FIND_LINKS"}
+# Chapters that list codes: every upper-case name there must be a registered code, not merely a name in the code.
+REGISTRY_CHAPTERS = ("Errors", "Warnings")
 
 
 def _cell(cell: str) -> str:
@@ -320,7 +322,7 @@ def test_the_table_reader_unticks_cells_and_reads_an_empty_default():
 
 def _code_problems(page: str, text: str, known: set[str]) -> list[str]:
     """Every upper-case name a page writes - ticked, bold or bare - that is neither a registered code nor a name the
-    repository's code uses; in an `## Errors` chapter, every one must be a registered code. Link targets and
+    repository's code uses; in an `## Errors` or `## Warnings` chapter, every one must be a registered code. Link targets and
     `path::symbol` anchors are left out: the anchor check resolves those."""
     problems: list[str] = []
     chapter = ""
@@ -331,8 +333,8 @@ def _code_problems(page: str, text: str, known: set[str]) -> list[str]:
         for name in _CONSTANT_WORD_RE.findall(ANCHOR_RE.sub("", _LINK_TARGET_RE.sub("]", line))):
             if name in ALL_CODES:
                 continue
-            if chapter == "Errors":
-                problems.append(f"{page} § Errors: `{name}` is not a registered code")
+            if chapter in REGISTRY_CHAPTERS:
+                problems.append(f"{page} § {chapter}: `{name}` is not a registered code")
             elif name not in known and name not in EXTERNAL_NAMES:
                 problems.append(f"{page}: `{name}` is neither a registered code nor a name in the repository's code")
     return problems
@@ -395,3 +397,11 @@ def test_an_anchor_or_link_target_is_not_read_as_a_code():
     """`main.py::COMMAND_INPUTS` is an anchor, and a URL's upper-case words are a link target."""
     text = "## Errors\n\n| x | `MISSING_INPUT` | `main.py::COMMAND_INPUTS` |\n\n[x](https://e.org/A_B)\n"
     assert _code_problems("docs/x.md", text, set()) == []
+
+
+def test_planted_unregistered_name_in_a_warnings_table_is_reported():
+    """A `## Warnings` chapter lists codes: a name the repository's code uses but the registry lacks fails there."""
+    text = "## Warnings\n\n| Code | The link |\n|---|---|\n| `DEFAULT_DOCUMENT_VERSION` | counts nowhere |\n"
+    assert _code_problems("docs/x.md", text, {"DEFAULT_DOCUMENT_VERSION"}) == [
+        "docs/x.md § Warnings: `DEFAULT_DOCUMENT_VERSION` is not a registered code"
+    ]
