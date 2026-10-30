@@ -1,12 +1,25 @@
 # SPEC — prospective-spec process for the Living Documentation Toolkit
 
-## Status
+## Purpose
 
-Process document — no pending specifications (see [§6](#6-pending-specifications)).
+This page says how a new command, package or contract change is specced before it is built. It lists the pending
+specifications, none today. Whoever proposes such a change reads it.
 
----
+Read before: [README](README.md), which routes to everything that is built.
+
+## Contents
+
+- [0. Document lifecycle](#0-document-lifecycle)
+- [1. When a spec is required](#1-when-a-spec-is-required)
+- [2. Command spec — required contents](#2-command-spec--required-contents)
+- [3. Reader-table spec — required contents](#3-reader-table-spec--required-contents)
+- [4. Cross-cutting contract changes](#4-cross-cutting-contract-changes)
+- [5. Review](#5-review)
+- [6. Pending specifications](#6-pending-specifications)
 
 ## 0. Document lifecycle
+
+<!-- over limit: the process text is kept as approved; each sentence states one rule of the lifecycle -->
 
 `SPEC.md` describes behaviour that does **not** exist yet. Every new command, package, or
 cross-cutting contract change in this monorepo is specced here **before** it is implemented,
@@ -15,11 +28,14 @@ the same way `living-doc-collector-gh/SPEC.md` specs a new collector mode before
 When a section here is implemented, that same PR **moves** the section's content out of
 `SPEC.md` and into the live, "what actually exists" docs:
 
-- [`README.md`](README.md) — user-facing usage and examples: the action's commands, inputs and output;
-- [`DEVELOPER.md`](DEVELOPER.md) — local-dev workflow, the quality gates and CI;
+- [`docs/action.md`](docs/action.md) — the action's commands, inputs, output and run-level errors;
+  [`README.md`](README.md) only lists them at a glance and links there;
 - the package's own `README.md` — package-specific behaviour, e.g.
   [`packages/core/README.md`](packages/core/README.md) for the reader table and the shared input
-  validation, [`apps/cli/README.md`](apps/cli/README.md) for the `living-doc` command group.
+  validation, [`apps/cli/README.md`](apps/cli/README.md) for the `living-doc` command group;
+- [`DEVELOPER.md`](DEVELOPER.md) — local-dev workflow, the quality gates and CI.
+
+The new text follows the page rules in [`DEVELOPER.md`, Writing documentation](DEVELOPER.md#writing-documentation).
 
 It is a **move, not a copy**: the section is deleted from `SPEC.md` in the same PR, so the
 spec shrinks toward empty instead of drifting out of sync with what shipped. When `SPEC.md`
@@ -33,6 +49,8 @@ there, never here.
 ---
 
 ## 1. When a spec is required
+
+<!-- over limit: the process text is kept as approved; each item is one trigger -->
 
 Write a spec section here, and land it as its own PR (or as the first commit of the
 implementation PR, reviewed before the code), when a change:
@@ -49,6 +67,8 @@ spec.
 ---
 
 ## 2. Command spec — required contents
+
+<!-- over limit: the process text is kept as approved; each item is one required part of a spec -->
 
 A new-command spec section must cover, in this order:
 
@@ -95,6 +115,8 @@ A spec that adds a contract to the reader table must cover:
 
 ## 4. Cross-cutting contract changes
 
+<!-- over limit: the process text is kept as approved -->
+
 A change to an existing external contract of the toolkit (CLI argument, action input or
 output, exit code, error line) is specced here first with:
 
@@ -108,19 +130,19 @@ output, exit code, error line) is specced here first with:
 
 ## 5. Review
 
+<!-- over limit: the process text is kept as approved; each item is one review criterion -->
+
 A spec section is reviewed against:
 
 - **testability** — every acceptance criterion maps to a concrete check on a literal code
   path;
 - **determinism** — no nondeterministic behaviour, no hidden side effects, no network
   calls in the transformation path (the pipeline is AI-free and offline — see
-  [`README.md`](README.md));
+  [AI-free Principle](CONTRIBUTING.md#ai-free-principle));
 - **contract stability** — existing contracts are unchanged unless the spec explicitly and
   deliberately changes them, with the version impact stated.
 
-The `specification-master` agent (`.github/agents/specification-master.agent.md`) owns the
-spec's shape; `sdet` translates acceptance criteria into tests; `reviewer` verifies each
-criterion against code at PR time.
+At PR time, the `reviewer` agent (`.claude/agents/reviewer.md`) checks each criterion against the code.
 
 ---
 

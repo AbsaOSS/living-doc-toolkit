@@ -3,178 +3,104 @@
 [![CI](https://github.com/AbsaOSS/living-doc-toolkit/actions/workflows/test.yml/badge.svg)](https://github.com/AbsaOSS/living-doc-toolkit/actions/workflows/test.yml)
 [![Integration Tests](https://github.com/AbsaOSS/living-doc-toolkit/actions/workflows/integration.yml/badge.svg)](https://github.com/AbsaOSS/living-doc-toolkit/actions/workflows/integration.yml)
 
-A monorepo of Python packages that transform and enrich machine-readable artifacts produced by upstream collectors (e.g., [living-doc-collector-gh](https://github.com/AbsaOSS/living-doc-collector-gh)) into datasets consumable by downstream actions (e.g., [living-doc-generator-pdf](https://github.com/AbsaOSS/living-doc-generator-pdf)).
+## Purpose
 
-> *This is a monorepo of multiple packages and follows a different README shape than the single-purpose `living-doc-*` action repos (per the fleet-wide `repo-conventions.md`). If you arrived from an action repo, the `Understand / Use / Maintain` layout below is deliberate.*
+A GitHub Action that runs one toolkit command per step: it turns the JSON a collector wrote into the file a
+generator reads. It is the normalize step of a living-documentation pipeline, between `living-doc-collector-gh` and
+`living-doc-generator-markdown`; it carries every transformation and renders nothing.
 
----
+## Contents
 
 - [Overview](#overview)
-- [Quickstart](#quickstart)
-- [GitHub Action](#github-action)
-- [Documentation](#documentation)
+- [Usage tip](#usage-tip)
+- [Inputs and outputs](#inputs-and-outputs)
+- [Where next](#where-next)
+- [Developer Guide](#developer-guide)
+- [Contributing](#contributing)
 - [License](#license)
-
----
+- [Contact](#contact)
 
 ## Overview
 
-**Expected usage: GitHub Actions first.** The `living-doc` CLI is invoked as a step in a GitHub Actions workflow, chained between the upstream `living-doc-*` collector actions and the downstream generator actions. Running `living-doc <command>` locally — the pattern documented in [DEVELOPER.md](DEVELOPER.md) — is a development and debugging affordance only, not a second supported deployment target. So is a run of the three commands over another component's output: [Local Integration Run](DEVELOPER.md#local-integration-run).
+- **`normalize-docs`**: one `doc-source.json` to `generator-ready.json`, with every authored field of every entity the view keeps, and the input's warnings → [command](packages/services/normalize_docs/README.md)
+- **`normalize-tests`**: one `ui-tests.json` to `ui-test-catalog.json`, each scenario unchanged, grouped by feature file and by every User Story or Functionality it links → [command](packages/services/normalize_tests/README.md)
+- **`coverage-matrix`**: one `doc-source.json` and one `ui-tests.json` to `coverage-matrix.json` → [command](packages/services/coverage_matrix/README.md)
+  - It counts each `active` or `deprecated` acceptance criterion of User Stories and Functionalities, per declared aspect, from linking scenarios.
+  - It adds a summary per entity, for the whole matrix and for the planned work; a scenario link it does not count as written is a warning in the file.
+- One command per step, through the composite action at the repository root → [Action reference](docs/action.md)
+- Contract artifacts only: a command reads its inputs through `living-doc-utilities`' `read_artifact`, and validates them together before it transforms them → [Core](packages/core/README.md)
+- No copy of a contract: the models and schemas come from the installed `living-doc-utilities` (`==0.8.0`) → [Contracts](https://github.com/AbsaOSS/living-doc-utilities/tree/master/docs/contracts)
+- Pipeline-ready: it chains with the other `living-doc-*` actions → [The frame](https://github.com/AbsaOSS/living-doc/blob/master/docs/introduction/principles.md#the-frame)
+- GitHub Actions first: a step in a workflow is the supported way to run it; a local run is a development and debugging aid, not a second deployment target → [CLI run](DEVELOPER.md#cli-run), [Local Integration Run](DEVELOPER.md#local-integration-run)
+- AI-free: collect → normalize → generate is deterministic tooling, with no LLM call anywhere in that path → [AI-free Principle](CONTRIBUTING.md#ai-free-principle)
+  - The tooling is Python, JSON Schema validation, and Jinja2 and Markdown templates.
+  - The agentic layer in [`living-doc` `agentic/`](https://github.com/AbsaOSS/living-doc/tree/master/agentic) can speed up authoring GitHub Issues and `.feature` files.
+  - It is never a runtime dependency: a human writing the same input by hand is a fully supported, identical path.
 
-**The Living Documentation pipeline runs AI-free.** Every step — collect → normalize → generate — is deterministic tooling (Python, JSON Schema validation, Jinja2/Markdown templates) with no LLM call anywhere in that path. [`AbsaOSS/agentic-toolkit`](https://github.com/AbsaOSS/agentic-toolkit) can accelerate the upstream *authoring* of GitHub Issues and `.feature` files, but it is never a runtime dependency of this pipeline: a human writing the same input by hand is a fully supported, identical path.
+## Usage tip
 
-The Living Documentation Toolkit is a **generic builder** designed to:
-- Run one command per GitHub Actions step, through the composite action at the repository root
-- Read only contract artifacts, through [`living-doc-utilities`](https://github.com/AbsaOSS/living-doc-utilities)' `read_artifact`, and validate a command's inputs together before it transforms them
-- Keep no copy of a contract: the models and schemas come from the installed `living-doc-utilities` (`==0.8.0`)
-- Offer core utilities shared across commands
-
-## Quickstart
-
-### Installation
-
-```bash
-# Clone the repository
-git clone https://github.com/AbsaOSS/living-doc-toolkit.git
-cd living-doc-toolkit
-
-# Create and activate a virtual environment
-python3 -m venv .venv
-source .venv/bin/activate
-
-# Install all packages
-pip install --upgrade pip
-pip install -r requirements.txt
-```
-
-### CLI
-
-```bash
-living-doc --version
-living-doc --help      # lists normalize-docs, normalize-tests and coverage-matrix
-
-# doc-source.json, as a collector wrote it, to generator-ready.json for a generator
-living-doc normalize-docs --input doc-source.json --output generator-ready.json
-living-doc normalize-docs --input doc-source.json --output generator-ready.json --view release
-living-doc normalize-tests --input ui-tests.json --output ui-test-catalog.json
-living-doc coverage-matrix --doc-input doc-source.json --tests-input ui-tests.json \
-  --output coverage-matrix.json --fail-under 80
-```
-
-The command's options, error lines and exit codes are in the [CLI README](apps/cli/README.md).
-
-## GitHub Action
-
-The repository root is a composite action. One step runs one command over its input files
-and writes the file the command produces.
+One step that normalizes a collector's documentation output, after `actions/setup-python`
+([Prerequisites](docs/action.md#prerequisites)):
 
 ```yaml
-- uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
-  with:
-    python-version: '3.14'
-
 - name: Normalize the collected documentation
   id: normalize
-  uses: AbsaOSS/living-doc-toolkit@<ref>
+  uses: AbsaOSS/living-doc-toolkit@v0.1.0
   with:
     command: normalize-docs
     input: doc-source.json
     output: output/generator-ready.json
     view: release
     document-title: Payments service
-
-- name: Normalize the collected tests
-  id: normalize-tests
-  uses: AbsaOSS/living-doc-toolkit@<ref>
-  with:
-    command: normalize-tests
-    input: ui-tests.json
-    output: output/ui-test-catalog.json
-
-- name: Compute the coverage matrix
-  id: coverage
-  uses: AbsaOSS/living-doc-toolkit@<ref>
-  with:
-    command: coverage-matrix
-    input: doc-source.json
-    tests-input: ui-tests.json
-    output: output/coverage-matrix.json
-    fail-under: 80
 ```
 
-- **Python:** the action uses the Python on `PATH`, 3.10 or later, so put `actions/setup-python`
-  before it. Below 3.10 it fails with one line before it installs anything.
-- **Runner:** Linux only. The action assumes the venv's POSIX `bin/` layout.
-- It installs the toolkit into a venv of its own under `$RUNNER_TEMP` and leaves the job's
-  `python` unchanged. [DEVELOPER.md](DEVELOPER.md#action-venv) holds the venv's rules.
+The three commands chained: [Commands](docs/action.md#commands). Where the output goes next: [Outputs](docs/action.md#outputs).
 
-### Commands
+## Inputs and outputs
 
-Every command the action declares runs.
+Every input at a glance; required flags, defaults, which command takes which, and errors are in the
+[action reference](docs/action.md#inputs).
 
-| Command | Reads | Writes |
-|---|---|---|
-| `normalize-docs` | one documentation file (`doc-source.json`) | `generator-ready.json`, in the `inner` or `release` view |
-| `normalize-tests` | one tests file (`ui-tests.json`) | `ui-test-catalog.json` |
-| `coverage-matrix` | one documentation file (`doc-source.json`) and one tests file (`ui-tests.json`) | `coverage-matrix.json`, with `document.view` `inner` or `release` |
+- `command` (required): `normalize-docs`, `normalize-tests` or `coverage-matrix`
+- `input` (required): the input JSON file
+- `output` (required): the JSON file the command writes
+- `view`: `inner` or `release`
+- `document-title`: the document title, for `normalize-docs`
+- `tests-input`: the tests JSON file, which `coverage-matrix` requires
+- `fail-under`: the coverage percentage below which `coverage-matrix` fails the step
+- `verbose-logging`: debug logging
 
-- `normalize-docs` carries every authored field of every entity the view keeps, and forwards the input's warnings.
-  How it maps the input and checks that no field is lost: [its package README](packages/services/normalize_docs/README.md).
-- `normalize-tests` groups each scenario by feature file and every User Story or Functionality it links to, carrying
-  the scenario unchanged. How it groups records and checks lineage: [its package README](packages/services/normalize_tests/README.md).
-- `coverage-matrix` counts each `active` or `deprecated` acceptance criterion of every User Story and Functionality
-  from the scenarios that link it, per declared aspect where the criterion declares aspects, and adds a summary per
-  entity, for the whole matrix and for the planned work. A scenario link it does not count as written is a warning in
-  the file. How it counts, warns and checks lineage: [its package README](packages/services/coverage_matrix/README.md).
-  - It reads exactly one documentation file: a second one fails with `MULTIPLE_DOCUMENTATION_SOURCES`. A repeated
-    entity id, or a repeated criterion id under one entity, fails with `DUPLICATE_ENTITY_ID` or `DUPLICATE_AC_ID`,
-    listing every place.
-  - With `fail-under`, a coverage percentage below the number, or none, fails the step after the file is written, and
-    `output-path` is not set.
+The one output, `output-path`, is the absolute path of the file the command wrote ([Outputs](docs/action.md#outputs)).
 
-### Inputs
+## Where next
 
-| Input | Required | Default | Taken by | Description |
-|---|---|---|---|---|
-| `command` | yes | | | `normalize-docs`, `normalize-tests` or `coverage-matrix`; every one runs. |
-| `input` | yes | | every command | Path to the input JSON file: the documentation file for `normalize-docs` and `coverage-matrix` (`--doc-input`), the tests file for `normalize-tests`. |
-| `output` | yes | | every command | Path of the JSON file the command writes. |
-| `view` | no | `''` | `normalize-docs`, `coverage-matrix` | `inner` (the CLI default) or `release`. |
-| `document-title` | no | `''` | `normalize-docs` | The document title; the input's `metadata.source.project_id` when empty. |
-| `tests-input` | for `coverage-matrix` | `''` | `coverage-matrix` | Path to the tests JSON file (`--tests-input`). |
-| `fail-under` | no | `''` | `coverage-matrix` | Fail the step when the coverage percentage is below this number, or there is none (`--fail-under`); the file is written first. |
-| `verbose-logging` | no | `'false'` | every command | `'true'` logs at DEBUG, the command line included. A re-run with debug logging (`RUNNER_DEBUG=1`) does the same without it. |
-
-- An input left empty is not passed, so the CLI's default applies.
-- A non-empty input the command does not take fails the step with one line naming the input
-  and the command; so does an empty required one, and a `fail-under` that is not a number.
-- An unknown `command` fails with one line listing the valid commands.
-- A failed command fails the step with the CLI's own error lines and exit code.
-
-### Output
-
-| Output | Description |
+| I want to… | Read |
 |---|---|
-| `output-path` | Absolute path of the file the command wrote; set once the command succeeds. |
+| set every input, chain the commands, read the output, handle an error | [Action reference](docs/action.md) |
+| run `living-doc` by hand: options, log and error lines, exit codes | [CLI](apps/cli/README.md) |
+| know what `normalize-docs` writes | [normalize-docs](packages/services/normalize_docs/README.md) |
+| know how `normalize-tests` groups scenarios | [normalize-tests](packages/services/normalize_tests/README.md) |
+| know how `coverage-matrix` counts | [coverage-matrix](packages/services/coverage_matrix/README.md) |
+| know the reader table, input validation, view filter, run context and envelope every command shares | [Core](packages/core/README.md) |
+| read the contracts, codes and pipeline rules the toolkit implements | [`living-doc-utilities` contracts](https://github.com/AbsaOSS/living-doc-utilities/tree/master/docs/contracts) |
+| spec a new command or package | [Specification](SPEC.md) |
+| set up the repository, run the gates or a local run | [Developer guide](DEVELOPER.md) |
+| contribute a change | [Contributing](CONTRIBUTING.md) |
 
-A later step reads it as `${{ steps.normalize.outputs.output-path }}`, for example as a
-generator's input file.
+## Developer Guide
 
-## Documentation
+Setup, the gates, the local runs, CI and the documentation rules: [DEVELOPER.md](DEVELOPER.md).
 
-### Understand
-- **[Core package](packages/core/README.md)** — The reader table, the shared input validation, the view filter and the CI run context every command uses
-- **[normalize-docs package](packages/services/normalize_docs/README.md)** — How `normalize-docs` builds `generator-ready.json`, and its lineage table
-- **[normalize-tests package](packages/services/normalize_tests/README.md)** — How `normalize-tests` builds `ui-test-catalog.json`, groups scenarios, and checks lineage
-- **[coverage-matrix package](packages/services/coverage_matrix/README.md)** — How `coverage-matrix` builds `coverage-matrix.json`, counts criteria, and checks lineage
-- **[CLI package](apps/cli/README.md)** — The `living-doc` command group and its commands
-- **[SPEC.md](SPEC.md)** — How a new command or package is specced before it is built (the prospective-spec process for this monorepo)
-- **[`living-doc-utilities` contracts](https://github.com/AbsaOSS/living-doc-utilities/tree/master/docs/contracts)** — The contracts, error codes and pipeline rules the toolkit implements
+## Contributing
 
-### Maintain
-- **[Developer Guide](DEVELOPER.md)** — Environment setup, testing, linting, branch conventions
-- **[Contribution Guidelines](CONTRIBUTING.md)** — How to report bugs, propose features, and open a PR
+Bug reports, feature requests, branch and pull request conventions, and the AI-free principle:
+[CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
-Licensed under the Apache License, Version 2.0. See [LICENSE](LICENSE) for full details.
+Licensed under the Apache License, Version 2.0; see [LICENSE](LICENSE).
+
+## Contact
+
+Questions, bugs and feature requests: the [GitHub Issues page](https://github.com/AbsaOSS/living-doc-toolkit/issues).
+Maintained by [ABSA Group Limited](https://github.com/AbsaOSS).

@@ -22,6 +22,9 @@ Every package has the same three modules:
 
 - Depends on `living-doc-core` and `living-doc-utilities` only; `apps/cli` imports the service module.
 - Each package README holds its rules and the canon sections it implements; read it before changing the package.
+  Its code map, fact → `path::symbol`, is the `CONTEXT.md` beside it.
+- The envelope fields and the forwarded-warning context every command shares are the core README's § Shared
+  envelope; a package README gives only its own.
 
 ## Conventions
 
