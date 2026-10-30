@@ -69,6 +69,8 @@ _FENCE_RE = re.compile(rf"^(?P<prefix>{_CONTAINER_PREFIX})(?P<fence>`{{3,}}|~{{3
 _FENCE_RUN_RE = re.compile(r"`{3,}|~{3,}")
 _QUOTES_RE = re.compile(r"^(?:[ \t]*>)*")
 _LIST_MARKER_RE = re.compile(_LIST_MARKER)
+# A list item's first line; `lead` runs to the column its content starts at.
+_LIST_ITEM_START_RE = re.compile(rf"^(?P<lead>[ \t]*{_LIST_MARKER}[ \t]{{1,4}})\S")
 # A code span: an exact run of backticks closed by the same run, across line breaks but not across a blank line.
 _CODE_SPAN = r"(?<!`)(?P<ticks>`+)(?:(?!\n[ \t]*\n).)+?(?<!`)(?P=ticks)(?!`)"
 _CODE_SPAN_RE = re.compile(_CODE_SPAN, re.S)
@@ -175,6 +177,43 @@ def _in_comment_after(line: str, in_comment: bool) -> bool:
     return in_comment
 
 
+class _Outside:
+    """What the lines outside fenced blocks say about the next line: whether an HTML comment is open, and the content
+    column of the list item the line may sit in."""
+
+    def __init__(self) -> None:
+        self.in_comment = False
+        self.list_column: int | None = None
+        self.after_blank = False
+
+    def fence(self, line: str) -> re.Match[str] | None:
+        """The fence `line` opens, or `None`: none opens inside an HTML comment, and a fence indented four spaces or
+        more is indented code unless it sits in a list item's content."""
+        fence_m = None if self.in_comment else _fence_open(line)
+        if fence_m is None:
+            return None
+        prefix = fence_m.group("prefix")
+        if len(prefix) < 4 or _quotes(prefix) or _LIST_MARKER_RE.search(prefix):
+            return fence_m
+        column = self.list_column
+        return fence_m if column is not None and column <= len(prefix) < column + 4 else None
+
+    def read(self, line: str) -> None:
+        """Take in a line outside fenced blocks: a list item opens a list; a heading, or a line indented less than the
+        item's content after a blank line, ends it."""
+        self.in_comment = _in_comment_after(line, self.in_comment)
+        item_m = _LIST_ITEM_START_RE.match(line)
+        if item_m:
+            self.list_column = len(item_m.group("lead"))
+        elif line.strip():
+            indent = len(line) - len(line.lstrip(" "))
+            if _HEADING_RE.match(line) or (
+                self.after_blank and self.list_column is not None and indent < self.list_column
+            ):
+                self.list_column = None
+        self.after_blank = not line.strip()
+
+
 def read_page(page: str) -> str:
     """The text of an approved page, read from the repository."""
     return (REPO_ROOT / page).read_text(encoding="utf-8")
@@ -222,7 +261,7 @@ def unfenced_lines(text: str) -> list[str]:
     commented-out heading or link, is never read as one."""
     lines: list[str] = []
     fence: _Fence | None = None
-    in_comment = False
+    outside = _Outside()
     for line in text.splitlines():
         if fence is not None:
             step = _step(line, fence)
@@ -230,25 +269,26 @@ def unfenced_lines(text: str) -> list[str]:
                 fence = None if step == "close" else fence
                 continue
             fence = None
-        fence_m = None if in_comment else _fence_open(line)
+        fence_m = outside.fence(line)
         if fence_m:
             fence = _open(fence_m)
             continue
         lines.append(line)
-        in_comment = _in_comment_after(line, in_comment)
+        outside.read(line)
     return _CODE_SPAN_OR_COMMENT_RE.sub(lambda m: m.group("span") or "", "\n".join(lines)).splitlines()
 
 
 def code_blocks(text: str) -> list[CodeBlock]:
-    """Every fenced block of the page, in order; a fence inside an HTML comment is not rendered, so it is no block."""
+    """Every fenced block of the page, in order; a fence inside an HTML comment, or indented code that looks like a
+    fence, is not rendered as one, so it is no block."""
     blocks: list[CodeBlock] = []
     lines = text.splitlines()
     index = 0
-    in_comment = False
+    outside = _Outside()
     while index < len(lines):
-        fence_m = None if in_comment else _fence_open(lines[index])
+        fence_m = outside.fence(lines[index])
         if fence_m is None:
-            in_comment = _in_comment_after(lines[index], in_comment)
+            outside.read(lines[index])
             index += 1
             continue
         fence = _open(fence_m)

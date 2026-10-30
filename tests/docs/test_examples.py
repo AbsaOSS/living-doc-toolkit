@@ -265,3 +265,18 @@ def test_a_comment_marker_inside_a_code_block_is_code():
     page = "```html\n<!--\n```\n\n## After\n"
     assert [block.code for block in code_blocks(page)] == ["<!--\n"]
     assert headings(page, 2) == ["After"]
+
+
+def test_a_fence_indented_four_spaces_outside_a_list_is_indented_code():
+    """Without a list item around it, a fence indented four spaces is indented code on GitHub: no example to run."""
+    assert code_blocks("Intro.\n\n    ```python\n    raise SystemExit\n    ```\n") == []
+
+
+def test_a_fence_indented_four_spaces_after_a_list_ended_is_indented_code():
+    """A paragraph at the margin after a blank line ends the list, so a later four-space fence is indented code."""
+    assert code_blocks("- item\n\nParagraph.\n\n    ```python\n    raise SystemExit\n    ```\n") == []
+
+
+def test_a_fence_indented_four_spaces_inside_a_list_item_is_an_example():
+    """Inside a list item, a fence indented to the item's content is a fenced block, so it is checked."""
+    assert [block.info for block in code_blocks("- item\n\n    ```python\n    x = 1\n    ```\n")] == ["python"]
