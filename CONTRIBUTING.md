@@ -1,5 +1,23 @@
 # How to Contribute?
 
+## Purpose
+
+This page is how to contribute: reporting a bug, proposing a feature, the AI-free principle, and how to name and
+describe a branch and a pull request. Anyone who wants to contribute reads it.
+
+Read before: [README](README.md) · Next: [Developer guide](DEVELOPER.md)
+
+## Contents
+
+- [Identifying and Reporting Bugs](#identifying-and-reporting-bugs)
+- [Proposing New Features](#proposing-new-features)
+- [AI-free Principle](#ai-free-principle)
+- [Contributing to Development](#contributing-to-development)
+- [Branch Naming](#branch-naming)
+- [PR Naming](#pr-naming)
+- [PR Description](#pr-description)
+- [Target Branches](#target-branches)
+
 ## **Identifying and Reporting Bugs**
 * **Ensure the bug has not already been reported** by searching our **[GitHub Issues](https://github.com/AbsaOSS/living-doc-toolkit/issues)**.
 * If you cannot find an open issue describing the problem, use the **Bug report** template to open a new one. Tag it with the **bug** label.
@@ -25,7 +43,12 @@ This pipeline runs AI-free; contributions must keep every collect → normalize 
 
 ## Branch Naming
 
-Branches have to start with one of the allowed prefixes — `feature/`, `fix/`, `docs/`, `chore/` — followed immediately by the issue number, then a kebab-case scope: `<prefix>/<issue>-<scope>`.
+Branches have to start with one of the allowed prefixes, followed immediately by the issue number, then a kebab-case scope: `<prefix>/<issue>-<scope>`.
+
+- `feature/`: new functionality and enhancements
+- `fix/`: bug fixes and defect resolutions
+- `docs/`: documentation-only updates; a docs-only PR uses `docs/`, not `feature/`
+- `chore/`: maintenance, CI, dependency bumps and non-behavioural refactors
 
 Examples:
 - `feature/542-add-hierarchy-support`
@@ -33,12 +56,20 @@ Examples:
 - `docs/203-contributing-rework`
 - `chore/318-update-ci-python-version`
 
-Use lowercase kebab-case and reflect the actual scope. The `check-pr-requirements` CI check rejects a branch that has no issue number.
+Use lowercase kebab-case, hyphens only, and reflect the actual scope; avoid vague terms such as `update` or `changes`. The `check-pr-requirements` CI check rejects a branch that has no issue number.
 
 Rename before pushing if needed:
 ```shell
 git branch -m <prefix>/<issue>-<new-scope>
 ```
+
+Check the current branch:
+```shell
+git rev-parse --abbrev-ref HEAD | grep -E '^(feature|fix|docs|chore)/[0-9]+-' \
+  || echo 'Branch naming violation (expected <prefix>/<issue>-<scope>)'
+```
+
+`refactor/` and `perf/` may become prefixes later; they are not enforced yet.
 
 ## PR Naming
 

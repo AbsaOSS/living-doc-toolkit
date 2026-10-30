@@ -67,6 +67,12 @@ repo's own risk areas and review expectations; it is not shared with other repos
 - Must not bikeshed formatting that Black or Pylint already enforces.
 - Avoid proposing architectural rewrites unless they are explicitly requested.
 
+## Documentation
+
+- Must review a change to `README.md`, `DEVELOPER.md`, `CONTRIBUTING.md`, `SPEC.md`, `docs/action.md` or a package page (`apps/cli/README.md`, `packages/core/README.md`, `packages/services/<command>/README.md`) against `DEVELOPER.md`, "Writing documentation" — that section is the only copy of the page rules; Must not restate them here.
+- Must check a sample of ten decision- or fact-list items per changed page against the code its code map names (the `## Code map` of the `CONTEXT.md` beside the code), and flag any item the code does not bear out.
+- Must flag a changed fact whose page and code map no longer agree.
+
 ## Repo specifics
 
 - Must treat these as high-risk areas — the shared input validation in `packages/core/src/living_doc_core/input_validation.py` (its step order, and every occurrence of a step reported), the reader table in `readers.py`, and the action's input checks in `main.py`.

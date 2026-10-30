@@ -216,7 +216,7 @@ outputs/
 /doc-source.json
 /coverage-matrix.json
 # local-integration.sh: its configuration (the committed `.env.local.example` stays tracked), its own venv and its
-# default output; DEVELOPER.md § Run CLI Locally writes to `output/` too.
+# default output; DEVELOPER.md § CLI run writes to `output/` too.
 .env.local
 .venv-local-integration/
 /output/

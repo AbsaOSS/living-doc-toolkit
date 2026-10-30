@@ -64,6 +64,6 @@ Files and parts marked "From agentic-defaults" are replaced when the kit updates
 
 - Setup: `make install`: `requirements-dev.txt`, then every package editable with `[dev]`
 - Run: `living-doc <command> …`, the CLI, after `make install`; the action's entry point: `python3 main.py` with `INPUT_*` variables
-- `make test`: pytest with the 80 % coverage gate, every package and the root (one package: `make test-<alias>`, alias `core`, `normalize-docs`, `normalize-tests`, `coverage-matrix` or `cli`; the root: `make test-root`)
+- `make test`: pytest with the 80 % coverage gate, every package and the root (one package: `make test-<alias>`, alias `core`, `normalize-docs`, `normalize-tests`, `coverage-matrix` or `cli`; the root: `make test-root`, the page checks in `tests/docs/` included)
 - `make lint` and `make format`: Ruff and Pylint (score ≥ 9.5); Ruff autofix and Black (line length 120)
 - Check, everything that must pass before work is done: `make qa`: format-check, lint, types, deptry and test per package, then the root, then `no-vendored-schemas`
