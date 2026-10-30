@@ -106,6 +106,7 @@ A run that succeeds logs one line; with no counted criterion it ends `no coverag
 
 A run that fails before the file is written logs its error lines:
 
+<!-- over limit: the cells quote the exact error lines a caller reads -->
 | Failure | Error lines |
 |---|---|
 | The inputs fail the shared input validation | one per problem, before anything is built ([Shared input validation](../../packages/core/README.md#shared-input-validation)): ``[ERROR] [MISSING_INPUT] tests input 'ui-tests.json': no such file; …``, one ``[ERROR] [MULTIPLE_DOCUMENTATION_SOURCES] documentation input '<path>': one of 2 documentation files; …`` per documentation file, and one ``[ERROR] [DUPLICATE_ENTITY_ID] …`` or ``[ERROR] [DUPLICATE_AC_ID] …`` per repeated id, listing every place it is at |
@@ -115,6 +116,7 @@ A run that fails before the file is written logs its error lines:
 `--fail-under` is checked after the file is written: a run below it logs the success line, then one of these lines,
 and leaves the file in place; at or above it, the run succeeds.
 
+<!-- over limit: the cells quote the exact error lines a caller reads -->
 | Gate | Error line |
 |---|---|
 | The coverage percentage is below `--fail-under` | ``[ERROR] coverage-matrix - the coverage percentage, <pct>, is below --fail-under <n>.`` |

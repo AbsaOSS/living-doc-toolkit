@@ -33,7 +33,7 @@ into `coverage-matrix.json`, the file a generator reads.
 
 - The three files are `living-doc-utilities` contracts, `doc-source-v1.0.0`, `ui-tests-v1.0.0` and `coverage-matrix-v1.0.0`; this package keeps no copy of any of them
 - The CLI registers it as `living-doc coverage-matrix`, with the `--fail-under` gate, and the action runs it as `command: coverage-matrix` → [CLI](../../../apps/cli/README.md#coverage-matrix), [Commands](../../../docs/action.md#commands)
-- Coverage is counted per declared aspect, and a scenario link the matrix does not count as written is a warning in the file → [Entities and rows](#entities-and-rows), [Warnings](#warnings)
+- Coverage is counted per declared aspect; a scenario link not counted as written is a warning in the file → [Entities and rows](#entities-and-rows), [Warnings](#warnings)
 
 ## What a run does
 
@@ -48,7 +48,7 @@ A run takes these steps; nothing is written when one fails:
 
 The builder gives each User Story and Functionality an entry and a row per counted criterion:
 
-- There is one `entities[]` entry per User Story and per Functionality, whatever its state, and whether or not it has a counted criterion. Its `type`, `title` and `state` are the entity's own
+- There is one `entities[]` entry per User Story and Functionality, whatever its state and even with no counted criterion. Its `type`, `title` and `state` are the entity's own
 - There is no Feature entity
 - An entity has a row per `active` or `deprecated` criterion, with that criterion's `state`; a `planned` or an `in_review` criterion has no row
 - A link matches a criterion by its `id`, whatever repository the scenario is in
@@ -58,7 +58,7 @@ The builder gives each User Story and Functionality an entry and a row per count
   - A keyword criterion's row carries `keyword`, the criterion's one `placeholder_values` key, as stored (`rule`); an `Aspect:` row carries none.
   - The keyword's name in a scenario tag is not stored, so it is not checked.
   - A link to an aspect the criterion does not declare counts nowhere ([Warnings](#warnings)).
-- A criterion without aspects gets a plain row: it lists the `scenario_id` of every scenario that links it, and is `covered` with at least one scenario and `not_covered` with none. It carries no aspect and no keyword
+- A criterion without aspects gets a plain row: it lists the `scenario_id` of every linking scenario, and is `covered` with at least one and `not_covered` with none. It carries no aspect and no keyword
   - A link with an aspect covers it too, as a bare one does, and is a warning: the scenario names the criterion, and the criterion has one thing to cover.
 - A scenario is listed once per aspect, and once per plain row, however many of its links reach it
 - Order: every User Story, then every Functionality, each in input order. Rows follow the entity's own criteria, aspects the criterion's declared values, and the scenarios the tests input. Nothing is sorted
@@ -111,7 +111,7 @@ After them, the command adds a warning for each scenario link it does not count 
 
 - `ac_id` is the link's criterion, and `entity_id` that id without its last `-<n>`. `line_no`, `path` and `source_url` stay unset: a collector fills them
 - `message` names the scenario, the criterion and an undeclared aspect. `context` holds them as `scenario_id='<id>'`, then a space and `aspect='<value>'` for an undeclared aspect
-- There is one warning per scenario and criterion, and per scenario, criterion and aspect for an undeclared aspect, in scenario order, then link order
+- There is one warning per scenario and criterion, or per scenario, criterion and undeclared aspect. They follow scenario order, then link order
 - The run still succeeds, and no command logs a warning: the warnings are the file's
 - A scenario on a `planned` or `in_review` criterion keeps its link in `ui-test-catalog` → [normalize-tests](../normalize_tests/README.md)
 - The codes and their fields are the errors page's § Codes and § How codes are reported → [errors](https://github.com/AbsaOSS/living-doc-utilities/blob/master/docs/contracts/errors.md)
@@ -147,15 +147,22 @@ Before `write_artifact`, `check_no_field_loss` computes the matrix's stats as `w
   - Why: over the input's own stats, an all-`planned` file writes no row and fails with `FIELD_LOSS` on `acceptance_criteria[].id` and `.state`.
   - So a new project with only planned work would get no matrix. Over the counted records, that file gets its matrix, and a builder that empties every entity's rows still fails.
   - The artifact rules' R7 defines `selected_stats` by the view filter. This command's view filters nothing, and its count rule plays that part; the contract pages do not state that reading yet → [artifact rules](https://github.com/AbsaOSS/living-doc-utilities/blob/master/docs/contracts/artifact-rules.md)
-- It checks every mapped path, the criteria's declared aspects and keywords included: a builder that drops every row's aspects fails on `acceptance_criteria[].aspect[]` and `.placeholder_values`, and one that drops only the keywords on `.placeholder_values`
-- `user_stories[]` and `functionalities[]` map to the same output paths, so a criterion, or its aspects or keyword, lost from one list while the other fills its path is a partial drop; R11 compares aggregate occupancy and does not detect it
+- It checks every mapped path, the criteria's declared aspects and keywords included: a builder dropping every row's aspects fails on `acceptance_criteria[].aspect[]` and `.placeholder_values`, and one dropping only keywords on `.placeholder_values`
+- `user_stories[]` and `functionalities[]` map to the same output paths. A criterion, aspect or keyword lost from one list while the other fills its path is a partial drop; R11 compares aggregate occupancy and does not detect it
 - `FIELD_LOSS` stays a hard error when the counted records have data in a mapped path and the matrix has none
 
 ## Tests
 
 - The fixture pair's matrix is compared with the committed [golden](tests/expected/README.md), masking only `metadata.generated_at`; the release view differs from it only in `document.view`
-- Built inputs cover counted and uncounted states, a `deprecated` row, rows with every, some and no aspect covered, a bare link on a criterion with aspects, a scenario that links a criterion twice, a keyword criterion beside an `Aspect:` one, each link warning with its fields and order, the planned-work counts, the merged `source`, both `source_inputs[]` entries and forwarding from both inputs
+- Built inputs cover:
+  - counted and uncounted states, and a `deprecated` row;
+  - rows with every, some and no aspect covered;
+  - a bare link on a criterion with aspects, and a scenario linking a criterion twice;
+  - a keyword criterion beside an `Aspect:` one;
+  - each link warning with its fields and order;
+  - the planned-work counts and the merged `source`;
+  - both `source_inputs[]` entries, and forwarding from both inputs.
 - `full_sample("doc-source-v1.0.0")` and `full_sample("ui-tests-v1.0.0")` are written with `write_artifact` and run through the command in both views, shared input validation included
-  - Their entities, every row, aspect, keyword and summary included, their root `summary` and their `planned_summary` equal `full_sample("coverage-matrix-v1.0.0")`'s, and they raise no warning.
+  - Their entities, with every row, aspect, keyword and summary, their root `summary` and their `planned_summary` equal `full_sample("coverage-matrix-v1.0.0")`'s. They raise no warning.
   - The entities are compared by id: that sample lists them in another order.
-- A builder that drops a mapped field, the rows, the titles, the aspects or the keywords, fails with `FIELD_LOSS` and writes no file
+- A builder dropping a mapped field, the rows, titles, aspects or keywords fails with `FIELD_LOSS` and writes no file

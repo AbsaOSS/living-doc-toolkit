@@ -45,7 +45,7 @@ A run takes these steps; nothing is written when one fails:
 The builder groups each scenario by feature file and by every entity it links:
 
 - There is one `feature_files[]` entry per feature file
-  - Its key and name are the scenario's `scenario_id` up to its last `/`, when that prefix ends with `/<source_ref.native_id>` and exactly two non-empty path components (`<org>/<repo>`) precede the native path.
+  - Its key and name are the scenario's `scenario_id` up to its last `/`. That prefix must end with `/<source_ref.native_id>`, after exactly two non-empty path components (`<org>/<repo>`).
   - Otherwise the key and name are `source_ref.native_id`.
   - Why exactly two: a `metadata.source.repositories[]` entry is `org/repo` or `org/project`; another length names no repository.
   - `org/repo` is GitHub's form, `org/project` Azure DevOps' ([artifact rules](https://github.com/AbsaOSS/living-doc-utilities/blob/master/docs/contracts/artifact-rules.md), § The metadata envelope).
@@ -91,5 +91,5 @@ Every input warning reaches the output through the core's [`forwarded`](../../co
 ## Tests
 
 - The fixture command output is compared with the committed [golden](tests/expected/README.md), masking only `metadata.generated_at`
-- Built inputs cover multiple linked entities, cross-group links, duplicate links to one entity, unlinked scenarios, input order, and two repositories with the same native path
+- Built inputs cover multiple entities, cross-group and duplicate links, unlinked scenarios, input order, and repositories sharing a native path
 - `full_sample("ui-tests-v1.0.0")` is written with `write_artifact` and run through the command, shared input validation included

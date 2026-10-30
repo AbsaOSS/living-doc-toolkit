@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This page is how a new command, package or contract change is specced before it is built, and the list of pending
+This page says how a new command, package or contract change is specced before it is built. It lists the pending
 specifications, none today. Whoever proposes such a change reads it.
 
 Read before: [README](README.md), which routes to everything that is built.
@@ -18,6 +18,8 @@ Read before: [README](README.md), which routes to everything that is built.
 - [6. Pending specifications](#6-pending-specifications)
 
 ## 0. Document lifecycle
+
+<!-- over limit: the process text is kept as approved; each sentence states one rule of the lifecycle -->
 
 `SPEC.md` describes behaviour that does **not** exist yet. Every new command, package, or
 cross-cutting contract change in this monorepo is specced here **before** it is implemented,
@@ -48,6 +50,8 @@ there, never here.
 
 ## 1. When a spec is required
 
+<!-- over limit: the process text is kept as approved; each item is one trigger -->
+
 Write a spec section here, and land it as its own PR (or as the first commit of the
 implementation PR, reviewed before the code), when a change:
 
@@ -63,6 +67,8 @@ spec.
 ---
 
 ## 2. Command spec — required contents
+
+<!-- over limit: the process text is kept as approved; each item is one required part of a spec -->
 
 A new-command spec section must cover, in this order:
 
@@ -109,6 +115,8 @@ A spec that adds a contract to the reader table must cover:
 
 ## 4. Cross-cutting contract changes
 
+<!-- over limit: the process text is kept as approved -->
+
 A change to an existing external contract of the toolkit (CLI argument, action input or
 output, exit code, error line) is specced here first with:
 
@@ -121,6 +129,8 @@ output, exit code, error line) is specced here first with:
 ---
 
 ## 5. Review
+
+<!-- over limit: the process text is kept as approved; each item is one review criterion -->
 
 A spec section is reviewed against:
 

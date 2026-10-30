@@ -64,13 +64,14 @@ Each command declares the roles it takes, one input each:
 5. `MULTIPLE_DOCUMENTATION_SOURCES`: more than one documentation file; a run reads exactly one.
 6. `DUPLICATE_ENTITY_ID`, `DUPLICATE_AC_ID`: an entity id twice in the documentation, or a criterion id twice under one entity, listing every place.
 
-- The first failing step ends validation: `InputValidationError` carries every occurrence of that step, each an `InputProblem` with its code, the input it is in and a hint, and nothing from a later step
+- The first failing step ends validation: `InputValidationError` carries every occurrence of that step, and nothing from a later step
+  - Each occurrence is an `InputProblem` with its code, the input it is in and a hint.
   - Why: a reader never gets a cascade of errors caused by the first one, and no precedence rule picks a winner.
 - An `InputProblem` reads as `[CODE] <role> input '<path>': <what is wrong>; <hint>`
 - Once every step passes, it returns `ValidatedInputs`: the documentation and tests as contract models, `None` for a role the command does not take
 - `metadata.producer.version` is audit information: it is never compared, and an unfamiliar one passes silently
 - `MIXED_DOCUMENTATION_SOURCES` needs a second documentation contract, so it arrives with `doc-entities` → [errors](https://github.com/AbsaOSS/living-doc-utilities/blob/master/docs/contracts/errors.md)
-- A command it does not know, a role the command does not take, or a second tests path is a `ValueError`: a command's own options rule them out
+- An unknown command, a role the command does not take, or a second tests path is a `ValueError`: a command's own options rule them out
 - The steps and codes are the [errors](https://github.com/AbsaOSS/living-doc-utilities/blob/master/docs/contracts/errors.md) page's § Shared input validation order; the one-documentation-file rule is the pipeline rules' § One project, one pipeline, one documentation source → [pipeline rules](https://github.com/AbsaOSS/living-doc-utilities/blob/master/docs/contracts/pipeline-rules.md)
 
 ## The view filter

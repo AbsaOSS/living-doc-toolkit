@@ -3,7 +3,7 @@
 ## Purpose
 
 This page is how to change this repository: setup, the layout, the quality gates, the test data, the local runs,
-the action's venv, CI, and the rules for writing documentation. Anyone who changes the code or the pages reads it.
+the action's venv, CI, and the page rules. Anyone who changes the code or the pages reads it.
 
 Read before: [README](README.md) · Next: [Contributing](CONTRIBUTING.md)
 
@@ -40,7 +40,7 @@ Read before: [README](README.md) · Next: [Contributing](CONTRIBUTING.md)
   - Every package declares `living-doc-utilities==0.8.0`, from PyPI, as each imports it; one pin, the same in each.
   - `requirements.txt` pins the same version, so the file the action installs names the contract version it runs on.
 - Every package declares the toolkit's one version, `0.1.0`, the version the action's release tag carries → `packages/core/src/living_doc_core/__init__.py::__version__`
-  - `metadata.producer.version` of a file the toolkit writes is read from the installed `living-doc-core`, so a release changes every package's version together.
+  - A written file's `metadata.producer.version` comes from the installed `living-doc-core`, so a release changes every package's version together.
 - The development tools live in both places. Each package's `[dev]` extra keeps the ranges that package needs on its own; `requirements-dev.txt` pins the versions `make install` and CI use.
 - `requirements.txt` carries no `-e`. `make install` gives the editable install for development; the action and a plain install need a plain one.
   - Why the order in `make install`: a later `pip install -r requirements.txt` would reinstall the packages non-editable.
@@ -73,13 +73,14 @@ Read before: [README](README.md) · Next: [Contributing](CONTRIBUTING.md)
   - `<kind>` is this repository's convention.
 - Each command's transform is a package of its own under `packages/services/`, with its lineage table in it.
 - Each package has its own `pyproject.toml`, `src/` layout and `tests/` directory; its gates run from inside its directory, as CI runs them → `Makefile::dir-core`
-- The toolkit's packages ship no `py.typed`, so a package that imports another reads its annotations through a mypy `follow_untyped_imports` override in its `pyproject.toml`, as the root does for `living_doc_core` → `pyproject.toml::follow_untyped_imports`
+- The toolkit's packages ship no `py.typed`, so a package importing another reads its annotations through a mypy `follow_untyped_imports` override → `pyproject.toml::follow_untyped_imports`
+  - The override sits in its `pyproject.toml`; the root has one for `living_doc_core`.
 - The repository root holds the action: `action.yml`, its entry point `main.py`, the local run's `local-integration.sh` and `tools/`, and the root `tests/` for them. The root gates run from the root with the root `pyproject.toml` → `Makefile::ROOT_PY`
 
 ## Gates
 
-`make qa` runs `format-check`, `lint`, `types`, `deptry` and `test` on every package, then the root's gates (`qa-root`),
-then `no-vendored-schemas`, and stops at the first failure → `Makefile::qa`. Run it before opening a pull request.
+`make qa` runs `format-check`, `lint`, `types`, `deptry` and `test` on every package, then the root's gates (`qa-root`).
+It ends with `no-vendored-schemas` and stops at the first failure → `Makefile::qa`. Run it before opening a pull request.
 
 <!-- over limit: one row per target; the columns are what each gate needs and cannot be shortened -->
 | Target | Runs | Gate | One package | The root | Old name |
@@ -101,11 +102,11 @@ then `no-vendored-schemas`, and stops at the first failure → `Makefile::qa`. R
 - `make help` lists every target → `Makefile::help`
 - Black, ruff, Pylint, mypy and pytest read their settings from each package's `pyproject.toml`; one file: `cd packages/core && pylint src/living_doc_core/input_validation.py` → `packages/core/pyproject.toml::tool.pylint`
 - mypy checks against the 3.10 floor, so a standard-library use newer than 3.10 fails → `packages/core/pyproject.toml::python_version`
-- `deptry` fails on an import its package does not declare, on a declared dependency nothing imports, and on an import that only arrives through another package → `packages/core/pyproject.toml::tool.deptry`
+- `deptry` fails on an undeclared import, on a declared dependency nothing imports, and on an import only another package brings → `packages/core/pyproject.toml::tool.deptry`
   - Each package sets `optional_dependencies_dev_groups = ["dev"]`, because the `[dev]` extra holds only tools, and `known_first_party`, its own `src/` package.
   - It has no root form: the root declares no package, and `main.py` imports only the standard library and `living_doc_core`, which `requirements.txt` installs.
 - `no-vendored-schemas` is R12 check 1 of `living-doc-utilities`' [component checks](https://github.com/AbsaOSS/living-doc-utilities/blob/master/docs/contracts/component-checks.md): no repository but `living-doc-utilities` commits a contract schema → `Makefile::check_no_vendored_schemas`
-  - It reads git's index, so a file not yet added is not seen, and it skips anything under a `tests/` directory.
+  - It reads git's index, so it misses a file not yet added, and skips anything under a `tests/` directory.
   - Why: the contract models and schemas come from the installed `living-doc-utilities`; a committed copy stops tracking it, and nothing reports that.
 - R12 check 2, one read path and one write path, is the code's. Every read goes through `read_artifact` and returns a contract model → [The reader table](packages/core/README.md#the-reader-table)
   - Every write goes through `write_artifact` from a contract model: each command's § What a run does, [normalize-docs](packages/services/normalize_docs/README.md#what-a-run-does), [normalize-tests](packages/services/normalize_tests/README.md#what-a-run-does), [coverage-matrix](packages/services/coverage_matrix/README.md#what-a-run-does).
@@ -156,7 +157,7 @@ python3 main.py                        # writes output/generator-ready.json
 ## Local Integration Run
 
 `local-integration.sh` runs the real toolkit over a given `doc-source.json` and `ui-tests.json`, on the machine that
-has them, outside any workflow. It runs the three commands through `main.py` in a venv of its own, re-reads every
+has them, outside any workflow. It runs the three commands through `main.py` in a venv of its own. It re-reads every
 output with `read_artifact`, and prints what ran and what came out. No workflow runs it; like any local run, it is a
 development and operator-check affordance, not a second supported deployment target.
 
@@ -205,19 +206,25 @@ As committed, the example runs over the fixture pair in `tests/fixtures/collecto
 
 A run, in order:
 
-1. **Checks** what `--check` checks. A missing setting or input file, an input inside a directory the run clears, a `VIEW` other than `inner` or `release`, or a Python below 3.10 stops it with one line that names it.
+1. **Checks** what `--check` checks. One line names what stops it:
+   - a missing setting or input file;
+   - an input inside a directory the run clears;
+   - a `VIEW` other than `inner` or `release`;
+   - a Python below 3.10.
 2. **Builds its venv**, `.venv-local-integration/` (git-ignored), separate from the development `.venv`. It installs only `requirements.txt` (`pip install -r`), from the repository root: a runtime requirement missing from that file fails here, as on a runner.
    - It follows [Action venv](#action-venv): the same six variables unset, the same import check after the install, and `main.py` run with `-E`.
    - The venv is reused only when the same interpreter built it from the same `requirements.txt`.
 3. **Prints what runs**: this repository's commit, the installed `living-doc-utilities` version, the Python version, both inputs, the view and the output directory. The commit is marked when tracked files differ from it.
-4. **Runs `normalize-docs`, `normalize-tests`, then `coverage-matrix`**, each as its own `main.py` run with only the inputs it takes ([Inputs](docs/action.md#inputs)), into `$OUT_DIR/toolkit/<command>/`, having cleared the three directories first. Each command is echoed before it runs.
+4. **Runs `normalize-docs`, `normalize-tests`, then `coverage-matrix`**, each as its own `main.py` run with only the inputs it takes ([Inputs](docs/action.md#inputs)). Each command is echoed before it runs.
+   - The outputs go to `$OUT_DIR/toolkit/<command>/`; the run clears those three directories first.
    - A command that fails stops the run with one line naming it, after the toolkit's own error lines. A `DOC_INPUT` that is not a `doc-source` artifact stops `normalize-docs` with `[CONTRACT_MISMATCH]`.
 5. **Validates and reports** each output → `tools/local_integration.py::report`
-   - It re-reads the output with `read_artifact` against its contract, then prints its producer, run time, size and `metadata.stats.cardinality`, and for `coverage-matrix` the root `summary`.
+   - It re-reads the output with `read_artifact` against its contract, then prints its producer, run time, size and `metadata.stats.cardinality`.
+   - For `coverage-matrix` it also prints the root `summary`.
    - It prints each `metadata.source_inputs[]` entry: the input's contract, the producer that wrote it, `source.project_id` and `source.repositories`.
    - It prints the warnings by code: each code's count and its first ten occurrences.
-   - Per input, it matches each of the input's warnings to one the output carries unchanged, every field the same but the context, which names the input first. It prints how many matched beside the input's own count; one that does not match fails the run ([`errors.md` § Forwarded warnings](https://github.com/AbsaOSS/living-doc-utilities/blob/master/docs/contracts/errors.md#forwarded-warnings)).
-   - In the report, text from the files is printed with control characters spelled out (`\n`, `\x1b`), so an input cannot forge a report line. The toolkit's own log lines above it are printed as the toolkit writes them.
+   - Per input, it matches each warning to one the output carries unchanged, every field the same but the context. The context names the input first. It prints how many matched beside the input's own count; one that does not match fails the run ([`errors.md` § Forwarded warnings](https://github.com/AbsaOSS/living-doc-utilities/blob/master/docs/contracts/errors.md#forwarded-warnings)).
+   - The report spells out control characters in text from the files (`\n`, `\x1b`), so an input cannot forge a line. The toolkit's own log lines above it are printed as the toolkit writes them.
 
 - It exits non-zero when a check, the install, a command or a validation fails → `tools/local_integration.py::main`
 - Outside GitHub Actions every `metadata.run` field is empty; the inputs' producers in `metadata.source_inputs[]` say where the run's data came from.
@@ -244,7 +251,7 @@ What differs from `living-doc-generator-markdown`:
 - The install and the import check run from the action's own directory, `$GITHUB_ACTION_PATH` → `action.yml::GITHUB_ACTION_PATH`
   - Why: pip reads `requirements.txt`'s `./packages/...` against its working directory; from the caller's workspace they do not exist.
   - Why the variable, not `${{ github.action_path }}`: in a `container:` job the expression gives the runner host's path, which does not exist inside the container.
-- The import check imports `living_doc_cli.main`, which imports `click`, the CLI package and each command it registers, with the packages those commands import: the three services, `living-doc-core` and `living-doc-utilities`.
+- The import check imports `living_doc_cli.main`, which loads `click`, the CLI package, each registered command and those commands' packages: the three services, `living-doc-core` and `living-doc-utilities`.
 - pip rebuilds a local directory on every install, so each run reinstalls the five packages into the reused venv; their dependencies stay installed.
 
 ## CI
@@ -260,7 +267,7 @@ What differs from `living-doc-generator-markdown`:
   - `action.yml` is in the list because `tests/test_action_yml.py` reads it.
 - The tests also run when a page, `action.yml`, a shell script, an `.example` file, `dependabot.yml` or a workflow changed → `.github/workflows/test.yml::docs_changed`
   - Why: `tests/docs/` checks every page against the code, and the root tests read the local run's script and its example configuration.
-- On a pull request a renamed file counts by its old path too, so moving a file out of either set still runs the tests → `tests/docs/test_ci_filter.py::test_a_rename_lists_its_old_path_too`
+- A pull request counts a renamed file by both paths, so leaving a set still runs the tests → `tests/docs/test_ci_filter.py::test_a_rename_lists_its_old_path_too`
 - A manual run runs every gate, and a manual run of `link-check.yml` checks every page.
   - Why: a manual run is a request to re-check the branch, whatever its last commit touched.
 - `format-check`, `lint`, `types`, `deptry` and `no-vendored-schemas` run once, on Python 3.10, over every package and the root.
@@ -269,12 +276,16 @@ What differs from `living-doc-generator-markdown`:
   - Why: the action runs on whatever Python ≥ 3.10 the caller puts on `PATH`.
 - `integration.yml`'s jobs run the action through `uses: ./` over the committed fixtures; they have no local form, as they need a GitHub runner.
 - `action-run` runs each command the action runs and checks what it wrote: `normalize-docs` over `doc-source.json` in the release view, `normalize-tests` over `ui-tests.json`, and `coverage-matrix` over both in the release view.
-  - It reads the file with `read_artifact` on the action's venv, checks `document.view`, the `selection_summary`, the feature files or the root coverage summary and a keyword row's status and keyword, and that `metadata.run.run_id` is the job's `GITHUB_RUN_ID` and `producer.build` is `null`, and checks that `output-path` is the file's absolute path.
+  - It reads the file with `read_artifact` on the action's venv and checks:
+    - `document.view`, the `selection_summary`, and the feature files or the root coverage summary;
+    - a keyword row's status and keyword;
+    - that `metadata.run.run_id` is the job's `GITHUB_RUN_ID` and `producer.build` is `null`;
+    - that `output-path` is the file's absolute path.
 - The venv jobs run `normalize-docs`, and the isolation job also runs `coverage-matrix`; each writes its file.
   - Each run step has `continue-on-error`, and the job asserts its `outcome`: `success` for each.
-  - A step cannot read another step's log, so each job then replays the run's inputs on the action's venv, as the run step runs `main.py`. Each replay asserts exit code 0, `output-path` and the file.
+  - A step cannot read another step's log, so each job replays the run's inputs on the action's venv. It runs `main.py` as the run step does. Each replay asserts exit code 0, `output-path` and the file.
     - Why: a failed install fails the step too; the replay shows the venv imports and the run ends where it should.
-  - Each job reads the files the run steps wrote too, with `read_artifact`: valid `generator-ready` files, in the isolation job with the view and title the step gave, and a `coverage-matrix` file with the fixture pair's counted criteria.
+  - Each job reads the files the run steps wrote too, with `read_artifact`: valid `generator-ready` files, and a `coverage-matrix` file with the fixture pair's counted criteria. In the isolation job the `generator-ready` files carry the view and title the step gave.
 - The jobs need only `contents: read`: they run the repository's code and make no GitHub API call.
 - The isolation job installs `pydantic<2` into the runner's interpreter and compares its `python`, version and pydantic before and after. It runs on 3.12, a version pydantic 1.x publishes wheels for.
   - Why: the packages need pydantic 2, through `living-doc-utilities`; on that interpreter the action's import check would fail.
@@ -282,7 +293,7 @@ What differs from `living-doc-generator-markdown`:
 - It proves the reuse by `pyvenv.cfg`'s mtime, unchanged across its runs of the action.
   - Why: `python -m venv` without `--clear` keeps existing files, so a marker survives a re-create; `pyvenv.cfg` is rewritten every time.
 - It runs `normalize-docs`, then `coverage-matrix`, then `normalize-docs` again with `view` and `document-title`, and replays all three.
-- The rebuild job runs the action on 3.12, switches `setup-python` to 3.11, runs it again, and asks the venv's own interpreter for its version after each run.
+- The rebuild job runs the action on 3.12, switches `setup-python` to 3.11 and runs it again. It asks the venv's own interpreter for its version after each run.
   - Why: the isolation job has one Python, so it cannot test the interpreter comparison.
   - A reused venv would still report 3.12, so the version proves the rebuild, where an mtime would not.
 - The 3.9 job runs the action with `continue-on-error` and asserts the failure, and that no venv exists. It asserts that `PATH`'s Python is 3.9 before it checks the failure.

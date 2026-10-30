@@ -25,14 +25,15 @@ generator reads. It is the normalize step of a living-documentation pipeline, be
 - **`normalize-docs`**: one `doc-source.json` to `generator-ready.json`, with every authored field of every entity the view keeps, and the input's warnings → [command](packages/services/normalize_docs/README.md)
 - **`normalize-tests`**: one `ui-tests.json` to `ui-test-catalog.json`, each scenario unchanged, grouped by feature file and by every User Story or Functionality it links → [command](packages/services/normalize_tests/README.md)
 - **`coverage-matrix`**: one `doc-source.json` and one `ui-tests.json` to `coverage-matrix.json` → [command](packages/services/coverage_matrix/README.md)
-  - It counts each `active` or `deprecated` acceptance criterion of every User Story and Functionality from the scenarios that link it, per declared aspect.
+  - It counts each `active` or `deprecated` acceptance criterion of User Stories and Functionalities, per declared aspect, from linking scenarios.
   - It adds a summary per entity, for the whole matrix and for the planned work; a scenario link it does not count as written is a warning in the file.
 - One command per step, through the composite action at the repository root → [Action reference](docs/action.md)
 - Contract artifacts only: a command reads its inputs through `living-doc-utilities`' `read_artifact`, and validates them together before it transforms them → [Core](packages/core/README.md)
 - No copy of a contract: the models and schemas come from the installed `living-doc-utilities` (`==0.8.0`) → [Contracts](https://github.com/AbsaOSS/living-doc-utilities/tree/master/docs/contracts)
 - Pipeline-ready: it chains with the other `living-doc-*` actions → [The frame](https://github.com/AbsaOSS/living-doc/blob/master/docs/introduction/principles.md#the-frame)
 - GitHub Actions first: a step in a workflow is the supported way to run it; a local run is a development and debugging aid, not a second deployment target → [CLI run](DEVELOPER.md#cli-run), [Local Integration Run](DEVELOPER.md#local-integration-run)
-- AI-free: collect → normalize → generate is deterministic tooling (Python, JSON Schema validation, Jinja2 and Markdown templates), with no LLM call anywhere in that path → [AI-free Principle](CONTRIBUTING.md#ai-free-principle)
+- AI-free: collect → normalize → generate is deterministic tooling, with no LLM call anywhere in that path → [AI-free Principle](CONTRIBUTING.md#ai-free-principle)
+  - The tooling is Python, JSON Schema validation, and Jinja2 and Markdown templates.
   - The agentic layer in [`living-doc` `agentic/`](https://github.com/AbsaOSS/living-doc/tree/master/agentic) can speed up authoring GitHub Issues and `.feature` files.
   - It is never a runtime dependency: a human writing the same input by hand is a fully supported, identical path.
 

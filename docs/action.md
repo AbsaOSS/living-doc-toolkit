@@ -88,9 +88,9 @@ commands `main.py` passes each input to.
 
 - An input left empty is not passed, so the CLI's default applies
   - Why: `action.yml` passes every input on every run, an unset one as its empty default.
-- Each input goes only to the commands that take it, as `--<option>=<value>`, so a value starting with `-` stays the option's value
+- Each input goes only to the commands taking it, as `--<option>=<value>`, so a leading `-` stays in the value
 - `output` reaches the CLI as an absolute path
-- Verbose logging adds the group's `--verbose` before the command name, so it applies to every command and no command declares it
+- Verbose logging adds the group's `--verbose` before the command name, so it covers every command and none declares it
   - Why `--verbose`: the CLI reads no `INPUT_*` variable, so `main.py` reads `INPUT_VERBOSE_LOGGING` and passes an option.
   - The variable also stays in the CLI's environment; `living-doc-utilities`' own logging reads it.
 - The only variables the CLI reads are the `GITHUB_*` run context, recorded in an output's `metadata.run` for audit only → [The CI run context](../packages/core/README.md#the-ci-run-context)
@@ -102,7 +102,7 @@ commands `main.py` passes each input to.
 | `output-path` | Absolute path of the file the command wrote; set once the command succeeds |
 
 - A later step reads it as `${{ steps.normalize.outputs.output-path }}`, for example as a generator's input file
-- A `coverage-matrix` run below `fail-under` writes its file, then fails with the CLI's line and exit code 1, so `output-path` is not set
+- A `coverage-matrix` run below `fail-under` writes its file, then fails with exit code 1, so `output-path` is not set
 
 ## Errors
 

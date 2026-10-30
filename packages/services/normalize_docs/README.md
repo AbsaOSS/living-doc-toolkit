@@ -110,7 +110,7 @@ field paths to its `generator-ready-v1.0.0` path, and drops none.
 - At run time, `check_no_field_loss` computes the output's stats as `write_artifact` will, and runs `check_field_loss` against `source_inputs[0].selected_stats`; it compares the table's mapped paths only
   - A mapped path with data in the kept records and none in the output is `FIELD_LOSS`, and the run stops.
   - A record the view drops is not a loss: `selected_stats` counts kept records only.
-  - Three input paths map to each output path, so a field lost from one list while another still fills it is a partial drop, which R11 does not stop at run time.
+  - Three input paths map to each output path. A field lost from one list while another still fills it is a partial drop; R11 does not stop it at run time.
 - The canon's rules are the component checks: R11, and R12 checks 2 and 3 → [component checks](https://github.com/AbsaOSS/living-doc-utilities/blob/master/docs/contracts/component-checks.md)
 
 ## Tests
