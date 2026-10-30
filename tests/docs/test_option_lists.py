@@ -341,9 +341,10 @@ def _code_problems(page: str, text: str, known: set[str]) -> list[str]:
 
 
 def _names_in_code() -> set[str]:
-    """Upper-case names in non-test, non-Markdown files, plus the external `ALL_CODES` registry."""
+    """Upper-case names in non-Markdown files outside every `tests/` directory, plus the external `ALL_CODES`
+    registry."""
     listed = subprocess.run(
-        ["git", "ls-files", "--cached", "--others", "--exclude-standard", ":!*.md", ":!tests/**"],
+        ["git", "ls-files", "--cached", "--others", "--exclude-standard", ":!*.md", ":(exclude,glob)**/tests/**"],
         cwd=REPO_ROOT,
         capture_output=True,
         check=True,
@@ -362,6 +363,7 @@ def _names_in_code() -> set[str]:
 def test_code_name_inventory_excludes_planted_test_names() -> None:
     names = _names_in_code()
     assert "SOURCE_UNAVAILABEL" not in names
+    assert "PIN_HINT" not in names, "a name only a package's tests use is no name in the code"
     assert "ALL_CODES" in names
 
 

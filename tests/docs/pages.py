@@ -99,7 +99,11 @@ def _fence_open(line: str) -> re.Match[str] | None:
 
 _HEADING_RE = re.compile(r"^(?P<hashes>#{1,6})\s+(?P<text>.*?)\s*#*\s*$")
 _LIST_LINK_RE = re.compile(r"^[-*]\s+\[[^\]]*\]\((?P<target>[^)\s]*)\)\s*$")
-_LINK_TARGET_RE = re.compile(r"\]\((?P<target>[^)\s]+)\)")
+# An inline link's destination, bare or in angle brackets, with its optional title.
+_LINK_TARGET_RE = re.compile(r"""\]\(<?(?P<target>[^)\s>]+)>?(?:\s+(?:"[^"]*"|'[^']*'|\([^)]*\)))?\s*\)""")
+_REFERENCE_DEFINITION_RE = re.compile(r"^ {0,3}\[(?P<label>[^\]]+)\]:[ \t]*<?(?P<target>[^\s>]+)>?.*$", re.M)
+# A reference link: `[text][label]`, `[label][]` or `[label]`; an inline link's `](` is not one.
+_REFERENCE_USE_RE = re.compile(r"\[(?P<text>[^\]]*)\](?:\[(?P<label>[^\]]*)\]|(?!\())")
 
 
 class CodeBlock(NamedTuple):
@@ -111,16 +115,14 @@ class CodeBlock(NamedTuple):
 
 
 class _Fence(NamedTuple):
-    """An open fence: its run, its `>` depth, its column after the quotes, whether a list item or blockquote holds
-    it (the block then ends where that container ends), the prefix its code lines carry, and its container's content
-    column, from which a closing run may be indented up to three spaces."""
+    """An open fence: its run, its `>` depth, its column in its blockquote's content, and its container's content
+    column. A closing run may be indented up to three spaces from that column; a line left of it has left the
+    container, which ends the block."""
 
     run: str
     depth: int
     column: int
-    contained: bool
-    indent: str
-    close_column: int
+    container: int
 
 
 def _quotes(line: str, depth: int | None = None) -> str:
@@ -130,42 +132,47 @@ def _quotes(line: str, depth: int | None = None) -> str:
     return quotes_m.group(0) if quotes_m else ""
 
 
-def _open(fence_m: re.Match[str]) -> _Fence:
-    """The fence an opening-fence match starts; a list marker in its prefix counts as indentation."""
+def _after_quotes(line: str, depth: int) -> str:
+    """`line` after its `depth` `>` markers and the one optional space that follows them."""
+    after = line[len(_quotes(line, depth)) :]
+    return after[1:] if depth and after.startswith(" ") else after
+
+
+def _open(fence_m: re.Match[str], list_column: int | None) -> _Fence:
+    """The fence an opening-fence match starts; a list marker in its prefix counts as indentation. Its container's
+    content column is the list item's it opens or sits in, else the margin, whatever its own indentation."""
     prefix = fence_m.group("prefix")
-    quotes = _quotes(prefix)
-    after = _LIST_MARKER_RE.sub(lambda marker_m: " " * len(marker_m.group(0)), prefix[len(quotes) :])
-    listed = after != prefix[len(quotes) :]
-    contained = bool(quotes) or listed or len(after) >= 4
-    # The closing run's three spaces count from the container's content column, never from the opener's own
-    # indentation: a list item's column when a marker or four spaces put the opener in one, else the margin or the one
-    # optional space after a `>`.
-    close_column = len(after) if listed or len(after) >= 4 else int(bool(quotes) and after.startswith(" "))
-    return _Fence(fence_m.group("fence"), quotes.count(">"), len(after), contained, quotes + after, close_column)
+    depth = _quotes(prefix).count(">")
+    inner = _after_quotes(prefix, depth)
+    after = _LIST_MARKER_RE.sub(lambda marker_m: " " * len(marker_m.group(0)), inner)
+    if after != inner:
+        container = len(after)
+    elif not depth and list_column is not None and list_column <= len(after):
+        container = list_column
+    else:
+        container = 0
+    return _Fence(fence_m.group("fence"), depth, len(after), container)
 
 
 def _step(line: str, fence: _Fence) -> str:
     """`close` when `line` closes the block, `end` when the block's container ended before `line`, else `code`."""
-    quotes = _quotes(line, fence.depth)
-    if quotes.count(">") < fence.depth:
+    if _quotes(line, fence.depth).count(">") < fence.depth:
         return "end"
-    after = line[len(quotes) :]
+    after = _after_quotes(line, fence.depth)
     lead = len(after) - len(after.lstrip(" "))
     stripped = after.strip()
     run_m = _FENCE_RUN_RE.fullmatch(stripped)
-    if run_m and stripped[0] == fence.run[0] and len(stripped) >= len(fence.run) and lead <= fence.close_column + 3:
+    if run_m and stripped[0] == fence.run[0] and len(stripped) >= len(fence.run) and lead <= fence.container + 3:
         return "close"
-    if fence.contained and stripped and lead < fence.column:
+    if stripped and lead < fence.container:
         return "end"
     return "code"
 
 
 def _code_line(line: str, fence: _Fence) -> str:
     """A line of the block without its container's prefix: the quotes, and indentation up to the fence's column."""
-    if line.startswith(fence.indent):
-        return line[len(fence.indent) :]
-    after = line[len(_quotes(line, fence.depth)) :]
-    return after[min(fence.column, len(after) - len(after.lstrip(" "))) :]
+    after = _after_quotes(line, fence.depth)
+    return after[min(fence.column, len(after) - len(after.lstrip(" \t"))) :]
 
 
 def _in_comment_after(line: str, in_comment: bool) -> bool:
@@ -271,7 +278,7 @@ def unfenced_lines(text: str) -> list[str]:
             fence = None
         fence_m = outside.fence(line)
         if fence_m:
-            fence = _open(fence_m)
+            fence = _open(fence_m, outside.list_column)
             continue
         lines.append(line)
         outside.read(line)
@@ -291,7 +298,7 @@ def code_blocks(text: str) -> list[CodeBlock]:
             outside.read(lines[index])
             index += 1
             continue
-        fence = _open(fence_m)
+        fence = _open(fence_m, outside.list_column)
         above = next((line.strip() for line in reversed(lines[:index]) if line.strip()), "")
         body: list[str] = []
         index += 1
@@ -411,13 +418,29 @@ def check_contents_links(page: str, text: str) -> list[str]:
     return problems
 
 
+def _link_targets(prose: str) -> list[str]:
+    """Every link destination of the page's prose: inline links, and the reference definitions a link uses; a
+    definition nothing uses renders nothing."""
+    definitions = {_label(m.group("label")): m.group("target") for m in _REFERENCE_DEFINITION_RE.finditer(prose)}
+    body = _REFERENCE_DEFINITION_RE.sub("", prose)
+    used = [_label(m.group("label") or m.group("text")) for m in _REFERENCE_USE_RE.finditer(body)]
+    return [m.group("target") for m in _LINK_TARGET_RE.finditer(body)] + [
+        definitions[label] for label in used if label in definitions
+    ]
+
+
+def _label(label: str) -> str:
+    """A reference label as Markdown matches it: in any case, with runs of whitespace collapsed."""
+    return " ".join(label.split()).casefold()
+
+
 def _resolved_links(page: str, text: str) -> set[str]:
     """Every relative link of the page into the repository, as a repository path without its fragment. A link
     inside a fenced code block, an HTML comment or a code span does not count - GitHub renders no link there."""
     base = PurePosixPath(page).parent
     resolved: set[str] = set()
-    for link_m in _LINK_TARGET_RE.finditer(_CODE_SPAN_RE.sub("", "\n".join(unfenced_lines(text)))):
-        target = link_m.group("target").split("#", 1)[0]
+    for target in _link_targets(_CODE_SPAN_RE.sub("", "\n".join(unfenced_lines(text)))):
+        target = target.split("#", 1)[0]
         if not target or "://" in target or target.startswith("mailto:"):
             continue
         parts: list[str] = []

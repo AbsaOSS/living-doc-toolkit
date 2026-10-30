@@ -280,3 +280,26 @@ def test_a_fence_indented_four_spaces_after_a_list_ended_is_indented_code():
 def test_a_fence_indented_four_spaces_inside_a_list_item_is_an_example():
     """Inside a list item, a fence indented to the item's content is a fenced block, so it is checked."""
     assert [block.info for block in code_blocks("- item\n\n    ```python\n    x = 1\n    ```\n")] == ["python"]
+
+
+@pytest.mark.parametrize(
+    "page",
+    [
+        "- item\n\n    ```yaml\n  with:\n      tests-inputs: t.json\n    ```\n",
+        "> ```yaml\n>with:\n>  tests-inputs: t.json\n> ```\n",
+    ],
+    ids=["list-content-left-of-the-opener", "no-space-after-the-quote-marker"],
+)
+def test_a_code_line_stays_in_its_block_while_its_container_holds_it(page):
+    """A line left of the opener, but still in the list item, is code, as is one with no space after its `>`, so the
+    block's inputs are checked."""
+    assert [problem for block in code_blocks(page) for problem in yaml_example_problems(block)] == [
+        "`with:` sets `tests-inputs`, which `action.yml` does not declare"
+    ]
+
+
+def test_a_line_left_of_the_list_item_ends_a_fence_in_it():
+    """A line left of the item's content leaves the item, which ends the block, however the opener is indented."""
+    page = "- item\n\n    ```yaml\n  a: 1\ntext\n\n## Next\n"
+    assert [block.code for block in code_blocks(page)] == ["a: 1\n"]
+    assert headings(page, 2) == ["Next"]
