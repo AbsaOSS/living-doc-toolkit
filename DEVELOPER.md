@@ -270,6 +270,8 @@ What differs from `living-doc-generator-markdown`:
 - A pull request counts a renamed file by both paths, so leaving a set still runs the tests → `tests/docs/test_ci_filter.py::test_a_rename_lists_its_old_path_too`
 - A manual run runs every gate, and a manual run of `link-check.yml` checks every page.
   - Why: a manual run is a request to re-check the branch, whatever its last commit touched.
+- `PR Requirements` skips a pull request Dependabot opened → `.github/workflows/check-pr-requirements.yml::dependabot[bot]`
+  - Why: Dependabot cannot give the issue-number title, the template's sections, a closing reference or a ticket branch.
 - `format-check`, `lint`, `types`, `deptry` and `no-vendored-schemas` run once, on Python 3.10, over every package and the root.
   - Why: they give the same result on every interpreter, and on the floor a syntax newer than 3.10 fails.
 - `make coverage` runs on Python 3.10 to 3.14.
