@@ -14,7 +14,7 @@ authors = [
 requires-python = ">=3.10"
 dependencies = [
     "living-doc-core",
-    "living-doc-utilities==0.8.0"
+    "living-doc-utilities==0.8.1"
 ]
 
 [project.optional-dependencies]

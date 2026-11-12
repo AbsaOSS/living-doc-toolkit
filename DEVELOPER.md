@@ -3,7 +3,7 @@
 ## Purpose
 
 This page is how to change this repository: setup, the layout, the quality gates, the test data, the local runs,
-the action's venv, CI, and the page rules. Anyone who changes the code or the pages reads it.
+the action's venv, CI, versioning and releases, and the page rules. Anyone who changes the code or the pages reads it.
 
 Read before: [README](README.md) · Next: [Contributing](CONTRIBUTING.md)
 
@@ -18,6 +18,8 @@ Read before: [README](README.md) · Next: [Contributing](CONTRIBUTING.md)
 - [Local Integration Run](#local-integration-run)
 - [Action venv](#action-venv)
 - [CI](#ci)
+- [Versioning](#versioning)
+- [Release](#release)
 - [Writing documentation](#writing-documentation)
 
 ## Setup
@@ -33,11 +35,11 @@ Read before: [README](README.md) · Next: [Contributing](CONTRIBUTING.md)
 <!-- over limit: one row per file; the columns are what each file holds and who installs it -->
 | File | What it holds | Who installs it |
 |---|---|---|
-| `requirements.txt` | Runtime only: the `living-doc-utilities==0.8.0` pin, then `./packages/core`, `./packages/services/normalize_docs`, `./packages/services/normalize_tests`, `./packages/services/coverage_matrix`, `./apps/cli`, in dependency order | `action.yml`, into its venv, on every run; a plain install, above |
+| `requirements.txt` | Runtime only: the `living-doc-utilities==0.8.1` pin, then `./packages/core`, `./packages/services/normalize_docs`, `./packages/services/normalize_tests`, `./packages/services/coverage_matrix`, `./apps/cli`, in dependency order | `action.yml`, into its venv, on every run; a plain install, above |
 | `requirements-dev.txt` | `-r requirements.txt`, the gate and test tools pinned, and `PyYAML` for the root tests | `make install` and CI |
 
 - Each package declares its own runtime dependencies in its `pyproject.toml`; `requirements.txt` names the packages, not their dependencies, with one exception: the `living-doc-utilities` pin.
-  - Every package declares `living-doc-utilities==0.8.0`, from PyPI, as each imports it; one pin, the same in each.
+  - Every package declares `living-doc-utilities==0.8.1`, from PyPI, as each imports it; one pin, the same in each.
   - `requirements.txt` pins the same version, so the file the action installs names the contract version it runs on.
 - Every package declares the toolkit's one version, `0.1.0`, the version the action's release tag carries → `packages/core/src/living_doc_core/__init__.py::__version__`
   - A written file's `metadata.producer.version` comes from the installed `living-doc-core`, so a release changes every package's version together.
@@ -302,6 +304,34 @@ What differs from `living-doc-generator-markdown`:
   - Why: otherwise it would also pass if `setup-python` resolved something newer and the action failed for another reason.
 - The 3.9 job runs on `ubuntu-24.04`; every other job runs on `ubuntu-latest`.
   - Why: `setup-python` publishes no 3.9 for `ubuntu-latest` (26.04), so the job would fail setting up Python before the action runs.
+
+## Versioning
+
+- The toolkit has one version, the one its release tag carries without the `v`: every package's `pyproject.toml` `version` and its `__version__` declare it → `packages/core/src/living_doc_core/__init__.py::__version__`
+- Every written file carries it as `metadata.producer.version`, read from the installed `living-doc-core` → `packages/core/src/living_doc_core/envelope.py::TOOLKIT_VERSION`
+- It follows Semantic Versioning. While it is `0.x`, a minor release may break and a patch never does; every breaking change is listed in the release notes with its migration.
+- Every `uses:` of this action on a page names the one release → `tests/docs/test_examples.py::test_every_example_names_one_release_of_this_action`
+- To check it locally: `living-doc --version`.
+
+## Release
+
+1. On a branch, set the version in every package's `pyproject.toml` and `__version__`, and the release in every `uses:` example. Merge it through a pull request after `make qa`.
+2. Actions → **Draft Release** → **Run workflow** on `master`, with `tag-name` `v<version>` and `from-tag-name` the previous tag → `.github/workflows/release_draft.yml::from-tag-name`
+   - From the CLI: `gh workflow run release_draft.yml --ref master -f tag-name=vX.Y.Z -f from-tag-name=vX.Y.W`.
+3. The workflow checks that the tag is well formed, new and a valid increment, collects the release notes, tags the head of the branch it runs on and pushes the tag, then creates a draft release.
+4. Review and edit the draft, then click **Publish release**.
+
+- The tag is pushed when the workflow runs, not when the draft is published → `.github/workflows/release_draft.yml::Create and Push Tag`
+  - Why: deleting a draft leaves its tag. A tag is never cut again: a wrong release is followed by the next patch.
+- The workflow tags the head of the branch, so nothing merges into `master` between the commit you release and the run → `.github/workflows/release_draft.yml::context.sha`
+- The workflow does not compare the packages' version with the tag, so step 1 is on you.
+  - Why: a forgotten bump ships a release whose files all carry the previous `metadata.producer.version`.
+- The first release, `v0.1.0`, has no earlier tag:
+  - the tag check accepts any version while no tag exists;
+  - `from-tag-name` stays empty: when given, it must name an existing tag;
+  - the draft then lists every closed issue since the repository began, so edit it down to what the release delivers.
+- Each merged pull request contributes the bullet lines directly under its `## Release Notes` heading, one line each: a bullet wrapped over two lines is cut after the first → `.github/workflows/release_draft.yml::release-notes-title`
+- A pull request labelled `no RN`, `pr:no-release-notes`, `duplicate`, `invalid` or `wontfix` (or their `generic:` names) contributes nothing → `.github/workflows/release_draft.yml::skip-release-notes-labels`
 
 ## Writing documentation
 

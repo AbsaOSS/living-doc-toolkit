@@ -28,7 +28,7 @@ Read before: [CLI](../../apps/cli/README.md) · Next: [normalize-docs](../servic
 | `living_doc_core.views` | `select_records(entities, view)`, the view filter |
 | `living_doc_core.run_context` | `run_context()`, the CI run a file is written in, for `metadata.run` |
 
-- It depends on `living-doc-utilities==0.8.0` and nothing else; the contract models and schemas are that package's
+- It depends on `living-doc-utilities==0.8.1` and nothing else; the contract models and schemas are that package's
 - `living_doc_core` itself exports only `setup_logging` and `__version__`; every other module loads the contract models, so it is imported by name
   - Why: it keeps the contract-model imports behind the module boundary that needs them.
 
