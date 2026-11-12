@@ -18,7 +18,7 @@ dependencies = [
     "living-doc-service-coverage-matrix",
     "living-doc-service-normalize-docs",
     "living-doc-service-normalize-tests",
-    "living-doc-utilities==0.8.0"
+    "living-doc-utilities==0.8.1"
 ]
 
 [project.optional-dependencies]

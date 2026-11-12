@@ -15,7 +15,7 @@ command's inputs together, and writes the contract a generator reads.
 ## Tech stack
 
 - Python `>=3.10`; CI runs 3.10 to 3.14.
-- `living-doc-utilities==0.8.0`: the contract models (pydantic 2), schemas, `read_artifact` / `write_artifact`,
+- `living-doc-utilities==0.8.1`: the contract models (pydantic 2), schemas, `read_artifact` / `write_artifact`,
   lineage and stats helpers.
 - `click` for the CLI; a bash composite action that builds its own venv (`action.yml`).
 - pytest + pytest-cov, ruff, Black, Pylint, mypy, deptry.

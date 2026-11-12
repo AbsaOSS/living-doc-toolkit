@@ -1,8 +1,8 @@
 # utilities-golden fixtures
 
 Copied byte-for-byte from [`AbsaOSS/living-doc-utilities`](https://github.com/AbsaOSS/living-doc-utilities) at tag
-`v0.8.0`, commit
-[`1901382`](https://github.com/AbsaOSS/living-doc-utilities/tree/1901382/tests/fixtures/golden/expected), from
+`v0.8.1`, commit
+[`ded6a91`](https://github.com/AbsaOSS/living-doc-utilities/tree/ded6a91/tests/fixtures/golden/expected), from
 `tests/fixtures/golden/expected/`:
 
 | File | Entity |

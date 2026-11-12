@@ -5,7 +5,7 @@
       "name": "AbsaOSS/living-doc-toolkit",
       "version": "0.1.0",
       "build": null,
-      "utilities_version": "0.8.0"
+      "utilities_version": "0.8.1"
     },
     "run": {
       "run_id": null,

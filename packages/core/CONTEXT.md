@@ -8,7 +8,7 @@ What every command shares. Its behaviour is [README.md](README.md); this file ma
 
 What realises each fact of [README.md](README.md):
 
-- Depends on `living-doc-utilities==0.8.0` only → `packages/core/pyproject.toml::living-doc-utilities`
+- Depends on `living-doc-utilities==0.8.1` only → `packages/core/pyproject.toml::living-doc-utilities`
 - The package exports `setup_logging` and `__version__` only → `packages/core/src/living_doc_core/__init__.py::__all__`
 - `[LEVEL] message` on stderr → `packages/core/src/living_doc_core/logging_config.py::setup_logging`
 - The reader table → `packages/core/src/living_doc_core/readers.py::READERS`
