@@ -126,6 +126,10 @@ All owned by `living-doc-utilities`; this repo defines none and commits no schem
 - `tests/test_action_yml.py`'s bash tests fail on Windows only; CI runs them on ubuntu (unverified).
 - `tests/test_local_integration.py` runs the real script in a copy whose venv is pre-seeded with the test's own
   interpreter, so no test installs from the network; `.env.local.example`'s keys must equal the script's `KEYS`.
+- The release-notes configuration is the same in every `living-doc*` repository (AbsaOSS/living-doc#97):
+  `release_draft.yml`'s `release-notes-title` and `chapters` through `row-format-link-pr`,
+  `check_pr_release_notes.yml`'s `skip-labels`, and both workflows' `permissions:`. Change it in all of them together
+  → [what it covers and how the generator sorts](https://github.com/AbsaOSS/living-doc/blob/master/.github/CONTEXT.md)
 - `.local_context/` is private and never committed.
 
 ## Code map
