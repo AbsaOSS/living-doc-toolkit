@@ -52,6 +52,8 @@ The builder gives each User Story and Functionality an entry and a row per count
 - There is no Feature entity
 - An entity has a row per `active` or `deprecated` criterion, with that criterion's `state`; a `planned` or an `in_review` criterion has no row
 - A link matches a criterion by its `id`, whatever repository the scenario is in
+- A scenario tagged `@skip` covers nothing: no row and no aspect lists it, so a criterion or an aspect whose only scenarios are skipped is `not_covered` ([Warnings](#warnings))
+  - Only the scenario's own tag, exactly `@skip`, counts; another spelling or skip tag covers as any other scenario does.
 - A criterion that declares aspects, with `Aspect:` or a keyword, gets an `aspects[]` entry per declared value, in declared order
   - An aspect lists the `scenario_id` of every scenario whose link names that aspect. A bare `@AC:<id>` link, with no aspect, lists its scenario under every aspect.
   - An aspect is `covered` with at least one scenario and `not_covered` with none. The row's `status` follows its aspects, `covered`, `partially_covered` or `not_covered`, and its own `scenario_ids` stays empty.
@@ -108,10 +110,12 @@ After them, the command adds a warning for each scenario link it does not count 
 | `STALE_AC_REF` | an aspect its criterion does not declare | counts nowhere; on a criterion without aspects, covers it |
 | `PLANNED_AC_HAS_TESTS` | a `planned` criterion, whatever the aspect | counts nowhere; the criterion has no row |
 | `IN_REVIEW_AC_HAS_TESTS` | an `in_review` criterion, whatever the aspect | counts nowhere; the criterion has no row |
+| `SKIPPED_SCENARIO` | an `active` or `deprecated` criterion, from a scenario tagged `@skip`, whatever the aspect | counts nowhere |
 
-- `ac_id` is the link's criterion, and `entity_id` that id without its last `-<n>`. `line_no`, `path` and `source_url` stay unset: a collector fills them
-- `message` names the scenario, the criterion and an undeclared aspect. `context` holds them as `scenario_id='<id>'`, then a space and `aspect='<value>'` for an undeclared aspect
+- `ac_id` is the link's criterion, and `entity_id` that id without its last `-<n>`. `line_no` and `path` stay unset: a collector fills them. `source_url` is the scenario's `source_ref.url` on `SKIPPED_SCENARIO`, and unset on the others
+- `message` names the scenario, the criterion and an undeclared aspect; on `SKIPPED_SCENARIO`, the scenario's title too, as a generator never shows `ac_id` or `context`. `context` holds them as `scenario_id='<id>'`, then a space and `aspect='<value>'` for an undeclared aspect
 - There is one warning per scenario and criterion, or per scenario, criterion and undeclared aspect. They follow scenario order, then link order
+- A skipped scenario's link to an unknown, `planned` or `in_review` criterion gets only that criterion's warning; one to a counted criterion gets only `SKIPPED_SCENARIO`, as no aspect is checked
 - The run still succeeds, and no command logs a warning: the warnings are the file's
 - A scenario on a `planned` or `in_review` criterion keeps its link in `ui-test-catalog` → [normalize-tests](../normalize_tests/README.md)
 - The codes and their fields are the errors page's § Codes and § How codes are reported → [errors](https://github.com/AbsaOSS/living-doc-utilities/blob/master/docs/contracts/errors.md)
@@ -134,6 +138,7 @@ After them, the command adds a warning for each scenario link it does not count 
   - Every `features[]` path, as the matrix has no Feature entity.
   - The other entity and criterion fields, as the matrix carries coverage, not content.
   - Each link's `id` and `aspect`, as they decide which row, and which aspect of it, lists the scenario.
+  - A scenario's `tags[]`, as a `@skip` tag only decides that no row lists it.
   - The other `scenarios[]` paths, as a row names its scenarios by id.
 
 ### The run-time check
@@ -158,6 +163,7 @@ Before `write_artifact`, `check_no_field_loss` computes the matrix's stats as `w
   - counted and uncounted states, and a `deprecated` row;
   - rows with every, some and no aspect covered;
   - a bare link on a criterion with aspects, and a scenario linking a criterion twice;
+  - a `@skip` scenario on counted, uncounted and unknown criteria, and tags that only look like `@skip`;
   - a keyword criterion beside an `Aspect:` one;
   - each link warning with its fields and order;
   - the planned-work counts and the merged `source`;

@@ -39,10 +39,13 @@ from living_doc_utilities.contracts.envelope import (
     Stats,
 )
 from living_doc_utilities.contracts.stats import compute_stats
-from living_doc_utilities.contracts.ui_tests import AcLink, UITestsResult
+from living_doc_utilities.contracts.ui_tests import AcLink, Scenario, UITestsResult
 
 # One scenario link to a criterion: the scenario's id and the link's aspect, `None` for a bare `@AC:<id>` tag.
 Link = tuple[str, str | None]
+
+# The tag, as `ui-tests` stores it, of a scenario the test runner skips: it covers nothing.
+SKIP_TAG = "@skip"
 
 
 def _is_counted(state: LifecycleState) -> TypeGuard[CountedState]:
@@ -55,10 +58,17 @@ def _matrix_entities(documentation: DocSourceResult) -> list[Entity]:
     return [*documentation.user_stories, *documentation.functionalities]
 
 
+def _is_skipped(scenario: Scenario) -> bool:
+    """Whether `scenario` carries the `@skip` tag itself, as written."""
+    return SKIP_TAG in scenario.tags
+
+
 def _linked_scenarios(tests: UITestsResult) -> dict[str, list[Link]]:
-    """Each linked criterion id with every link to it, in input order."""
+    """Each linked criterion id with every link to it, in input order; a skipped scenario links nothing."""
     links: dict[str, list[Link]] = {}
     for scenario in tests.scenarios:
+        if _is_skipped(scenario):
+            continue
         for link in scenario.acceptance_criteria:
             links.setdefault(link.id, []).append((scenario.scenario_id, link.aspect))
     return links
@@ -124,16 +134,17 @@ def _entity_coverage(entity: Entity, links: Mapping[str, list[Link]]) -> EntityC
 
 def _warning(code: Code, message: str, scenario_id: str, ac_id: str, aspect: str | None = None) -> ContractWarning:
     """A link warning: on the linked criterion and its entity, the id without its last `-<n>`. A collector fills
-    `line_no`, `path` and `source_url`, so they stay unset."""
+    `line_no`, `path` and `source_url`, so they stay unset; `SKIPPED_SCENARIO` adds the scenario's `source_url`."""
     context = f"scenario_id={scenario_id!r}" if aspect is None else f"scenario_id={scenario_id!r} aspect={aspect!r}"
     return ContractWarning(
         code=code.name, message=message, context=context, entity_id=ac_id.rsplit("-", 1)[0], ac_id=ac_id
     )
 
 
-def _link_warning(scenario_id: str, link: AcLink, criterion: AcceptanceCriterion | None) -> ContractWarning | None:
+def _link_warning(scenario: Scenario, link: AcLink, criterion: AcceptanceCriterion | None) -> ContractWarning | None:
     """The warning for one link, or `None` when the matrix counts it as written. `criterion` is the one the link names,
     `None` when no User Story or Functionality has it."""
+    scenario_id = scenario.scenario_id
     linked = f"Scenario {scenario_id!r} links acceptance criterion {link.id!r}"
     if criterion is None:
         return _warning(
@@ -160,6 +171,17 @@ def _link_warning(scenario_id: str, link: AcLink, criterion: AcceptanceCriterion
             scenario_id,
             link.id,
         )
+    # Whatever the link's aspect: a skipped scenario covers no aspect to check it against.
+    if _is_skipped(scenario):
+        skipped = _warning(
+            Code.SKIPPED_SCENARIO,
+            f"Scenario {scenario_id!r}, {scenario.title!r}, links acceptance criterion {link.id!r} and is tagged "
+            f"{SKIP_TAG}: the matrix counts no skipped scenario, so the link counts nowhere until the tag is removed.",
+            scenario_id,
+            link.id,
+        )
+        # The scenario's file, as a generator shows a warning's link and never its `context`.
+        return skipped.model_copy(update={"source_url": scenario.source_ref.url})
     if link.aspect is None or link.aspect in criterion.aspect:
         return None
     linked_aspect = f"Scenario {scenario_id!r} links aspect {link.aspect!r} of acceptance criterion {link.id!r}"
@@ -177,14 +199,15 @@ def _link_warning(scenario_id: str, link: AcLink, criterion: AcceptanceCriterion
 def _link_warnings(entities: Iterable[Entity], tests: UITestsResult) -> list[ContractWarning]:
     """
     A warning for each link the matrix does not count as written: `STALE_AC_REF` for an unknown criterion or an
-    undeclared aspect, `PLANNED_AC_HAS_TESTS` and `IN_REVIEW_AC_HAS_TESTS` for a criterion with no row. One per
-    scenario and criterion, and per aspect for an undeclared one, in scenario order, then link order.
+    undeclared aspect, `PLANNED_AC_HAS_TESTS` and `IN_REVIEW_AC_HAS_TESTS` for a criterion with no row, and
+    `SKIPPED_SCENARIO` for a skipped scenario on a counted one. One per scenario and criterion, and per aspect for an
+    undeclared one, in scenario order, then link order.
     """
     criteria = {criterion.id: criterion for entity in entities for criterion in entity.acceptance_criteria}
     warnings: dict[tuple[str | None, str | None], ContractWarning] = {}
     for scenario in tests.scenarios:
         for link in scenario.acceptance_criteria:
-            warning = _link_warning(scenario.scenario_id, link, criteria.get(link.id))
+            warning = _link_warning(scenario, link, criteria.get(link.id))
             # `ac_id` names the criterion, and `context` the scenario and any undeclared aspect.
             if warning is not None:
                 warnings.setdefault((warning.ac_id, warning.context), warning)
