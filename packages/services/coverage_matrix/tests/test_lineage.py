@@ -55,6 +55,12 @@ def test_a_links_id_and_aspect_are_dropped_because_they_only_route_its_scenario(
     )
 
 
+def test_a_scenarios_tags_are_dropped_because_a_skip_tag_only_decides_whether_any_row_lists_it():
+    tags = LINEAGE_TABLE.entries["scenarios[].tags[]"]
+
+    assert isinstance(tags, Dropped) and "a `@skip` tag decides that no row lists its scenario" in tags.reason
+
+
 def test_every_dropped_path_says_why():
     dropped = [entry for entry in LINEAGE_TABLE.entries.values() if isinstance(entry, Dropped)]
 

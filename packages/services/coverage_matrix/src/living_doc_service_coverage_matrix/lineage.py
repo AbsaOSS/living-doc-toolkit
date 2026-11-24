@@ -111,6 +111,7 @@ LINK_ROUTES_ASPECT = Dropped(
     "a link's aspect decides which aspect of the criterion's row lists its scenario; the row's aspects come from the "
     "documentation input"
 )
+SKIP_TAG_ROUTES = Dropped("a `@skip` tag decides that no row lists its scenario; a coverage row carries no tags")
 SCENARIO_BY_ID = Dropped("a coverage row names its scenarios by scenario_id only")
 
 
@@ -125,6 +126,8 @@ def _scenario_entry(path: str) -> LineageEntry:
         return LINK_ROUTES_SCENARIO
     if path == "acceptance_criteria[].aspect":
         return LINK_ROUTES_ASPECT
+    if path == "tags[]":
+        return SKIP_TAG_ROUTES
     return SCENARIO_BY_ID
 
 
