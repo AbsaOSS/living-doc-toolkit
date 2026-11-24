@@ -459,6 +459,99 @@ def test_a_link_to_an_in_review_criterion_warns_and_the_criterion_has_no_row(doc
     ]
 
 
+def _skipped(scenario: Scenario, title: str) -> Scenario:
+    """`scenario`, titled `title` and tagged `@skip` as well as its own tags."""
+    return scenario.model_copy(update={"title": title, "tags": [*scenario.tags, "@skip"]})
+
+
+def _skipped_warning(scenario: Scenario, ac_id: str) -> ContractWarning:
+    return ContractWarning(
+        code="SKIPPED_SCENARIO",
+        message=f"Scenario {scenario.scenario_id!r}, {scenario.title!r}, links acceptance criterion {ac_id!r} and is "
+        "tagged @skip: the matrix counts no skipped scenario, so the link counts nowhere until the tag is removed.",
+        context=f"scenario_id={scenario.scenario_id!r}",
+        entity_id=ac_id.rsplit("-", 1)[0],
+        ac_id=ac_id,
+        source_url=scenario.source_ref.url,
+    )
+
+
+def test_a_skip_scenario_covers_nothing_and_warns_once_per_counted_criterion_it_links(documentation, ui_tests):
+    built = _with_criteria(
+        documentation,
+        _criterion("US-001-01", "active"),
+        _criterion("US-001-02", "deprecated"),
+        _criterion("US-001-03", "active", aspects=DEVICES),
+    )
+    skipped = _skipped(
+        _scenario(
+            ui_tests,
+            "SCN-S",
+            ("US-001-01", None),
+            ("US-001-02", None),
+            ("US-001-03", "desktop"),
+            ("US-001-03", None),
+            ("US-001-03", "watch"),
+        ),
+        "Sign in with a passkey",
+    )
+    tests = _with_scenarios(ui_tests, _scenario(ui_tests, "SCN-A", ("US-001-01", None)), skipped)
+
+    result = _build(built, tests)
+
+    # US-001-02's and US-001-03's only scenario is skipped, so neither is covered.
+    assert _rows(result)["US-001"] == [
+        ("US-001-01", "active", "covered", ["SCN-A"]),
+        ("US-001-02", "deprecated", "not_covered", []),
+        ("US-001-03", "active", "not_covered", []),
+    ]
+    assert _row(result, "US-001-03").aspects == [_aspect(device) for device in DEVICES]
+    summary = result.summary
+    assert (summary.counted_acs, summary.covered_acs, summary.not_covered_acs, summary.coverage_pct) == (3, 1, 2, 33.3)
+    # One warning per criterion, whatever its links' aspects: a skipped link is not checked against them.
+    assert _own_warnings(result, built) == [
+        _skipped_warning(skipped, "US-001-01"),
+        _skipped_warning(skipped, "US-001-02"),
+        _skipped_warning(skipped, "US-001-03"),
+    ]
+
+
+def test_a_skip_scenario_on_an_uncounted_or_unknown_criterion_keeps_only_that_criterions_warning(
+    documentation, ui_tests
+):
+    built = _with_criteria(
+        documentation,
+        _criterion("US-001-01", "active"),
+        _criterion("US-001-02", "planned", None),
+        _criterion("US-001-03", "in_review"),
+    )
+    skipped = _skipped(
+        _scenario(ui_tests, "SCN-S", ("US-001-02", None), ("US-001-03", None), ("US-001-99", None)),
+        "Sign in with a passkey",
+    )
+
+    result = _build(built, _with_scenarios(ui_tests, skipped))
+
+    assert [(warning.code, warning.ac_id) for warning in _own_warnings(result, built)] == [
+        ("PLANNED_AC_HAS_TESTS", "US-001-02"),
+        ("IN_REVIEW_AC_HAS_TESTS", "US-001-03"),
+        ("STALE_AC_REF", "US-001-99"),
+    ]
+
+
+def test_only_the_exact_skip_tag_skips_a_scenario(documentation, ui_tests):
+    built = _with_criteria(documentation, _criterion("US-001-01", "active"))
+    tagged = [
+        _scenario(ui_tests, f"SCN-{index}", ("US-001-01", None)).model_copy(update={"tags": [tag]})
+        for index, tag in enumerate(("@Skip", "@skipped", "@wip", "skip"))
+    ]
+
+    result = _build(built, _with_scenarios(ui_tests, *tagged))
+
+    assert _rows(result)["US-001"] == [("US-001-01", "active", "covered", ["SCN-0", "SCN-1", "SCN-2", "SCN-3"])]
+    assert _own_warnings(result, built) == []
+
+
 def test_the_link_warnings_follow_the_forwarded_ones_in_scenario_then_link_order(documentation, ui_tests):
     tests_warning = ContractWarning(code="STALE_AC_REF", message="An unknown criterion.", context="tag='@AC:US-9-1'")
     built = _with_criteria(

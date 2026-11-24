@@ -46,7 +46,7 @@ Every package has the same three modules:
 - Each `tests/expected/README.md` says how to regenerate the golden: run the command over the fixture pair with no
   `GITHUB_*` variable set, review the diff, replace the file. The comparison masks `metadata.generated_at` only.
 - `coverage-matrix` counts per declared aspect and writes its own link warnings (`STALE_AC_REF`,
-  `PLANNED_AC_HAS_TESTS`, `IN_REVIEW_AC_HAS_TESTS`) after the forwarded ones; the rules are its
+  `PLANNED_AC_HAS_TESTS`, `IN_REVIEW_AC_HAS_TESTS`, `SKIPPED_SCENARIO`) after the forwarded ones; the rules are its
   [README](coverage_matrix/README.md).
 - `coverage-matrix` checks field loss against the documentation input only, over the counted criteria.
 - `full_sample("coverage-matrix-v1.0.0")` lists its entities in another order than the command and names another

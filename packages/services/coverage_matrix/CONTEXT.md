@@ -14,6 +14,8 @@ What realises each fact of [README.md](README.md):
 - An entity's rows → `packages/services/coverage_matrix/src/living_doc_service_coverage_matrix/builder.py::_entity_coverage`
 - A row only for an `active` or `deprecated` criterion → `packages/services/coverage_matrix/src/living_doc_service_coverage_matrix/builder.py::_is_counted`
 - A link matches a criterion by its `id` → `packages/services/coverage_matrix/src/living_doc_service_coverage_matrix/builder.py::_linked_scenarios`
+- A `@skip` scenario covers nothing; only its own exact `@skip` tag counts → `packages/services/coverage_matrix/src/living_doc_service_coverage_matrix/builder.py::_is_skipped`
+- A `@skip` above `Feature:`, `Rule:` or `Examples:` does not reach `ui-tests` → utilities
 - A row's aspects, keyword, status and scenarios → `packages/services/coverage_matrix/src/living_doc_service_coverage_matrix/builder.py::_row`
 - An aspect's scenarios and status → `packages/services/coverage_matrix/src/living_doc_service_coverage_matrix/builder.py::_aspect_coverage`
 - A scenario once per aspect or plain row → `packages/services/coverage_matrix/src/living_doc_service_coverage_matrix/builder.py::_once`
@@ -24,7 +26,7 @@ What realises each fact of [README.md](README.md):
 - `selected_stats` over the counted records → `packages/services/coverage_matrix/src/living_doc_service_coverage_matrix/builder.py::_counted_selection`
 - The tests entry → `packages/services/coverage_matrix/src/living_doc_service_coverage_matrix/builder.py::_tests_entry`
 - A link warning's code → `packages/services/coverage_matrix/src/living_doc_service_coverage_matrix/builder.py::_link_warning`
-- A link warning's fields → `packages/services/coverage_matrix/src/living_doc_service_coverage_matrix/builder.py::_warning`
+- A link warning's fields; `source_url` only on `SKIPPED_SCENARIO` → `packages/services/coverage_matrix/src/living_doc_service_coverage_matrix/builder.py::_warning`
 - Link warnings in scenario, then link order → `packages/services/coverage_matrix/src/living_doc_service_coverage_matrix/builder.py::_link_warnings`
 - The lineage table over both inputs → `packages/services/coverage_matrix/src/living_doc_service_coverage_matrix/lineage.py::LINEAGE_TABLE`
 - The table is complete against both inputs → `packages/services/coverage_matrix/tests/test_lineage.py::test_the_lineage_table_accounts_for_every_doc_source_field`, `packages/services/coverage_matrix/tests/test_lineage.py::test_the_lineage_table_accounts_for_every_ui_tests_field`
