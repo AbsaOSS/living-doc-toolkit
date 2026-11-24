@@ -15,6 +15,7 @@ What realises each fact of [README.md](README.md):
 - A row only for an `active` or `deprecated` criterion → `packages/services/coverage_matrix/src/living_doc_service_coverage_matrix/builder.py::_is_counted`
 - A link matches a criterion by its `id` → `packages/services/coverage_matrix/src/living_doc_service_coverage_matrix/builder.py::_linked_scenarios`
 - A `@skip` scenario covers nothing; only its own exact `@skip` tag counts → `packages/services/coverage_matrix/src/living_doc_service_coverage_matrix/builder.py::_is_skipped`
+- A `@skip` above `Feature:`, `Rule:` or `Examples:` does not reach `ui-tests` → utilities
 - A row's aspects, keyword, status and scenarios → `packages/services/coverage_matrix/src/living_doc_service_coverage_matrix/builder.py::_row`
 - An aspect's scenarios and status → `packages/services/coverage_matrix/src/living_doc_service_coverage_matrix/builder.py::_aspect_coverage`
 - A scenario once per aspect or plain row → `packages/services/coverage_matrix/src/living_doc_service_coverage_matrix/builder.py::_once`

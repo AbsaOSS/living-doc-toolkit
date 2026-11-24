@@ -134,7 +134,8 @@ def _entity_coverage(entity: Entity, links: Mapping[str, list[Link]]) -> EntityC
 
 def _warning(code: Code, message: str, scenario_id: str, ac_id: str, aspect: str | None = None) -> ContractWarning:
     """A link warning: on the linked criterion and its entity, the id without its last `-<n>`. A collector fills
-    `line_no`, `path` and `source_url`, so they stay unset; `SKIPPED_SCENARIO` adds the scenario's `source_url`."""
+    `line_no`, `path` and `source_url`, so they stay unset here; `_link_warning` sets a `SKIPPED_SCENARIO`'s
+    `source_url` to the scenario's."""
     context = f"scenario_id={scenario_id!r}" if aspect is None else f"scenario_id={scenario_id!r} aspect={aspect!r}"
     return ContractWarning(
         code=code.name, message=message, context=context, entity_id=ac_id.rsplit("-", 1)[0], ac_id=ac_id

@@ -54,6 +54,7 @@ The builder gives each User Story and Functionality an entry and a row per count
 - A link matches a criterion by its `id`, whatever repository the scenario is in
 - A scenario tagged `@skip` covers nothing: no row and no aspect lists it, so a criterion or an aspect whose only scenarios are skipped is `not_covered` ([Warnings](#warnings))
   - Only the scenario's own tag, exactly `@skip`, counts; another spelling or skip tag covers as any other scenario does.
+  - A `@skip` above `Feature:`, `Rule:` or `Examples:` does not reach `ui-tests.json`, so the scenarios under it still cover.
 - A criterion that declares aspects, with `Aspect:` or a keyword, gets an `aspects[]` entry per declared value, in declared order
   - An aspect lists the `scenario_id` of every scenario whose link names that aspect. A bare `@AC:<id>` link, with no aspect, lists its scenario under every aspect.
   - An aspect is `covered` with at least one scenario and `not_covered` with none. The row's `status` follows its aspects, `covered`, `partially_covered` or `not_covered`, and its own `scenario_ids` stays empty.
