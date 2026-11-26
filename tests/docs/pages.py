@@ -36,7 +36,6 @@ APPROVED_PAGES: dict[str, int] = {
     "README.md": 1,
     "DEVELOPER.md": 1,
     "CONTRIBUTING.md": 1,
-    "SPEC.md": 1,
     "docs/action.md": 2,
     "apps/cli/README.md": 2,
     "packages/core/README.md": 2,

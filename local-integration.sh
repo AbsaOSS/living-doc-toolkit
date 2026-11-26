@@ -287,7 +287,7 @@ toolkit() {  # toolkit COMMAND CONTRACT OUTPUT INPUT_NAME=VALUE...
 toolkit normalize-docs generator-ready "$OUTPUT_ROOT/normalize-docs/generator-ready.json" \
   INPUT_INPUT="$DOC_INPUT" INPUT_VIEW="$CFG_VIEW"
 toolkit normalize-tests ui-test-catalog "$OUTPUT_ROOT/normalize-tests/ui-test-catalog.json" \
-  INPUT_INPUT="$TESTS_INPUT"
+  INPUT_INPUT="$DOC_INPUT" INPUT_TESTS_INPUT="$TESTS_INPUT" INPUT_VIEW="$CFG_VIEW"
 toolkit coverage-matrix coverage-matrix "$OUTPUT_ROOT/coverage-matrix/coverage-matrix.json" \
   INPUT_INPUT="$DOC_INPUT" INPUT_TESTS_INPUT="$TESTS_INPUT" INPUT_VIEW="$CFG_VIEW"
 

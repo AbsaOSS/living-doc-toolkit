@@ -43,7 +43,7 @@ declares runs.
 | Command | Reads | Writes | What a run does |
 |---|---|---|---|
 | `normalize-docs` | one documentation file, `doc-source.json` | `generator-ready.json`, in the `inner` or `release` view | [normalize-docs](../packages/services/normalize_docs/README.md) |
-| `normalize-tests` | one tests file, `ui-tests.json` | `ui-test-catalog.json` | [normalize-tests](../packages/services/normalize_tests/README.md) |
+| `normalize-tests` | one documentation file and one tests file | `ui-test-catalog.json`, in the `inner` or `release` view | [normalize-tests](../packages/services/normalize_tests/README.md) |
 | `coverage-matrix` | one documentation file and one tests file | `coverage-matrix.json`, with `document.view` `inner` or `release` | [coverage-matrix](../packages/services/coverage_matrix/README.md) |
 
 The three commands chained, one step each; the first one's `id` lets a later step read its output:
@@ -58,7 +58,8 @@ The three commands chained, one step each; the first one's `id` lets a later ste
 - uses: AbsaOSS/living-doc-toolkit@v0.1.0
   with:
     command: normalize-tests
-    input: ui-tests.json
+    input: doc-source.json
+    tests-input: ui-tests.json
     output: output/ui-test-catalog.json
 - uses: AbsaOSS/living-doc-toolkit@v0.1.0
   with:
@@ -78,11 +79,11 @@ commands `main.py` passes each input to.
 | Input | Required | Default | Taken by | Meaning |
 |---|---|---|---|---|
 | `command` | yes | — | — | The command to run: `normalize-docs`, `normalize-tests` or `coverage-matrix` ([Commands](#commands)) |
-| `input` | yes | — | `normalize-docs`, `normalize-tests`, `coverage-matrix` | Path to the input JSON file: the documentation file for `normalize-docs` and `coverage-matrix` (`--doc-input`), the tests file for `normalize-tests` |
+| `input` | yes | — | `normalize-docs`, `normalize-tests`, `coverage-matrix` | Path to the documentation JSON file (`--input` for `normalize-docs`, `--doc-input` for the other two) |
 | `output` | yes | — | `normalize-docs`, `normalize-tests`, `coverage-matrix` | Path of the JSON file the command writes |
-| `view` | no | `''` | `normalize-docs`, `coverage-matrix` | `inner` (the CLI default) or `release` |
+| `view` | no | `''` | `normalize-docs`, `normalize-tests`, `coverage-matrix` | `inner` (the CLI default) or `release` |
 | `document-title` | no | `''` | `normalize-docs` | The document title; the input's `metadata.source.project_id` when empty |
-| `tests-input` | no | `''` | `coverage-matrix` | Path to the tests JSON file (`--tests-input`); `coverage-matrix` requires it |
+| `tests-input` | no | `''` | `normalize-tests`, `coverage-matrix` | Path to the tests JSON file (`--tests-input`); both commands require it |
 | `fail-under` | no | `''` | `coverage-matrix` | Fail the step when the coverage percentage is below this number, or there is none (`--fail-under`); the file is written first ([Outputs](#outputs)) |
 | `verbose-logging` | no | `false` | every command, as the group's `--verbose` | `true`, in any case, logs at DEBUG, the command line included; a re-run with debug logging (`RUNNER_DEBUG=1`) does the same without it |
 
@@ -115,7 +116,7 @@ The step fails at the first check that does not pass, in this order:
 | venv | the import check fails: the packages did not land in the venv | one `::error::` line pointing at the runner's pip configuration, for a `target` or `prefix` setting |
 | input | `command` is empty or unknown | one line listing the valid commands |
 | input | a non-empty input the command does not take | one line naming the input and the command |
-| input | an empty input the command requires, `tests-input` for `coverage-matrix` included | one line naming it |
+| input | an empty input the command requires, `tests-input` for `normalize-tests` and `coverage-matrix` included | one line naming it |
 | input | `output` holds a line break, which `output-path` cannot carry | one line naming it |
 | input | `fail-under` is not a finite number | one line naming it |
 | command | the command fails | the CLI's own error lines and exit code ([Exit codes](../apps/cli/README.md#exit-codes)) |

@@ -96,6 +96,11 @@ SCENARIO_PATHS = (
     "source_ref.area_path",
     "source_ref.iteration_path",
     "tags[]",
+    "line",
+    "rule",
+    "rule_background[]",
+    "steps[]",
+    "background[]",
     "acceptance_criteria[].id",
     "acceptance_criteria[].aspect",
 )

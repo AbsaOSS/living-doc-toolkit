@@ -123,7 +123,7 @@ After them, the command adds a warning for each scenario link it does not count 
 
 ## Lineage
 
-`LINEAGE_TABLE` is one table over both inputs: the 162 `doc-source-v1.0.0` paths and the 12 `ui-tests-v1.0.0` paths.
+`LINEAGE_TABLE` is one table over both inputs: the 162 `doc-source-v1.0.0` paths and the 17 `ui-tests-v1.0.0` paths.
 
 | Input path | Output path |
 |---|---|
@@ -140,7 +140,7 @@ After them, the command adds a warning for each scenario link it does not count 
   - The other entity and criterion fields, as the matrix carries coverage, not content.
   - Each link's `id` and `aspect`, as they decide which row, and which aspect of it, lists the scenario.
   - A scenario's `tags[]`, as a `@skip` tag only decides that no row lists it.
-  - The other `scenarios[]` paths, as a row names its scenarios by id.
+  - The other `scenarios[]` paths, its steps, line, rule and backgrounds included, as a row names its scenarios by id.
 
 ### The run-time check
 

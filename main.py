@@ -48,8 +48,10 @@ COMMAND_INPUTS: dict[str, dict[str, tuple[str, bool]]] = {
         "document-title": ("--document-title", False),
     },
     "normalize-tests": {
-        "input": ("--input", True),
+        "input": ("--doc-input", True),
         OUTPUT: ("--output", True),
+        "view": ("--view", False),
+        "tests-input": ("--tests-input", True),
     },
     "coverage-matrix": {
         "input": ("--doc-input", True),

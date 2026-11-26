@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(.venv/bin/python -m pytest tests/test_local_integration.py -q)",
+      "Bash(.venv/bin/python -m pytest tests/docs -q)",
+      "Bash(bash .claude/skills/context-md/check.sh)",
+      "Bash(echo \"exit $?\")",
+      "Bash(rtk grep *)"
+    ],
+    "additionalDirectories": [
+      "/Users/admin/repos/AbsaOSS/living-doc-toolkit/.claude",
+      "/Users/admin/repos/AbsaOSS/living-doc"
+    ]
+  }
+}

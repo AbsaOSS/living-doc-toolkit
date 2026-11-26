@@ -26,6 +26,7 @@ Read before: [README](README.md) · Next: [Developer guide](DEVELOPER.md)
 
 * **Check if the feature has already been requested** by searching through our **[GitHub Issues](https://github.com/AbsaOSS/living-doc-toolkit/issues)**.
 * If the feature request doesn't exist, feel free to create a new one. Tag it with the **request** label.
+* The issue is the change's spec: this repository keeps no spec file. The pull request that ships it writes what it built into the pages.
 
 ## AI-free Principle
 

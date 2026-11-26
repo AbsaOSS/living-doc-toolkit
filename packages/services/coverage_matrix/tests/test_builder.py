@@ -10,6 +10,7 @@ from typing import get_type_hints
 
 import pytest
 from living_doc_utilities.contracts import doc_source
+from living_doc_utilities.contracts import ui_tests as ui_tests_contract
 from living_doc_utilities.contracts.common import AcceptanceCriterion
 from living_doc_utilities.contracts.coverage_matrix import (
     AcCoverage,
@@ -633,7 +634,9 @@ def test_the_source_inputs_are_the_documentation_entry_then_the_tests_entry(docu
         assert entry.run == given.metadata.run
         assert entry.source == given.metadata.source
         assert entry.stats == AuditStats.model_validate(given.metadata.stats.model_dump())
-    assert entries[1].selected_stats == entries[1].stats
+    # Every scenario, counted on the pinned contract: the fixture's own stats predate the ui-tests fields of 0.9.0rc2.
+    every_scenario = compute_stats(ui_tests, ui_tests_contract.RECORD_ROOTS, ui_tests.metadata.stats.cardinality)
+    assert entries[1].selected_stats == AuditStats.model_validate(every_scenario.model_dump())
 
 
 def test_the_documentation_selected_stats_cover_the_counted_criteria_of_user_stories_and_functionalities(

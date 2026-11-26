@@ -76,9 +76,9 @@ def test_a_package_readme_is_depth_two_and_a_readme_beside_test_data_is_no_page(
     assert "tests/fixtures/collector-gh/README.md" not in listed
 
 
-def test_depth_one_is_exactly_the_four_root_pages():
-    """Depth 1 is `README.md` and the three solo pages, and no solo page has child pages."""
-    solo = ["CONTRIBUTING.md", "DEVELOPER.md", "SPEC.md"]
+def test_depth_one_is_exactly_the_three_root_pages():
+    """Depth 1 is `README.md` and the two solo pages, and no solo page has child pages."""
+    solo = ["CONTRIBUTING.md", "DEVELOPER.md"]
     assert sorted(page for page, depth in APPROVED_PAGES.items() if depth == 1) == sorted(["README.md", *solo])
     assert [page for page in solo if (REPO_ROOT / "docs" / page.removesuffix(".md")).exists()] == []
 

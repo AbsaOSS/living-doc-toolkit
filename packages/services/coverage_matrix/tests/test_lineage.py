@@ -13,8 +13,8 @@ def test_the_lineage_table_accounts_for_every_doc_source_field():
 
 def test_the_lineage_table_accounts_for_every_ui_tests_field():
     assert_complete(LINEAGE_TABLE, "ui-tests-v1.0.0")
-    # 54 paths for each of the three entity lists, and 12 for the scenarios.
-    assert len(LINEAGE_TABLE.entries) == 3 * 54 + 12
+    # 54 paths for each of the three entity lists, and 17 for the scenarios.
+    assert len(LINEAGE_TABLE.entries) == 3 * 54 + 17
 
 
 def test_only_identity_criterion_aspect_keyword_and_scenario_id_paths_are_mapped():

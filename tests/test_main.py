@@ -55,7 +55,7 @@ def _set_inputs(monkeypatch, **inputs: str) -> None:
 
 def _set_required_inputs(monkeypatch, command: str) -> None:
     _set_inputs(monkeypatch, command=command, input="in.json", output="out.json")
-    if command == "coverage-matrix":
+    if command in ("normalize-tests", "coverage-matrix"):
         _set_inputs(monkeypatch, tests_input="tests.json")
 
 
@@ -125,10 +125,8 @@ def test_the_action_runs_the_three_commands_it_declares():
     [
         ({"command": "normalize-docs", "tests_input": "tests.json"}, "tests-input"),
         ({"command": "normalize-docs", "fail_under": "80"}, "fail-under"),
-        ({"command": "normalize-tests", "view": "release"}, "view"),
-        ({"command": "normalize-tests", "document_title": "Title"}, "document-title"),
-        ({"command": "normalize-tests", "tests_input": "tests.json"}, "tests-input"),
-        ({"command": "normalize-tests", "fail_under": "80"}, "fail-under"),
+        ({"command": "normalize-tests", "tests_input": "tests.json", "document_title": "Title"}, "document-title"),
+        ({"command": "normalize-tests", "tests_input": "tests.json", "fail_under": "80"}, "fail-under"),
         ({"command": "coverage-matrix", "tests_input": "tests.json", "document_title": "Title"}, "document-title"),
     ],
 )
@@ -152,6 +150,7 @@ def test_an_input_the_command_does_not_take_fails_with_one_line_naming_it(cli, m
         ("normalize-docs", "output"),
         ("normalize-tests", "input"),
         ("normalize-tests", "output"),
+        ("normalize-tests", "tests-input"),
         ("coverage-matrix", "input"),
         ("coverage-matrix", "output"),
         ("coverage-matrix", "tests-input"),
@@ -206,8 +205,8 @@ def test_an_empty_input_the_command_does_not_take_is_not_passed(cli, monkeypatch
     # Arrange: `action.yml` passes every input, an unset optional one as its empty default.
     _set_inputs(
         monkeypatch,
-        command="normalize-tests",
-        input="ui-tests.json",
+        command="normalize-docs",
+        input="doc-source.json",
         output="out.json",
         view="",
         document_title="",
@@ -220,7 +219,34 @@ def test_an_empty_input_the_command_does_not_take_is_not_passed(cli, monkeypatch
 
     # Assert
     assert _errors(capsys.readouterr().err) == []
-    assert cli.runs == [[*CLI, "normalize-tests", "--input=ui-tests.json", f"--output={Path.cwd() / 'out.json'}"]]
+    assert cli.runs == [[*CLI, "normalize-docs", "--input=doc-source.json", f"--output={Path.cwd() / 'out.json'}"]]
+
+
+def test_normalize_tests_gets_each_input_as_its_option_and_the_output_as_an_absolute_path(cli, monkeypatch):
+    # Arrange: `input` is the documentation file, as for `coverage-matrix`.
+    _set_inputs(
+        monkeypatch,
+        command="normalize-tests",
+        input="doc-source.json",
+        tests_input="ui-tests.json",
+        output="ui-test-catalog.json",
+        view="release",
+    )
+
+    # Act
+    run()
+
+    # Assert
+    assert cli.runs == [
+        [
+            *CLI,
+            "normalize-tests",
+            "--doc-input=doc-source.json",
+            f"--output={Path.cwd() / 'ui-test-catalog.json'}",
+            "--view=release",
+            "--tests-input=ui-tests.json",
+        ]
+    ]
 
 
 def test_coverage_matrix_gets_each_input_as_its_option_and_the_output_as_an_absolute_path(cli, monkeypatch):
@@ -536,14 +562,24 @@ def test_the_entry_point_runs_normalize_tests_over_the_fixture_and_sets_the_outp
 
     result = _run_entry_point(
         tmp_path,
-        {"command": "normalize-tests", "input": os.fspath(UI_TESTS), "output": output_path},
+        {
+            "command": "normalize-tests",
+            "input": os.fspath(DOC_SOURCE),
+            "tests-input": os.fspath(UI_TESTS),
+            "output": output_path,
+            "view": "release",
+        },
     )
 
     assert result.returncode == 0, result.stderr
     assert _errors(result.stderr) == []
     written = read_artifact(tmp_path / output_path, expected="ui-test-catalog")
     assert isinstance(written, UiTestCatalogResult)
-    assert written.document.view == "inner"
+    assert written.document.view == "release"
+    assert [source.schema_version for source in written.metadata.source_inputs] == [
+        "doc-source-v1.0.0",
+        "ui-tests-v1.0.0",
+    ]
     assert [feature_file.feature_file for feature_file in written.feature_files] == [
         "AbsaOSS/living-doc/docs/examples/gherkin/liv_doc_func/func-001-validate-password-strength.feature",
         "AbsaOSS/living-doc/docs/examples/gherkin/liv_doc_us/us-001-customer-login.feature",

@@ -25,7 +25,7 @@ from living_doc_core.readers import READERS, DocumentationResult, Role, TestsRes
 # project, one pipeline, one documentation source).
 COMMAND_ROLES: dict[str, tuple[Role, ...]] = {
     "normalize-docs": (Role.DOCUMENTATION,),
-    "normalize-tests": (Role.TESTS,),
+    "normalize-tests": (Role.DOCUMENTATION, Role.TESTS),
     "coverage-matrix": (Role.DOCUMENTATION, Role.TESTS),
 }
 

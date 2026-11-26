@@ -28,7 +28,7 @@ Read before: [CLI](../../apps/cli/README.md) · Next: [normalize-docs](../servic
 | `living_doc_core.views` | `select_records(entities, view)`, the view filter |
 | `living_doc_core.run_context` | `run_context()`, the CI run a file is written in, for `metadata.run` |
 
-- It depends on `living-doc-utilities==0.9.0rc1` and nothing else; the contract models and schemas are that package's
+- It depends on `living-doc-utilities==0.9.0rc2` and nothing else; the contract models and schemas are that package's
 - `living_doc_core` itself exports only `setup_logging` and `__version__`; every other module loads the contract models, so it is imported by name
   - Why: it keeps the contract-model imports behind the module boundary that needs them.
 
@@ -43,7 +43,7 @@ Read before: [CLI](../../apps/cli/README.md) · Next: [normalize-docs](../servic
 
 - It is keyed by contract name, never by producer: the file's own `schema_version` says how it is read
 - Every read goes through `read_artifact(path, expected=<the role's contract names>)`, which runs R5, and returns the contract's model: `read_documentation` a `DocSourceResult`, `read_tests` a `UITestsResult`; neither returns a `dict`
-- The issue-tracker documentation contract, `doc-entities`, joins the documentation role in a later release, through a spec → [Reader-table spec](../../SPEC.md#3-reader-table-spec--required-contents)
+- The issue-tracker documentation contract, `doc-entities`, joins the documentation role in a later release, through an issue of its own
 
 ## Shared input validation
 
@@ -52,7 +52,7 @@ Each command declares the roles it takes, one input each:
 | Command | Documentation input | Tests input |
 |---|---|---|
 | `normalize-docs` | one | none |
-| `normalize-tests` | none | one |
+| `normalize-tests` | one | one |
 | `coverage-matrix` | one | one |
 
 `validate_inputs(command, {Role.DOCUMENTATION: [...], Role.TESTS: [...]})` runs these steps in order:

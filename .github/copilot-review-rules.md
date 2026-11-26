@@ -47,7 +47,7 @@ repo's own risk areas and review expectations; it is not shared with other repos
 - Must re-check high-risk areas — the step order and the every-occurrence reporting in `living_doc_core/input_validation.py`, the reader table in `living_doc_core/readers.py`, and `main.py`'s input checks and their order.
 - Prefer looking for hidden side effects — behaviour on a missing or malformed input file, a step that stops at its first occurrence instead of listing every one, and a read that bypasses `read_artifact`.
 - Prefer validating safe defaults — safe error messages, and predictable behaviour when an input file is empty or names an unknown producer.
-- Must confirm the version impact of any contract change is stated — additive (no bump) vs breaking (major bump of the affected package), per `SPEC.md` § Cross-cutting contract changes.
+- Must confirm the version impact of any contract change is stated — additive, or breaking; while the toolkit is `0.x` a breaking change is a minor release, listed in the release notes with its migration, per `DEVELOPER.md` § Versioning.
 
 **Response format**
 
@@ -69,7 +69,7 @@ repo's own risk areas and review expectations; it is not shared with other repos
 
 ## Documentation
 
-- Must review a change to `README.md`, `DEVELOPER.md`, `CONTRIBUTING.md`, `SPEC.md`, `docs/action.md` or a package page (`apps/cli/README.md`, `packages/core/README.md`, `packages/services/<command>/README.md`) against `DEVELOPER.md`, "Writing documentation" — that section is the only copy of the page rules; Must not restate them here.
+- Must review a change to `README.md`, `DEVELOPER.md`, `CONTRIBUTING.md`, `docs/action.md` or a package page (`apps/cli/README.md`, `packages/core/README.md`, `packages/services/<command>/README.md`) against `DEVELOPER.md`, "Writing documentation" — that section is the only copy of the page rules; Must not restate them here.
 - Must check a sample of ten decision- or fact-list items per changed page against the code its code map names (the `## Code map` of the `CONTEXT.md` beside the code), and flag any item the code does not bear out.
 - Must flag a changed fact whose page and code map no longer agree.
 

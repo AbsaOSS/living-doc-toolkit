@@ -23,13 +23,14 @@ generator reads. It is the normalize step of a living-documentation pipeline, be
 ## Overview
 
 - **`normalize-docs`**: one `doc-source.json` to `generator-ready.json`, with every authored field of every entity the view keeps, and the input's warnings → [command](packages/services/normalize_docs/README.md)
-- **`normalize-tests`**: one `ui-tests.json` to `ui-test-catalog.json`, each scenario unchanged, grouped by feature file and by every User Story or Functionality it links → [command](packages/services/normalize_tests/README.md)
+- **`normalize-tests`**: one `doc-source.json` and one `ui-tests.json` to `ui-test-catalog.json`, each scenario grouped by feature file and by every User Story or Functionality it links, each link with its criterion's state → [command](packages/services/normalize_tests/README.md)
+  - Its release view drops each link to a `planned` or `in_review` criterion; the scenario stays.
 - **`coverage-matrix`**: one `doc-source.json` and one `ui-tests.json` to `coverage-matrix.json` → [command](packages/services/coverage_matrix/README.md)
   - It counts each `active` or `deprecated` acceptance criterion of User Stories and Functionalities, per declared aspect, from linking scenarios.
   - It adds a summary per entity, for the whole matrix and for the planned work; a scenario link it does not count as written is a warning in the file.
 - One command per step, through the composite action at the repository root → [Action reference](docs/action.md)
 - Contract artifacts only: a command reads its inputs through `living-doc-utilities`' `read_artifact`, and validates them together before it transforms them → [Core](packages/core/README.md)
-- No copy of a contract: the models and schemas come from the installed `living-doc-utilities` (`==0.9.0rc1`) → [Contracts](https://github.com/AbsaOSS/living-doc-utilities/tree/master/docs/contracts)
+- No copy of a contract: the models and schemas come from the installed `living-doc-utilities` (`==0.9.0rc2`) → [Contracts](https://github.com/AbsaOSS/living-doc-utilities/tree/master/docs/contracts)
 - Pipeline-ready: it chains with the other `living-doc-*` actions → [The frame](https://github.com/AbsaOSS/living-doc/blob/master/docs/introduction/principles.md#the-frame)
 - GitHub Actions first: a step in a workflow is the supported way to run it; a local run is a development and debugging aid, not a second deployment target → [CLI run](DEVELOPER.md#cli-run), [Local Integration Run](DEVELOPER.md#local-integration-run)
 - AI-free: collect → normalize → generate is deterministic tooling, with no LLM call anywhere in that path → [AI-free Principle](CONTRIBUTING.md#ai-free-principle)
@@ -62,11 +63,11 @@ Every input at a glance; required flags, defaults, which command takes which, an
 [action reference](docs/action.md#inputs).
 
 - `command` (required): `normalize-docs`, `normalize-tests` or `coverage-matrix`
-- `input` (required): the input JSON file
+- `input` (required): the documentation JSON file
 - `output` (required): the JSON file the command writes
 - `view`: `inner` or `release`
 - `document-title`: the document title, for `normalize-docs`
-- `tests-input`: the tests JSON file, which `coverage-matrix` requires
+- `tests-input`: the tests JSON file, which `normalize-tests` and `coverage-matrix` require
 - `fail-under`: the coverage percentage below which `coverage-matrix` fails the step
 - `verbose-logging`: debug logging
 
@@ -79,13 +80,12 @@ The one output, `output-path`, is the absolute path of the file the command wrot
 | set every input, chain the commands, read the output, handle an error | [Action reference](docs/action.md) |
 | run `living-doc` by hand: options, log and error lines, exit codes | [CLI](apps/cli/README.md) |
 | know what `normalize-docs` writes | [normalize-docs](packages/services/normalize_docs/README.md) |
-| know how `normalize-tests` groups scenarios | [normalize-tests](packages/services/normalize_tests/README.md) |
+| know how `normalize-tests` groups scenarios and which links its release view drops | [normalize-tests](packages/services/normalize_tests/README.md) |
 | know how `coverage-matrix` counts | [coverage-matrix](packages/services/coverage_matrix/README.md) |
 | know the reader table, input validation, view filter, run context and envelope every command shares | [Core](packages/core/README.md) |
 | read the contracts, codes and pipeline rules the toolkit implements | [`living-doc-utilities` contracts](https://github.com/AbsaOSS/living-doc-utilities/tree/master/docs/contracts) |
-| spec a new command or package | [Specification](SPEC.md) |
 | set up the repository, run the gates or a local run | [Developer guide](DEVELOPER.md) |
-| contribute a change | [Contributing](CONTRIBUTING.md) |
+| propose or contribute a change | [Contributing](CONTRIBUTING.md) |
 
 ## Developer Guide
 

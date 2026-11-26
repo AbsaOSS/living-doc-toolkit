@@ -35,11 +35,11 @@ Read before: [README](README.md) · Next: [Contributing](CONTRIBUTING.md)
 <!-- over limit: one row per file; the columns are what each file holds and who installs it -->
 | File | What it holds | Who installs it |
 |---|---|---|
-| `requirements.txt` | Runtime only: the `living-doc-utilities==0.9.0rc1` pin, then `./packages/core`, `./packages/services/normalize_docs`, `./packages/services/normalize_tests`, `./packages/services/coverage_matrix`, `./apps/cli`, in dependency order | `action.yml`, into its venv, on every run; a plain install, above |
+| `requirements.txt` | Runtime only: the `living-doc-utilities==0.9.0rc2` pin, then `./packages/core`, `./packages/services/normalize_docs`, `./packages/services/normalize_tests`, `./packages/services/coverage_matrix`, `./apps/cli`, in dependency order | `action.yml`, into its venv, on every run; a plain install, above |
 | `requirements-dev.txt` | `-r requirements.txt`, the gate and test tools pinned, and `PyYAML` for the root tests | `make install` and CI |
 
 - Each package declares its own runtime dependencies in its `pyproject.toml`; `requirements.txt` names the packages, not their dependencies, with one exception: the `living-doc-utilities` pin.
-  - Every package declares `living-doc-utilities==0.9.0rc1`, from PyPI, as each imports it; one pin, the same in each.
+  - Every package declares `living-doc-utilities==0.9.0rc2`, from PyPI, as each imports it; one pin, the same in each.
   - `requirements.txt` pins the same version, so the file the action installs names the contract version it runs on.
 - Every package declares the toolkit's one version, `0.1.0`, the version the action's release tag carries → `packages/core/src/living_doc_core/__init__.py::__version__`
   - A written file's `metadata.producer.version` comes from the installed `living-doc-core`, so a release changes every package's version together.
@@ -132,8 +132,8 @@ living-doc --version
 living-doc --help
 living-doc --verbose normalize-docs --input tests/fixtures/collector-gh/doc-source.json \
   --output output/generator-ready.json --view release
-living-doc normalize-tests --input tests/fixtures/collector-gh/ui-tests.json \
-  --output output/ui-test-catalog.json
+living-doc normalize-tests --doc-input tests/fixtures/collector-gh/doc-source.json \
+  --tests-input tests/fixtures/collector-gh/ui-tests.json --output output/ui-test-catalog.json --view release
 living-doc coverage-matrix --doc-input tests/fixtures/collector-gh/doc-source.json \
   --tests-input tests/fixtures/collector-gh/ui-tests.json --output output/coverage-matrix.json --fail-under 50
 ```
@@ -190,9 +190,9 @@ As committed, the example runs over the fixture pair in `tests/fixtures/collecto
 
 | Key | Required | What it sets |
 |---|---|---|
-| `DOC_INPUT` | yes | the documentation input, a `doc-source` artifact: `normalize-docs` and `coverage-matrix` `input` |
-| `TESTS_INPUT` | yes | the tests input, a `ui-tests` artifact: `normalize-tests` `input`, `coverage-matrix` `tests-input` |
-| `VIEW` | no | `view` for `normalize-docs` and `coverage-matrix`: `inner` (the default) or `release` |
+| `DOC_INPUT` | yes | the documentation input, a `doc-source` artifact: every command's `input` |
+| `TESTS_INPUT` | yes | the tests input, a `ui-tests` artifact: `normalize-tests` and `coverage-matrix` `tests-input` |
+| `VIEW` | no | every command's `view`: `inner` (the default) or `release` |
 | `OUT_DIR` | no | the output root, default `./output` (git-ignored) |
 | `PYTHON` | no | the interpreter the venv is built from |
 
@@ -279,9 +279,10 @@ What differs from `living-doc-generator-markdown`:
 - `make coverage` runs on Python 3.10 to 3.14.
   - Why: the action runs on whatever Python ≥ 3.10 the caller puts on `PATH`.
 - `integration.yml`'s jobs run the action through `uses: ./` over the committed fixtures; they have no local form, as they need a GitHub runner.
-- `action-run` runs each command the action runs and checks what it wrote: `normalize-docs` over `doc-source.json` in the release view, `normalize-tests` over `ui-tests.json`, and `coverage-matrix` over both in the release view.
+- `action-run` runs each command the action runs and checks what it wrote: `normalize-docs` over `doc-source.json` in the release view, `normalize-tests` and `coverage-matrix` over both in the release view.
   - It reads the file with `read_artifact` on the action's venv and checks:
     - `document.view`, the `selection_summary`, and the feature files or the root coverage summary;
+    - the catalog's two `source_inputs[]` entries and its links' states;
     - a keyword row's status and keyword;
     - that `metadata.run.run_id` is the job's `GITHUB_RUN_ID` and `producer.build` is `null`;
     - that `output-path` is the file's absolute path.
@@ -344,7 +345,7 @@ Depth is where a page sits in the folder tree. Deeper means more detail.
 
 | Depth | Pages | Rule |
 |---|---|---|
-| 1 | `README.md`; `DEVELOPER.md`, `CONTRIBUTING.md` and `SPEC.md` | `README.md` is the entry: what the action is for, overview, usage tip, inputs and outputs at a glance, "where next". The other three are solo: one page each, no child pages |
+| 1 | `README.md`; `DEVELOPER.md` and `CONTRIBUTING.md` | `README.md` is the entry: what the action is for, overview, usage tip, inputs and outputs at a glance, "where next". The other two are solo: one page each, no child pages |
 | 2 | `docs/<topic>.md` | a hub: principle, decision list, routing to depth 3; it names and links facts, and defines none |
 | 2 leaf | `docs/<topic>.md` with no `docs/<topic>/` folder; a package's `README.md`, beside its `pyproject.toml` | a leaf may define, like a depth-3 page |
 | 3 | `docs/<topic>/<page>.md` | detail: fact lists, option lists, examples |

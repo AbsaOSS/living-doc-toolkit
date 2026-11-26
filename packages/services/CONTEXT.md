@@ -49,5 +49,7 @@ Every package has the same three modules:
   `PLANNED_AC_HAS_TESTS`, `IN_REVIEW_AC_HAS_TESTS`, `SKIPPED_SCENARIO`) after the forwarded ones; the rules are its
   [README](coverage_matrix/README.md).
 - `coverage-matrix` checks field loss against the documentation input only, over the counted criteria.
+- `normalize-tests` checks field loss against the tests input, over the links its view keeps: the documentation holds
+  none of the catalog's fields. The canon says "the documentation input" (utilities#233).
 - `full_sample("coverage-matrix-v1.0.0")` lists its entities in another order than the command and names another
   input: compare it by entity id, never by position or `source_inputs`.

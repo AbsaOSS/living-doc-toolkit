@@ -5,7 +5,7 @@
       "name": "AbsaOSS/living-doc-toolkit",
       "version": "0.1.0",
       "build": null,
-      "utilities_version": "0.9.0rc1"
+      "utilities_version": "0.9.0rc2"
     },
     "run": {
       "run_id": null,
@@ -544,6 +544,11 @@
             "scenarios[].source_ref.area_path": 0,
             "scenarios[].source_ref.iteration_path": 0,
             "scenarios[].tags[]": 6,
+            "scenarios[].line": 0,
+            "scenarios[].rule": 0,
+            "scenarios[].rule_background[]": 0,
+            "scenarios[].steps[]": 0,
+            "scenarios[].background[]": 0,
             "scenarios[].acceptance_criteria[].id": 6,
             "scenarios[].acceptance_criteria[].aspect": 4
           }

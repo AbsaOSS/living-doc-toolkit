@@ -15,7 +15,7 @@ command's inputs together, and writes the contract a generator reads.
 ## Tech stack
 
 - Python `>=3.10`; CI runs 3.10 to 3.14.
-- `living-doc-utilities==0.9.0rc1`: the contract models (pydantic 2), schemas, `read_artifact` / `write_artifact`,
+- `living-doc-utilities==0.9.0rc2`: the contract models (pydantic 2), schemas, `read_artifact` / `write_artifact`,
   lineage and stats helpers.
 - `click` for the CLI; a bash composite action that builds its own venv (`action.yml`).
 - pytest + pytest-cov, ruff, Black, Pylint, mypy, deptry.
@@ -32,14 +32,14 @@ command's inputs together, and writes the contract a generator reads.
 | `tests/` | The root tests (`test_main.py`, `test_action_yml.py`, `test_local_integration.py`), the page checks in `tests/docs/`, and the one fixture copy under `tests/fixtures/` |
 | `.github/workflows/` | `test.yml` runs the `make` targets, the tests also on a page-only change (`docs_changed`); `integration.yml` runs the action through `uses: ./` |
 | `README.md`, `docs/action.md` | The entry page; the action's full reference (inputs, commands, output, run-level errors) |
-| `DEVELOPER.md`, `CONTRIBUTING.md`, `SPEC.md` | Solo pages: development, contribution conventions, the spec process with its pending list |
+| `DEVELOPER.md`, `CONTRIBUTING.md` | Solo pages: development, contribution conventions |
 
 ## How it fits together
 
 ```mermaid
 flowchart LR
   C[living-doc-collector-gh] -->|doc-source.json| ND[normalize-docs]
-  C -->|ui-tests.json| NT[normalize-tests]
+  C -->|doc-source.json + ui-tests.json| NT[normalize-tests]
   C -->|doc-source.json + ui-tests.json| CM[coverage-matrix]
   ND -->|generator-ready.json| G[generators]
   NT -->|ui-test-catalog.json| G
@@ -67,7 +67,7 @@ All owned by `living-doc-utilities`; this repo defines none and commits no schem
 | Command | Reads | Writes |
 |---|---|---|
 | `normalize-docs` | `doc-source-v1.0.0` | `generator-ready-v1.0.0` |
-| `normalize-tests` | `ui-tests-v1.0.0` | `ui-test-catalog-v1.0.0` |
+| `normalize-tests` | `doc-source-v1.0.0`, `ui-tests-v1.0.0` | `ui-test-catalog-v1.0.0` |
 | `coverage-matrix` | `doc-source-v1.0.0`, `ui-tests-v1.0.0` | `coverage-matrix-v1.0.0` |
 
 - The canon: `living-doc-utilities` `docs/contracts/` (rendering, errors, artifact rules, component checks) and
@@ -105,7 +105,8 @@ All owned by `living-doc-utilities`; this repo defines none and commits no schem
   `write_artifact`.
 - Every package is version `0.1.0` and pins the same `living-doc-utilities`; `metadata.producer.version` comes from
   the installed `living-doc-core`, never a literal.
-- `SPEC.md` content moves to the live docs in the PR that ships it (`.claude/rules/docs-lifecycle.md`).
+- No spec file: a change's spec is its issue, and the ecosystem's plan is `living-doc`'s. The PR that ships a change
+  writes what it built into the live docs.
 
 ## Key decisions
 

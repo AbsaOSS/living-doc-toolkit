@@ -18,7 +18,6 @@ from living_doc_core.input_validation import (
     COMMAND_ROLES,
     InputProblem,
     InputValidationError,
-    ValidatedInputs,
     validate_inputs,
 )
 from living_doc_core.readers import Role
@@ -59,7 +58,7 @@ def _repeat_first_user_story(payload):
 def test_each_command_declares_the_roles_it_takes():
     assert COMMAND_ROLES == {
         "normalize-docs": (DOCUMENTATION,),
-        "normalize-tests": (TESTS,),
+        "normalize-tests": (DOCUMENTATION, TESTS),
         "coverage-matrix": (DOCUMENTATION, TESTS),
     }
 
@@ -84,13 +83,24 @@ def test_normalize_docs_returns_only_its_documentation(doc_source):
     assert validated.tests is None
 
 
-def test_normalize_tests_returns_only_its_tests(ui_tests):
+def test_normalize_tests_returns_its_documentation_and_its_tests(doc_source, ui_tests):
     # Act
-    validated = validate_inputs("normalize-tests", {TESTS: [ui_tests], DOCUMENTATION: []})
+    validated = validate_inputs("normalize-tests", {DOCUMENTATION: [doc_source], TESTS: [ui_tests]})
 
     # Assert
-    assert validated == ValidatedInputs(tests=validated.tests)
+    assert isinstance(validated.documentation, DocSourceResult)
     assert isinstance(validated.tests, UITestsResult)
+
+
+def test_normalize_tests_without_its_documentation_fails_with_missing_input(ui_tests):
+    # Act
+    problems = _fails("normalize-tests", {DOCUMENTATION: [], TESTS: [ui_tests]})
+
+    # Assert
+    assert [str(problem) for problem in problems] == [
+        "[MISSING_INPUT] documentation input: none given; `normalize-tests` takes one documentation input and one "
+        "tests input"
+    ]
 
 
 def test_an_unfamiliar_producer_version_passes_without_a_warning(changed_copy, doc_source, caplog, recwarn):
@@ -212,13 +222,15 @@ def test_an_unshipped_contract_version_fails_with_invalid_contract_id_and_the_pi
     assert problems[0].message.endswith(hint)
 
 
-def test_a_file_that_fails_its_schema_fails_with_schema_validation_failed_naming_the_path(changed_copy, ui_tests):
+def test_a_file_that_fails_its_schema_fails_with_schema_validation_failed_naming_the_path(
+    changed_copy, doc_source, ui_tests
+):
     # Arrange: the fixture was written by an older utilities than the running one, so the message ends with the hint.
     written = json.loads(ui_tests.read_text(encoding="utf-8"))["metadata"]["producer"]["utilities_version"]
     path = changed_copy(ui_tests, lambda payload: payload["metadata"]["source"].pop("project_id"))
 
     # Act
-    problems = _fails("normalize-tests", {TESTS: [path]})
+    problems = _fails("normalize-tests", {DOCUMENTATION: [doc_source], TESTS: [path]})
 
     # Assert
     assert _codes(problems) == [Code.SCHEMA_VALIDATION_FAILED]
@@ -247,13 +259,13 @@ def test_a_file_that_is_not_json_fails_with_one_line_without_a_code_naming_the_f
     assert str(problems[0]) == f"documentation input {str(truncated)!r}: not JSON: {parse_error.value}"
 
 
-def test_a_file_that_is_not_utf8_text_is_not_json(tmp_path):
+def test_a_file_that_is_not_utf8_text_is_not_json(tmp_path, doc_source):
     # Arrange
     binary = tmp_path / "ui-tests.json"
     binary.write_bytes(b"\xff\xfe{}")
 
     # Act
-    problems = _fails("normalize-tests", {TESTS: [binary]})
+    problems = _fails("normalize-tests", {DOCUMENTATION: [doc_source], TESTS: [binary]})
 
     # Assert
     assert [str(problem) for problem in problems] == [
@@ -481,7 +493,7 @@ def test_the_error_text_lists_every_problem_in_order(ui_tests, doc_source):
     ("command", "inputs", "message"),
     [
         ("normalize-everything", {}, "unknown command 'normalize-everything'"),
-        ("normalize-tests", {DOCUMENTATION: ["doc-source.json"]}, "`normalize-tests` takes no documentation input"),
+        ("normalize-docs", {TESTS: ["ui-tests.json"]}, "`normalize-docs` takes no tests input"),
         ("coverage-matrix", {TESTS: ["a.json", "b.json"]}, "`coverage-matrix` takes one tests input"),
     ],
 )

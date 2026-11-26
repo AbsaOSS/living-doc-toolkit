@@ -56,7 +56,11 @@ TOKEN = "ghp_dummy_local_integration_token"
 # Per output contract: the command that writes it, its CLI arguments over the fixture pair, and the inputs it reads.
 COMMANDS = {
     "generator-ready": ("normalize-docs", [f"--input={DOC_SOURCE}"], [DOC_SOURCE]),
-    "ui-test-catalog": ("normalize-tests", [f"--input={UI_TESTS}"], [UI_TESTS]),
+    "ui-test-catalog": (
+        "normalize-tests",
+        [f"--doc-input={DOC_SOURCE}", f"--tests-input={UI_TESTS}"],
+        [DOC_SOURCE, UI_TESTS],
+    ),
     "coverage-matrix": (
         "coverage-matrix",
         [f"--doc-input={DOC_SOURCE}", f"--tests-input={UI_TESTS}"],
@@ -220,14 +224,32 @@ def test_the_coverage_matrix_report_adds_the_root_summary_and_counts_each_input(
     assert lines[-2:] == ["  forwarded: 2 of 2 from doc-source-v1.0.0", "  forwarded: 0 of 0 from ui-tests-v1.0.0"]
 
 
-def test_an_output_with_no_warnings_shows_an_empty_mapping_as_a_dash(written):
+def test_an_output_with_no_warnings_shows_an_empty_mapping_as_a_dash(tmp_path):
+    # Arrange: the fixture's documentation without its two warnings, so the catalog the real CLI writes forwards none.
+    payload = json.loads(DOC_SOURCE.read_text(encoding="utf-8"))
+    payload["warnings"] = []
+    doc_input = tmp_path / "doc-source.json"
+    doc_input.write_text(json.dumps(payload), encoding="utf-8")
+    catalog = tmp_path / "ui-test-catalog.json"
+    subprocess.run(
+        [sys.executable, "-I", "-m", "living_doc_cli.main", "normalize-tests", f"--doc-input={doc_input}"]
+        + [f"--tests-input={UI_TESTS}", f"--output={catalog}"],
+        capture_output=True,
+        check=True,
+        timeout=120,
+    )
+
     # Act
-    lines = report(written["ui-test-catalog"], "ui-test-catalog", 0, _inputs("ui-test-catalog"))
+    lines = report(os.fspath(catalog), "ui-test-catalog", 0, [os.fspath(doc_input), os.fspath(UI_TESTS)])
 
     # Assert
     assert "    warnings_by_code: -" in lines
     assert "  summary:" not in lines
-    assert lines[-2:] == ["  warnings: 0", "  forwarded: 0 of 0 from ui-tests-v1.0.0"]
+    assert lines[-3:] == [
+        "  warnings: 0",
+        "  forwarded: 0 of 0 from doc-source-v1.0.0",
+        "  forwarded: 0 of 0 from ui-tests-v1.0.0",
+    ]
 
 
 @pytest.mark.parametrize(("elapsed_ms", "shown"), [(0, "0.00"), (125600, "125.60")])
@@ -333,8 +355,8 @@ def test_a_tests_input_warning_is_counted_against_that_input_and_must_be_forward
     tests_input.write_text(json.dumps(payload), encoding="utf-8")
     catalog = tmp_path / "ui-test-catalog.json"
     subprocess.run(
-        [sys.executable, "-I", "-m", "living_doc_cli.main", "normalize-tests", f"--input={tests_input}"]
-        + [f"--output={catalog}"],
+        [sys.executable, "-I", "-m", "living_doc_cli.main", "normalize-tests", f"--doc-input={DOC_SOURCE}"]
+        + [f"--tests-input={tests_input}", f"--output={catalog}"],
         capture_output=True,
         check=True,
         timeout=120,
@@ -795,7 +817,7 @@ def test_a_run_writes_validates_and_reports_the_three_outputs(seeded, tmp_path):
     runs = [line for line in result.stderr.splitlines() if line.startswith("+ env ")]
     assert [sorted(set(re.findall(r"\bINPUT_[A-Z_]+(?==)", run))) for run in runs] == [
         ["INPUT_COMMAND", "INPUT_INPUT", "INPUT_OUTPUT", "INPUT_VIEW"],
-        ["INPUT_COMMAND", "INPUT_INPUT", "INPUT_OUTPUT"],
+        ["INPUT_COMMAND", "INPUT_INPUT", "INPUT_OUTPUT", "INPUT_TESTS_INPUT", "INPUT_VIEW"],
         ["INPUT_COMMAND", "INPUT_INPUT", "INPUT_OUTPUT", "INPUT_TESTS_INPUT", "INPUT_VIEW"],
     ]
     assert all(run.endswith(" -E main.py") for run in runs)
@@ -804,7 +826,7 @@ def test_a_run_writes_validates_and_reports_the_three_outputs(seeded, tmp_path):
         assert read_artifact(path, contract).schema_version == f"{contract}-v1.0.0"
         assert f"{contract}: {path}" in result.stdout
     assert "    coverage_pct: 55.6" in result.stdout
-    assert result.stdout.count("  forwarded: 2 of 2 from doc-source-v1.0.0") == 2
+    assert result.stdout.count("  forwarded: 2 of 2 from doc-source-v1.0.0") == 3
     assert (
         result.stdout.splitlines()[-1]
         == f"local-integration.sh: the three outputs are written and valid under {output}"

@@ -31,8 +31,9 @@ living-doc normalize-docs --input doc-source.json --output generator-ready.json
 living-doc normalize-docs --input doc-source.json --output generator-ready.json \
   --view release --document-title "Payments service" --document-version 2.3.0
 
-# ui-tests.json to ui-test-catalog.json
-living-doc normalize-tests --input ui-tests.json --output ui-test-catalog.json
+# ui-tests.json to ui-test-catalog.json, each link with its state from doc-source.json, in the release view
+living-doc normalize-tests --doc-input doc-source.json --tests-input ui-tests.json \
+  --output ui-test-catalog.json --view release
 
 # doc-source.json and ui-tests.json to coverage-matrix.json, failing below 80 % coverage
 living-doc coverage-matrix --doc-input doc-source.json --tests-input ui-tests.json \
@@ -74,16 +75,19 @@ A run that fails logs its error lines:
 
 ## normalize-tests
 
-Reads one tests file and writes `ui-test-catalog.json`. What it groups, and how it checks that no scenario field is
-lost: [normalize-tests](../../packages/services/normalize_tests/README.md).
+Reads one documentation file and one tests file and writes `ui-test-catalog.json`. What it groups, which links the
+release view drops, and how it checks that no scenario field is lost:
+[normalize-tests](../../packages/services/normalize_tests/README.md).
 
 | Option | Required | Default | Description |
 |---|---|---|---|
-| `--input` | yes | | The tests input, `ui-tests.json`. |
+| `--doc-input` | yes | | The documentation input, `doc-source.json`, read for each criterion's state. A run reads exactly one: given twice, the run fails. |
+| `--tests-input` | yes | | The tests input, `ui-tests.json`. |
 | `--output` | yes | | The `ui-test-catalog.json` to write; its directory is created when missing. |
+| `--view` | no | `inner` | `inner` or `release`: `document.view`; the release view drops each link to a `planned` or `in_review` criterion. |
 
 A run that succeeds logs one line:
-``[INFO] normalize-tests - written: `<output>` (<feature files> feature files, <scenarios> scenarios).``
+``[INFO] normalize-tests - written: `<output>` (<view> view; <feature files> feature files, <scenarios> scenarios).``
 
 - A run that fails logs one `[ERROR]` line per input problem before the transform; `FIELD_LOSS` and an output it cannot write log one line each, as for [`normalize-docs`](#normalize-docs)
 
