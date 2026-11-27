@@ -7,7 +7,7 @@ The `coverage-matrix` transform: one `doc-source.json` and one `ui-tests.json` i
 inputs, and `service` runs validation, field-loss checking, and the write.
 """
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 __all__ = [
     "__version__",

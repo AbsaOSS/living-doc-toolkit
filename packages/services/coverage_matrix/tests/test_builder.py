@@ -634,7 +634,7 @@ def test_the_source_inputs_are_the_documentation_entry_then_the_tests_entry(docu
         assert entry.run == given.metadata.run
         assert entry.source == given.metadata.source
         assert entry.stats == AuditStats.model_validate(given.metadata.stats.model_dump())
-    # Every scenario, counted on the pinned contract: the fixture's own stats predate the ui-tests fields of 0.9.0rc2.
+    # Every scenario, counted on the pinned contract: the fixture's own stats predate the ui-tests fields of 0.9.0.
     every_scenario = compute_stats(ui_tests, ui_tests_contract.RECORD_ROOTS, ui_tests.metadata.stats.cardinality)
     assert entries[1].selected_stats == AuditStats.model_validate(every_scenario.model_dump())
 
@@ -689,7 +689,7 @@ def test_the_producer_is_the_toolkit_and_the_caller_counts_are_zero(documentatio
     result = _build(documentation, ui_tests)
 
     producer = result.metadata.producer
-    assert (producer.name, producer.version, producer.build) == ("AbsaOSS/living-doc-toolkit", "0.1.0", None)
+    assert (producer.name, producer.version, producer.build) == ("AbsaOSS/living-doc-toolkit", "0.2.0", None)
     cardinality = result.metadata.stats.cardinality
     counts = (
         cardinality.sources_configured,

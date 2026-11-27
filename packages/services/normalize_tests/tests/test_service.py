@@ -108,7 +108,7 @@ def test_the_producer_uses_the_toolkit_identity_and_keeps_build_null(run_command
     producer = run_command(DOC_SOURCE, UI_TESTS).metadata.producer
 
     assert producer.name == "AbsaOSS/living-doc-toolkit"
-    assert producer.version == "0.1.0"
+    assert producer.version == "0.2.0"
     assert producer.build is None
 
 

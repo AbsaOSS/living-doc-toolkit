@@ -50,18 +50,18 @@ The three commands chained, one step each; the first one's `id` lets a later ste
 
 ```yaml
 - id: normalize
-  uses: AbsaOSS/living-doc-toolkit@v0.1.0
+  uses: AbsaOSS/living-doc-toolkit@v0.2.0
   with:
     command: normalize-docs
     input: doc-source.json
     output: output/generator-ready.json
-- uses: AbsaOSS/living-doc-toolkit@v0.1.0
+- uses: AbsaOSS/living-doc-toolkit@v0.2.0
   with:
     command: normalize-tests
     input: doc-source.json
     tests-input: ui-tests.json
     output: output/ui-test-catalog.json
-- uses: AbsaOSS/living-doc-toolkit@v0.1.0
+- uses: AbsaOSS/living-doc-toolkit@v0.2.0
   with:
     command: coverage-matrix
     input: doc-source.json

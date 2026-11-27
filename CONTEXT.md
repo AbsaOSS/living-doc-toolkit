@@ -15,7 +15,7 @@ command's inputs together, and writes the contract a generator reads.
 ## Tech stack
 
 - Python `>=3.10`; CI runs 3.10 to 3.14.
-- `living-doc-utilities==0.9.0rc2`: the contract models (pydantic 2), schemas, `read_artifact` / `write_artifact`,
+- `living-doc-utilities==0.9.0`: the contract models (pydantic 2), schemas, `read_artifact` / `write_artifact`,
   lineage and stats helpers.
 - `click` for the CLI; a bash composite action that builds its own venv (`action.yml`).
 - pytest + pytest-cov, ruff, Black, Pylint, mypy, deptry.
@@ -103,7 +103,7 @@ All owned by `living-doc-utilities`; this repo defines none and commits no schem
 - No error line, log text or exit code changes without a stated reason; the tests assert them exactly.
 - Read a contract only through `living_doc_core.readers`, validate only through `validate_inputs`, write only through
   `write_artifact`.
-- Every package is version `0.1.0` and pins the same `living-doc-utilities`; `metadata.producer.version` comes from
+- Every package is version `0.2.0` and pins the same `living-doc-utilities`; `metadata.producer.version` comes from
   the installed `living-doc-core`, never a literal.
 - No spec file: a change's spec is its issue, and the ecosystem's plan is `living-doc`'s. The PR that ships a change
   writes what it built into the live docs.
