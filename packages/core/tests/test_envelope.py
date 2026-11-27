@@ -11,7 +11,7 @@ from living_doc_utilities.contracts.envelope import ContractWarning
 
 def test_the_producer_identity_uses_the_installed_core_version():
     assert PRODUCER_NAME == "AbsaOSS/living-doc-toolkit"
-    assert TOOLKIT_VERSION == version("living-doc-core") == "0.1.0"
+    assert TOOLKIT_VERSION == version("living-doc-core") == "0.2.0"
 
 
 def test_a_forwarded_warning_names_the_input_before_its_own_context():

@@ -35,13 +35,13 @@ Read before: [README](README.md) · Next: [Contributing](CONTRIBUTING.md)
 <!-- over limit: one row per file; the columns are what each file holds and who installs it -->
 | File | What it holds | Who installs it |
 |---|---|---|
-| `requirements.txt` | Runtime only: the `living-doc-utilities==0.9.0rc2` pin, then `./packages/core`, `./packages/services/normalize_docs`, `./packages/services/normalize_tests`, `./packages/services/coverage_matrix`, `./apps/cli`, in dependency order | `action.yml`, into its venv, on every run; a plain install, above |
+| `requirements.txt` | Runtime only: the `living-doc-utilities==0.9.0` pin, then `./packages/core`, `./packages/services/normalize_docs`, `./packages/services/normalize_tests`, `./packages/services/coverage_matrix`, `./apps/cli`, in dependency order | `action.yml`, into its venv, on every run; a plain install, above |
 | `requirements-dev.txt` | `-r requirements.txt`, the gate and test tools pinned, and `PyYAML` for the root tests | `make install` and CI |
 
 - Each package declares its own runtime dependencies in its `pyproject.toml`; `requirements.txt` names the packages, not their dependencies, with one exception: the `living-doc-utilities` pin.
-  - Every package declares `living-doc-utilities==0.9.0rc2`, from PyPI, as each imports it; one pin, the same in each.
+  - Every package declares `living-doc-utilities==0.9.0`, from PyPI, as each imports it; one pin, the same in each.
   - `requirements.txt` pins the same version, so the file the action installs names the contract version it runs on.
-- Every package declares the toolkit's one version, `0.1.0`, the version the action's release tag carries → `packages/core/src/living_doc_core/__init__.py::__version__`
+- Every package declares the toolkit's one version, `0.2.0`, the version the action's release tag carries → `packages/core/src/living_doc_core/__init__.py::__version__`
   - A written file's `metadata.producer.version` comes from the installed `living-doc-core`, so a release changes every package's version together.
 - The development tools live in both places. Each package's `[dev]` extra keeps the ranges that package needs on its own; `requirements-dev.txt` pins the versions `make install` and CI use.
 - `requirements.txt` carries no `-e`. `make install` gives the editable install for development; the action and a plain install need a plain one.

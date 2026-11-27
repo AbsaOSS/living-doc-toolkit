@@ -28,7 +28,7 @@ def test_cli_version(runner):
     """Test that --version displays version information."""
     result = runner.invoke(cli, ["--version"])
     assert result.exit_code == 0
-    assert "0.1.0" in result.output
+    assert "0.2.0" in result.output
 
 
 def test_cli_registers_every_command_the_action_runs(runner):

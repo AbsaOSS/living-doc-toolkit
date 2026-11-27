@@ -9,7 +9,7 @@ Only logging is exported here. `living_doc_core.envelope`, `living_doc_core.read
 so they are imported by name, by the code that uses them.
 """
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 from living_doc_core.logging_config import setup_logging
 

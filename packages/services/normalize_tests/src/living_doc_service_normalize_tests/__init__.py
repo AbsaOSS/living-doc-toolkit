@@ -7,7 +7,7 @@ The `normalize-tests` transform: one `ui-tests.json` input to `ui-test-catalog.j
 field-loss checking, and the write.
 """
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 __all__ = [
     "__version__",
